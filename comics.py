@@ -11,7 +11,8 @@ opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKi
 urllib.request.install_opener(opener)
 
 url=input("INPUT URL: ")
-
+spliturl=url.split("/")
+urltitle=spliturl[4]
 source = requests.get(url).text
 
 soup = BeautifulSoup(source, 'lxml')
@@ -28,7 +29,6 @@ REGEX_2 = r'(\")(.*)(\/\"\ \+\ )(.*)(\ \+\ \")(.*)(\")'
 #REGEX_3 = r'(var a = )([0-9]+);'
 _session = requests.Session()
 
-
 def do_main():
 	extract, status = parse_link(zippy[0])
 	if status:
@@ -36,7 +36,9 @@ def do_main():
 		print("Link = {}".format(p))
 		_links.append(p)
 		r=requests.get(_links[0])
-		with open("book.cbr", "wb") as code:
+		link=_links[0]
+		fileextension=link[-3:]
+		with open(urltitle+"."+fileextension, "wb") as code:
 			code.write(r.content)
 
 def get_domain(link):
