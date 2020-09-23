@@ -2,7 +2,7 @@
 
 A webscraper to download comics from getcomics.info
 
-Works with Python 3 only
+!!Python 3 only!!
 
 Gets Zippyshare link from getcomics, then gets the actual download link from zippyshare, and saves
 the book as "book.cbr"
