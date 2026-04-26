@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Spy x Family</title>
+  <rect width="128" height="128" rx="28" fill="#2f4f4f"/>
+  <circle cx="64" cy="64" r="34" fill="#f0e6d2"/>
+  <path d="M52 56h24v8H52zm-4 18h32v8H48z" fill="#1d1d1d"/>
+  <path d="M38 40 54 52M90 40 74 52" stroke="#d7a24c" stroke-width="7" stroke-linecap="round"/>
+</svg>

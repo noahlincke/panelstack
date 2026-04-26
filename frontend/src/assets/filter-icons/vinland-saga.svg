@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Vinland Saga</title>
+  <rect width="128" height="128" rx="28" fill="#446b46"/>
+  <path d="M28 78h72l-16 22H44z" fill="#d7c2a3"/>
+  <path d="M64 26c18 10 28 28 28 46H36c0-18 10-36 28-46z" fill="#f4efe4"/>
+  <path d="M64 26v46" stroke="#446b46" stroke-width="8" stroke-linecap="round"/>
+</svg>

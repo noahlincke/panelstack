@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Chainsaw Man</title>
+  <rect width="128" height="128" rx="28" fill="#f29b38"/>
+  <path d="M28 72h72l-14 14H42z" fill="#1c1c1c"/>
+  <path d="M32 68h64l-8-18H40z" fill="#fff3d9"/>
+  <path d="m46 44 8 24M64 40l4 28M82 44l-8 24" stroke="#1c1c1c" stroke-width="6" stroke-linecap="round"/>
+</svg>
