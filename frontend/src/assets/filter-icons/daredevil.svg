@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Daredevil</title>
+  <rect width="128" height="128" rx="28" fill="#8e1f1f"/>
+  <path d="M44 36h14c18 0 30 11 30 28S76 92 58 92H44zm14 14V78c10 0 16-5 16-14s-6-14-16-14z" fill="#f6e9da"/>
+  <path d="M34 36h14v56H34z" fill="#f6e9da"/>
+</svg>

@@ -1,0 +1,16 @@
+.venv/
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+downloads/
+fixture-downloads/
+backend/.venv/
+backend/__pycache__/
+backend/*.db
+backend/data/*
+!backend/data/curation/
+!backend/data/curation/reading_paths.json
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo

@@ -1,0 +1,16 @@
+{
+  "name": "panelstack",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "postinstall": "npm run setup",
+    "setup": "npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt",
+    "setup:frontend": "npm --prefix frontend install",
+    "dev": "python3 scripts/dev.py",
+    "dev:backend": "cd backend && . .venv/bin/activate && uvicorn app.main:app --reload",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm run build:frontend",
+    "build:frontend": "npm --prefix frontend run build"
+  }
+}

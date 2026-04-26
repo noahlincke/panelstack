@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Hunter x Hunter</title>
+  <rect width="128" height="128" rx="28" fill="#2f7f62"/>
+  <circle cx="64" cy="64" r="45" fill="none" stroke="#f2e4a2" stroke-width="10"/>
+  <path d="M33 36h13v22h18V36h13v56H64V70H46v22H33V36zm51 0h13v19l14-19h15L109 59l18 33h-15l-12-23-3 4v19H84V36z" fill="#fff9e8"/>
+  <path d="M58 62h12v12H58z" fill="#f05d4e"/>
+</svg>

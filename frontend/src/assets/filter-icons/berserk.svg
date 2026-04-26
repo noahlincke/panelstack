@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Berserk</title>
+  <rect width="128" height="128" rx="28" fill="#1d1d1f"/>
+  <path d="M64 18 76 46l30 4-22 19 7 31-27-16-27 16 7-31-22-19 30-4z" fill="#a12a2a"/>
+  <path d="M58 40h12v48H58zm-10 18h32v12H48z" fill="#f3e4d3"/>
+</svg>

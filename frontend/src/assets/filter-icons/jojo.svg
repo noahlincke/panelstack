@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>JoJo</title>
+  <rect width="128" height="128" rx="28" fill="#f7d34b"/>
+  <path d="M23 31h29v14H37v38c0 9 5 13 13 13 6 0 11-1 15-3v13c-6 3-12 4-21 4-18 0-28-10-28-27V31zm54 0h27c15 0 24 9 24 23 0 10-5 17-13 20 10 3 15 10 15 22 0 19-14 29-35 29H77V31zm19 14h-5v21h6c10 0 17-3 17-11 0-7-5-10-18-10zm-5 34v23h7c11 0 17-4 17-12 0-8-6-11-18-11h-6z" fill="#111"/>
+</svg>

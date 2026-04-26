@@ -1,29 +1,60 @@
-# Getcomics-dl
+# Panel Stack
 
-A webscraper to download comics from getcomics.info
+Local comic downloader, catalog, and reader for a personal library.
 
-!!Python 3 only!!
+Panel Stack is intentionally undeployed for now. It runs as a local Vite + FastAPI app, stores catalog data in SQLite, and keeps downloaded archives in `downloads/`.
 
-Gets Zippyshare link from getcomics, then gets the actual download link from zippyshare, and saves
-the book as "book.cbr"
+## Quick Start
 
-# Installation
+```bash
+npm install
+npm run dev
+```
 
-Make sure python is installed, as well as bs4 (Beautiful Soup), requests, and img2pdf, 
+The dev launcher starts both services:
 
-apt-get install python3-bs4 (for python3)
+- Web UI: `http://127.0.0.1:5173`
+- API: `http://127.0.0.1:8000`
 
-pip install requests
+Use another frontend port with:
 
-pip install img2pdf
+```bash
+npm run dev -- --port 5174
+```
 
+## Downloader
 
-# Usage
+`comics.py` can download from GetComics posts, supported mirror links, or direct archive URLs.
 
-python3 comics.py
+Interactive terminal flow:
 
-Example:
+```bash
+python3 comics.py --tui
+```
 
-Input url: https://getcomics.info/dc/batman-year-one-tpb-2005/
+Direct command:
 
+```bash
+python3 comics.py 'https://getcomics.org/dc/absolute-batman-17-2026/'
+```
 
+Useful options:
+
+```bash
+python3 comics.py --choose '<getcomics-post-url>'
+python3 comics.py --host pixeldrain.com '<getcomics-post-url>'
+python3 comics.py --dry-run '<getcomics-post-url>'
+python3 comics.py --no-extract '<getcomics-post-url>'
+```
+
+Supported automated mirrors are best-effort. Some hosts still require browser-only, premium, or anti-automation flows.
+
+## App Shape
+
+- `backend/`: FastAPI, SQLite, SQLAlchemy, local ingest, reading-path catalog, archive page streaming
+- `frontend/`: React + Vite library UI, All/Search, detail pages, and image viewer
+- `comics.py`: standalone downloader TUI/CLI
+- `scripts/dev.py`: combined local dev launcher
+- `backend/data/curation/reading_paths.json`: checked-in seed catalog
+
+Generated data is ignored by git: `downloads/`, local SQLite databases, cached provider data, virtualenvs, `node_modules/`, and frontend build output.
