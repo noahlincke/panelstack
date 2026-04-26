@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Green Lantern Placeholder Icon</title>
+  <rect width="128" height="128" rx="24" fill="#0a0a0a" />
+  <circle cx="64" cy="64" r="41" fill="none" stroke="#3fe26f" stroke-width="12" />
+  <rect x="24" y="54" width="80" height="20" rx="4" fill="#3fe26f" />
+  <rect x="48" y="34" width="32" height="18" rx="3" fill="#3fe26f" />
+  <rect x="48" y="76" width="32" height="18" rx="3" fill="#3fe26f" />
+</svg>
