@@ -26,6 +26,21 @@ npm run dev -- --port 5174
 
 `comics.py` can download from GetComics posts, supported mirror links, or direct archive URLs.
 
+Install the downloader dependencies first:
+
+```bash
+uv venv
+uv pip install -r requirements.txt
+```
+
+If you do not use `uv`, the standard Python flow is:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+```
+
 Interactive terminal flow:
 
 ```bash
