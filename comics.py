@@ -14,9 +14,24 @@ from pathlib import Path
 from typing import Iterable
 from urllib.parse import unquote, urljoin, urlparse
 
-import requests
-import urllib3
-from bs4 import BeautifulSoup
+try:
+    import requests
+    import urllib3
+    from bs4 import BeautifulSoup
+except ModuleNotFoundError as exc:
+    missing = exc.name or "a required dependency"
+    print(
+        f"Missing Python dependency: {missing}\n\n"
+        "Install downloader dependencies first:\n"
+        "  uv venv\n"
+        "  uv pip install -r requirements.txt\n\n"
+        "Or with the standard library venv:\n"
+        "  python3 -m venv .venv\n"
+        "  . .venv/bin/activate\n"
+        "  pip install -r requirements.txt",
+        file=sys.stderr,
+    )
+    raise SystemExit(1) from exc
 
 
 USER_AGENT = (
