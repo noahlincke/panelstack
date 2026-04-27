@@ -178,6 +178,11 @@ export type AuthSession = {
   authenticated: boolean;
 };
 
+export type AppSettings = {
+  downloadRoot: string;
+  defaultDownloadRoot: string;
+};
+
 export type OpenFolderResult = {
   path: string;
 };

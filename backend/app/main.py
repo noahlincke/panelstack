@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timezone
 from functools import lru_cache
+import json
 import logging
 from pathlib import Path
 import re
@@ -47,6 +48,8 @@ from .models import (
 )
 from .routers import ingest_router
 from .schemas import (
+    AppSettingsRead,
+    AppSettingsWrite,
     ArchivePageListResponse,
     ArchivePageRead,
     CanonicalIssueListResponse,
@@ -104,8 +107,47 @@ from .services.ingest import ComicMetadata, PageRecord, ScanResult
 SeriesSort = Literal["title", "latest_published_desc", "latest_published_asc"]
 ReadingPathSort = Literal["title", "latest_published_desc", "latest_published_asc"]
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DOWNLOADS_ROOT = REPO_ROOT / "downloads"
+APP_SETTINGS_PATH = REPO_ROOT / "backend" / "data" / "app_settings.json"
 logger = logging.getLogger(__name__)
+
+
+def _default_download_root() -> Path:
+    return (Path.home() / "Documents" / "panelstack-downloads").expanduser().resolve()
+
+
+def _normalize_download_root(value: str) -> Path:
+    raw_value = value.strip()
+    if not raw_value:
+        raise HTTPException(status_code=422, detail="Download folder is required.")
+    path = Path(raw_value).expanduser()
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    return path.resolve()
+
+
+def _read_app_settings_payload() -> dict[str, str]:
+    if not APP_SETTINGS_PATH.exists():
+        return {}
+    try:
+        payload = json.loads(APP_SETTINGS_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        logger.warning("Ignoring invalid app settings file at %s", APP_SETTINGS_PATH)
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _write_app_settings_payload(payload: dict[str, str]) -> None:
+    APP_SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = APP_SETTINGS_PATH.with_suffix(".tmp")
+    temporary_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary_path.replace(APP_SETTINGS_PATH)
+
+
+def _downloads_root() -> Path:
+    configured = _read_app_settings_payload().get("download_root")
+    if isinstance(configured, str) and configured.strip():
+        return _normalize_download_root(configured)
+    return _default_download_root()
 
 
 def _series_latest_published_on(series: Series) -> date | None:
@@ -316,6 +358,13 @@ def _reading_path_latest_issue_entry(reading_path: ReadingPath) -> ReadingPathEn
     return max(issue_entries, key=lambda entry: (entry.sort_order, entry.id))
 
 
+def _reading_path_collected_edition_entry(reading_path: ReadingPath) -> ReadingPathEntry | None:
+    collection_entries = [entry for entry in reading_path.entries if entry.entry_type == "collection"]
+    if not collection_entries:
+        return None
+    return max(collection_entries, key=lambda entry: (entry.sort_order, entry.id))
+
+
 def _reading_path_issue_label(entry: ReadingPathEntry | None) -> str | None:
     if entry is None:
         return None
@@ -331,23 +380,32 @@ def _reading_path_issue_label(entry: ReadingPathEntry | None) -> str | None:
 
 
 def _reading_path_cover_query(reading_path: ReadingPath) -> str:
-    latest_entry = _reading_path_latest_issue_entry(reading_path)
-    latest_issue_label = _reading_path_issue_label(latest_entry)
+    collection_entry = _reading_path_collected_edition_entry(reading_path)
+    collection_label = _reading_path_issue_label(collection_entry)
+    if collection_label:
+        return collection_label
+    latest_issue_label = _reading_path_issue_label(_reading_path_latest_issue_entry(reading_path))
     return latest_issue_label or reading_path.title
 
 
+def _expected_getcomics_title(issue: CanonicalIssue | Issue) -> str:
+    if issue.issue_kind == "collection" and issue.title:
+        return issue.title
+    return issue.series.title
+
+
 def _reading_path_cover_context(reading_path: ReadingPath) -> tuple[str | None, str | None, int | None]:
-    latest_entry = _reading_path_latest_issue_entry(reading_path)
-    if latest_entry is None:
+    entry = _reading_path_collected_edition_entry(reading_path) or _reading_path_latest_issue_entry(reading_path)
+    if entry is None:
         return None, None, None
-    if latest_entry.canonical_issue is not None:
-        issue = latest_entry.canonical_issue
+    if entry.canonical_issue is not None:
+        issue = entry.canonical_issue
         year = issue.published_on.year if issue.published_on is not None else None
-        return issue.series.title, issue.issue_number, year
-    if latest_entry.issue is not None:
-        issue = latest_entry.issue
+        return _expected_getcomics_title(issue), issue.issue_number, year
+    if entry.issue is not None:
+        issue = entry.issue
         year = issue.published_on.year if issue.published_on is not None else None
-        return issue.series.title, issue.issue_number, year
+        return _expected_getcomics_title(issue), issue.issue_number, year
     return None, None, None
 
 
@@ -385,11 +443,11 @@ def _reading_path_entry_download_context(entry: ReadingPathEntry) -> tuple[str, 
     if entry.canonical_issue is not None:
         issue = entry.canonical_issue
         year = issue.published_on.year if issue.published_on is not None else None
-        return query, issue.series.title, issue.issue_number, year
+        return query, _expected_getcomics_title(issue), issue.issue_number, year
     if entry.issue is not None:
         issue = entry.issue
         year = issue.published_on.year if issue.published_on is not None else None
-        return query, issue.series.title, issue.issue_number, year
+        return query, _expected_getcomics_title(issue), issue.issue_number, year
     return query, None, None, None
 
 
@@ -482,10 +540,17 @@ def _parse_download_output(stdout: str) -> list[str]:
     imported_paths: list[str] = []
 
     for line in stdout.splitlines():
-        if line.startswith("Saved archive: "):
-            imported_paths.append(line.removeprefix("Saved archive: ").strip())
-        elif line.startswith("Extracted to: "):
-            extracted_path = line.removeprefix("Extracted to: ").strip()
+        normalized_line = line.strip()
+        if normalized_line.startswith("Saved archive: "):
+            imported_paths.append(normalized_line.removeprefix("Saved archive: ").strip())
+        elif normalized_line.startswith("Archive:"):
+            imported_paths.append(normalized_line.removeprefix("Archive:").strip())
+        elif normalized_line.startswith("Extracted to: "):
+            extracted_path = normalized_line.removeprefix("Extracted to: ").strip()
+            if extracted_path:
+                imported_paths.append(extracted_path)
+        elif normalized_line.startswith("Extract:"):
+            extracted_path = normalized_line.removeprefix("Extract:").strip()
             if extracted_path:
                 imported_paths.append(extracted_path)
 
@@ -517,14 +582,59 @@ def _import_downloaded_paths(db: Session, imported_paths: list[str]) -> tuple[li
     return preferred_paths, result
 
 
+def _link_imported_paths_to_entry(db: Session, imported_paths: list[str], entry: ReadingPathEntry) -> None:
+    if entry.canonical_issue_id is None:
+        return
+    resolved_paths = [str(Path(raw_path).expanduser().resolve()) for raw_path in imported_paths]
+    if not resolved_paths:
+        return
+
+    archives = db.scalars(
+        select(Archive)
+        .options(selectinload(Archive.issue).selectinload(Issue.canonical_matches))
+        .where(or_(Archive.storage_path.in_(resolved_paths), Archive.extracted_path.in_(resolved_paths)))
+    ).all()
+    for archive in archives:
+        if archive.issue is None:
+            continue
+        for match in archive.issue.canonical_matches:
+            match.is_primary = False
+        existing = next(
+            (
+                match
+                for match in archive.issue.canonical_matches
+                if match.canonical_issue_id == entry.canonical_issue_id
+            ),
+            None,
+        )
+        if existing is None:
+            db.add(
+                IssueMatch(
+                    local_issue_id=archive.issue.id,
+                    canonical_issue_id=entry.canonical_issue_id,
+                    match_strategy="downloaded-reading-path-entry",
+                    confidence_score=100,
+                    is_primary=True,
+                    note=f"Linked downloaded archive to reading path entry {entry.id}.",
+                )
+            )
+        else:
+            existing.match_strategy = "downloaded-reading-path-entry"
+            existing.confidence_score = 100
+            existing.is_primary = True
+            existing.note = f"Linked downloaded archive to reading path entry {entry.id}."
+    db.commit()
+
+
 def _download_post_to_library(db: Session, post_url: str) -> tuple[list[str], PersistResult]:
-    DOWNLOADS_ROOT.mkdir(parents=True, exist_ok=True)
+    downloads_root = _downloads_root()
+    downloads_root.mkdir(parents=True, exist_ok=True)
     command = [
         sys.executable,
         str(REPO_ROOT / "comics.py"),
         post_url,
         "--output-dir",
-        str(DOWNLOADS_ROOT),
+        str(downloads_root),
     ]
     completed = subprocess.run(
         command,
@@ -565,7 +675,7 @@ def _provider_issue_directory(issue: CanonicalIssue) -> Path:
     else:
         issue_segment = issue_number
     directory_name = _sanitize_download_name(f"{series_title} {issue_segment}")
-    return DOWNLOADS_ROOT / directory_name
+    return _downloads_root() / directory_name
 
 
 def _provider_download_binary(url: str, *, referer_url: str | None = None) -> tuple[bytes, str | None]:
@@ -643,7 +753,7 @@ def _download_provider_issue_to_library(db: Session, issue: CanonicalIssue) -> t
     if not page_urls:
         raise HTTPException(status_code=502, detail="Provider returned no downloadable pages for this issue.")
 
-    DOWNLOADS_ROOT.mkdir(parents=True, exist_ok=True)
+    _downloads_root().mkdir(parents=True, exist_ok=True)
     target_dir = _provider_issue_directory(issue)
     if target_dir.exists():
         shutil.rmtree(target_dir, ignore_errors=True)
@@ -933,13 +1043,39 @@ def library_summary(db: Session = Depends(get_db)) -> LibrarySummaryResponse:
 
 @app.post("/library/open-downloads")
 def open_downloads_folder() -> dict[str, str]:
+    downloads_root = _downloads_root()
     try:
-        _open_path_in_file_manager(DOWNLOADS_ROOT)
+        _open_path_in_file_manager(downloads_root)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail="No file manager command is available on this system.") from exc
     except OSError as exc:
         raise HTTPException(status_code=500, detail=f"Unable to open downloads folder: {exc}") from exc
-    return {"path": str(DOWNLOADS_ROOT.resolve())}
+    return {"path": str(downloads_root.resolve())}
+
+
+@app.get("/settings", response_model=AppSettingsRead)
+def get_app_settings() -> AppSettingsRead:
+    return AppSettingsRead(
+        download_root=str(_downloads_root()),
+        default_download_root=str(_default_download_root()),
+    )
+
+
+@app.put("/settings", response_model=AppSettingsRead)
+def update_app_settings(payload: AppSettingsWrite) -> AppSettingsRead:
+    download_root = _normalize_download_root(payload.download_root)
+    try:
+        download_root.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise HTTPException(status_code=422, detail=f"Unable to create download folder: {exc}") from exc
+
+    settings_payload = _read_app_settings_payload()
+    settings_payload["download_root"] = str(download_root)
+    _write_app_settings_payload(settings_payload)
+    return AppSettingsRead(
+        download_root=str(download_root),
+        default_download_root=str(_default_download_root()),
+    )
 
 
 @app.get("/series", response_model=SeriesListResponse)
@@ -1624,6 +1760,7 @@ def download_reading_path_issue(reading_path_id: int, db: Session = Depends(get_
     for entry in missing_entries:
         if entry.canonical_issue is not None and entry.canonical_issue.provider_name == "MangaPill":
             item_paths, item_result = _download_provider_issue_to_library(db, entry.canonical_issue)
+            _link_imported_paths_to_entry(db, item_paths, entry)
             imported_paths.extend(item_paths)
             result = result.merge(item_result)
             downloaded_issue_count += 1
@@ -1639,6 +1776,7 @@ def download_reading_path_issue(reading_path_id: int, db: Session = Depends(get_
             skipped_issue_count += 1
             continue
         item_paths, item_result = _download_post_to_library(db, cover.post_url)
+        _link_imported_paths_to_entry(db, item_paths, entry)
         imported_paths.extend(item_paths)
         result = result.merge(item_result)
         downloaded_issue_count += 1
@@ -1679,7 +1817,7 @@ def download_reading_path_entry(reading_path_id: int, entry_id: int, db: Session
         raise HTTPException(status_code=404, detail=f"Reading path {reading_path_id} not found")
 
     entry = next((item for item in reading_path.entries if item.id == entry_id), None)
-    if entry is None or entry.entry_type != "issue":
+    if entry is None or entry.entry_type not in {"issue", "collection"}:
         raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
     if _entry_has_streamable_local_match(entry):
         return ReadingPathDownloadResponse(
@@ -1691,6 +1829,7 @@ def download_reading_path_entry(reading_path_id: int, entry_id: int, db: Session
 
     if entry.canonical_issue is not None and entry.canonical_issue.provider_name == "MangaPill":
         imported_paths, result = _download_provider_issue_to_library(db, entry.canonical_issue)
+        _link_imported_paths_to_entry(db, imported_paths, entry)
         return ReadingPathDownloadResponse(
             reading_path_id=reading_path_id,
             entry_id=entry_id,
@@ -1716,6 +1855,7 @@ def download_reading_path_entry(reading_path_id: int, entry_id: int, db: Session
         raise HTTPException(status_code=502, detail="No downloadable GetComics post was resolved for this issue.")
 
     imported_paths, result = _download_post_to_library(db, cover.post_url)
+    _link_imported_paths_to_entry(db, imported_paths, entry)
     return ReadingPathDownloadResponse(
         reading_path_id=reading_path_id,
         entry_id=entry_id,

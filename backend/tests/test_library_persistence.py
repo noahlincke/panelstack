@@ -9,8 +9,16 @@ from unittest.mock import patch
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.app.main import delete_issue, open_downloads_folder
+from backend.app.main import (
+    _default_download_root,
+    _parse_download_output,
+    delete_issue,
+    get_app_settings,
+    open_downloads_folder,
+    update_app_settings,
+)
 from backend.app.models import Archive, Base, Issue, Series
+from backend.app.schemas import AppSettingsWrite
 from backend.app.services.ingest import scan_source
 from backend.app.services.library import persist_scans
 from backend.app.services.reader import archive_page_bytes, list_archive_pages
@@ -145,14 +153,46 @@ class LibraryPersistenceTests(unittest.TestCase):
 
     def test_open_downloads_folder_uses_configured_download_root(self) -> None:
         root = Path(self.temp_dir.name) / "downloads"
+        settings_path = Path(self.temp_dir.name) / "settings.json"
+        settings_path.write_text(f'{{"download_root": "{root}"}}', encoding="utf-8")
 
-        with patch("backend.app.main.DOWNLOADS_ROOT", root), patch(
+        with patch("backend.app.main.APP_SETTINGS_PATH", settings_path), patch(
             "backend.app.main._open_path_in_file_manager"
         ) as open_path:
             result = open_downloads_folder()
 
-        open_path.assert_called_once_with(root)
+        open_path.assert_called_once_with(root.resolve())
         self.assertEqual(result["path"], str(root.resolve()))
+
+    def test_update_app_settings_persists_download_root(self) -> None:
+        settings_path = Path(self.temp_dir.name) / "settings.json"
+        download_root = Path(self.temp_dir.name) / "custom-downloads"
+
+        with patch("backend.app.main.APP_SETTINGS_PATH", settings_path):
+            result = update_app_settings(AppSettingsWrite(download_root=str(download_root)))
+            loaded = get_app_settings()
+
+        self.assertEqual(result.download_root, str(download_root.resolve()))
+        self.assertEqual(loaded.download_root, str(download_root.resolve()))
+        self.assertTrue(download_root.exists())
+
+    def test_default_download_root_uses_documents_panelstack_downloads(self) -> None:
+        self.assertEqual(
+            _default_download_root(),
+            Path.home().joinpath("Documents", "panelstack-downloads").resolve(),
+        )
+
+    def test_parse_download_output_accepts_current_cli_labels(self) -> None:
+        root = Path(self.temp_dir.name)
+        archive = root / "sample.cbz"
+        extracted = root / "sample"
+        archive.touch()
+        extracted.mkdir()
+        parsed = _parse_download_output(
+            f"Title: Sample\nArchive:  {archive}\nExtract:  {extracted}\nPages: 2 image files\n"
+        )
+
+        self.assertEqual(parsed, [str(archive.resolve()), str(extracted.resolve())])
 
 
 if __name__ == "__main__":

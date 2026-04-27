@@ -2018,6 +2018,14 @@
           "published_on": "2025-04-01"
         },
         {
+          "issue_number": "1090-1096",
+          "issue_kind": "collection",
+          "title": "Batman - Detective Comics Vol. 1 - Mercy of the Father (TPB)",
+          "published_on": "2025-07-01",
+          "sort_order": 1096500,
+          "summary": "Collects Detective Comics #1090-1096."
+        },
+        {
           "issue_number": "1097",
           "title": "Detective Comics #1097",
           "published_on": "2025-05-01"
@@ -6032,7 +6040,7 @@
     {
       "slug": "detective-comics-1937-vol-1",
       "title": "Detective Comics: Vol. 1",
-      "description": "The first current-era collection for Detective Comics.",
+      "description": "Detective Comics #1090-1096, also collected as Mercy of the Father.",
       "status": "published",
       "source_name": "DC",
       "source_url": "https://www.dc.com/blog/2024/09/26/dc-first-look-detective-comics-1090",
@@ -6078,6 +6086,21 @@
           "story_arc_slug": "detective-comics-1937-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 70,
+          "canonical_issue_key": "detective-comics-1937#1096",
+          "story_arc_slug": "detective-comics-1937-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "detective-comics-1937#1090-1096",
+          "story_arc_slug": "detective-comics-1937-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Detective Comics #1090-1096."
         }
       ]
     },
@@ -6091,41 +6114,34 @@
       "entries": [
         {
           "sort_order": 10,
-          "canonical_issue_key": "detective-comics-1937#1096",
-          "story_arc_slug": "detective-comics-1937-vol-2",
-          "entry_type": "issue",
-          "importance": "main"
-        },
-        {
-          "sort_order": 20,
           "canonical_issue_key": "detective-comics-1937#1097",
           "story_arc_slug": "detective-comics-1937-vol-2",
           "entry_type": "issue",
           "importance": "main"
         },
         {
-          "sort_order": 30,
+          "sort_order": 20,
           "canonical_issue_key": "detective-comics-1937#1098",
           "story_arc_slug": "detective-comics-1937-vol-2",
           "entry_type": "issue",
           "importance": "main"
         },
         {
-          "sort_order": 40,
+          "sort_order": 30,
           "canonical_issue_key": "detective-comics-1937#1099",
           "story_arc_slug": "detective-comics-1937-vol-2",
           "entry_type": "issue",
           "importance": "main"
         },
         {
-          "sort_order": 50,
+          "sort_order": 40,
           "canonical_issue_key": "detective-comics-1937#1100",
           "story_arc_slug": "detective-comics-1937-vol-2",
           "entry_type": "issue",
           "importance": "main"
         },
         {
-          "sort_order": 60,
+          "sort_order": 50,
           "canonical_issue_key": "detective-comics-1937#1101",
           "story_arc_slug": "detective-comics-1937-vol-2",
           "entry_type": "issue",
