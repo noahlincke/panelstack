@@ -1,6 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { apiClient } from '../api/client';
-import type { ReadingPath, ReadingPathCover } from '../api/types';
+import type { AppSettings, ReadingPath, ReadingPathCover } from '../api/types';
 import { ReadingPathPoster } from '../components/ReadingPathPoster';
 import { useShellSettingsAction } from '../components/Shell';
 import { ViewSettingsDrawer } from '../components/ViewSettingsDrawer';
@@ -21,6 +21,9 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
   const [status, setStatus] = useState('');
   const [posterSize, setPosterSize] = usePersistentPosterSize('library-poster-size', 130);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState<AppSettings | undefined>();
+  const [downloadRootDraft, setDownloadRootDraft] = useState('');
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -43,6 +46,36 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
     }
   }
 
+  async function loadSettings(mountedRef?: { current: boolean }) {
+    try {
+      const payload = await apiClient.getSettings();
+      if (mountedRef && !mountedRef.current) {
+        return;
+      }
+      setSettings(payload);
+      setDownloadRootDraft(payload.downloadRoot);
+    } catch (reason: unknown) {
+      if (mountedRef && !mountedRef.current) {
+        return;
+      }
+      setStatus(reason instanceof Error ? reason.message : 'Unable to load library settings.');
+    }
+  }
+
+  async function handleSaveSettings() {
+    try {
+      setIsSavingSettings(true);
+      const payload = await apiClient.updateSettings({ downloadRoot: downloadRootDraft });
+      setSettings(payload);
+      setDownloadRootDraft(payload.downloadRoot);
+      setStatus(`Download folder set to ${payload.downloadRoot}`);
+    } catch (reason: unknown) {
+      setStatus(reason instanceof Error ? reason.message : 'Unable to save library settings.');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  }
+
   useEffect(() => {
     let mounted = true;
     setStatus('');
@@ -61,6 +94,14 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
       mounted = false;
     };
   }, [refreshToken]);
+
+  useEffect(() => {
+    const mounted = { current: true };
+    void loadSettings(mounted);
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const normalizedQuery = deferredSearchQuery.trim().toLowerCase();
   const isGlobalSearch = normalizedQuery.length > 0;
@@ -168,7 +209,43 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
         onClose={() => setIsSettingsOpen(false)}
         posterSize={posterSize}
         onPosterSizeChange={setPosterSize}
-      />
+      >
+        <section>
+          <div className="settings-drawer__section-head">
+            <h3>Download folder</h3>
+            <p>Choose where downloaded issues and MangaPill chapters are saved.</p>
+          </div>
+          <div className="settings-field">
+            <input
+              type="text"
+              value={downloadRootDraft}
+              placeholder={settings?.defaultDownloadRoot ?? 'Download folder path'}
+              onChange={(event) => setDownloadRootDraft(event.target.value)}
+              spellCheck={false}
+            />
+            <div className="settings-field__actions">
+              <button
+                type="button"
+                className="button button--primary"
+                onClick={() => void handleSaveSettings()}
+                disabled={isSavingSettings || downloadRootDraft.trim().length === 0}
+              >
+                {isSavingSettings ? 'Saving...' : 'Save Folder'}
+              </button>
+              {settings ? (
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => setDownloadRootDraft(settings.defaultDownloadRoot)}
+                  disabled={isSavingSettings}
+                >
+                  Use Default
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      </ViewSettingsDrawer>
 
       <div className="catalog-toolbar catalog-toolbar--library">
         <div className="catalog-toolbar__left" />
@@ -176,6 +253,7 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
           Open Downloads
         </button>
       </div>
+      {status ? <p className="catalog-detail-status">{status}</p> : null}
 
       {renderedPaths.length > 0 ? (
         <>

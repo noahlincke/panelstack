@@ -816,6 +816,34 @@ h2 {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 240, 232, 0.96));
 }
 
+.settings-field {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-field input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 13px;
+  border: 1px solid rgba(36, 29, 23, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text);
+  font: inherit;
+}
+
+.settings-field input:focus {
+  border-color: rgba(86, 57, 43, 0.32);
+  outline: 2px solid rgba(86, 57, 43, 0.12);
+  outline-offset: 1px;
+}
+
+.settings-field__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .settings-slider input {
   width: 100%;
   accent-color: var(--accent-strong);

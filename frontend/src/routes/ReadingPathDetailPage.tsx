@@ -49,6 +49,10 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
     () => path?.entries.filter((entry) => entry.matchedIssue).length ?? 0,
     [path],
   );
+  const hasCollectedEditions = useMemo(
+    () => path?.entries.some((entry) => entry.entryType === 'collection') ?? false,
+    [path],
+  );
   const localSeriesId = path?.entries.find((entry) => entry.matchedIssue)?.matchedIssue?.seriesId;
 
   async function handleDownload() {
@@ -78,14 +82,16 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
 
   async function handleEntryDownload(entryId: string, openWhenDone = false) {
     try {
+      const currentEntry = path?.entries.find((entry) => entry.id === entryId);
+      const entryNoun = currentEntry?.entryType === 'collection' ? 'Collected edition' : 'Issue';
       setDownloadingEntryId(entryId);
       setDownloadStatus('');
       const result = await apiClient.downloadReadingPathEntry(readingPathId, entryId);
       onLibraryMutated();
       setDownloadStatus(
         result.downloadedIssueCount > 0
-          ? 'Issue downloaded to My Library.'
-          : 'This issue is already available locally.',
+          ? `${entryNoun} downloaded to My Library.`
+          : `This ${entryNoun.toLowerCase()} is already available locally.`,
       );
       const updatedPath = await refreshReadingPath(readingPathId);
       const updatedEntry = updatedPath?.entries.find((entry) => entry.id === entryId);
@@ -239,16 +245,21 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
       {downloadStatus ? <p className="catalog-detail-status">{downloadStatus}</p> : null}
 
       <div className="section-head">
-        <h2>Issues</h2>
-        <span>{path.entries.length} total</span>
+        <h2>{hasCollectedEditions ? 'Issues and collected editions' : 'Issues'}</h2>
+        <span>
+          {path.totalIssues} issue{path.totalIssues === 1 ? '' : 's'}
+          {hasCollectedEditions ? ` · ${path.entries.length - path.totalIssues} collected` : ''}
+        </span>
       </div>
 
       <div className="poster-grid poster-grid--issues" style={{ '--poster-min-width': '150px' } as CSSProperties}>
         {path.entries.map((entry) => {
           const matchedIssue = entry.matchedIssue;
           const isRead = Boolean(entry.isRead);
+          const isCollection = entry.entryType === 'collection';
           const issueTitle = entry.canonicalIssue?.title ?? entry.label ?? 'Issue';
-          const issueSubtitle = `${entry.canonicalIssue ? `#${entry.canonicalIssue.issueNumber}` : 'Issue'}${entry.canonicalIssue?.publishedOn ? ` · ${entry.canonicalIssue.publishedOn}` : ''}`;
+          const issueSubtitle = `${isCollection ? 'Collected edition' : entry.canonicalIssue ? `#${entry.canonicalIssue.issueNumber}` : 'Issue'}${entry.canonicalIssue?.publishedOn ? ` · ${entry.canonicalIssue.publishedOn}` : ''}`;
+          const entryNoun = isCollection ? 'collected edition' : 'issue';
           return (
             <article
               key={entry.id}
@@ -272,7 +283,9 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                       alt={`${matchedIssue?.title ?? issueTitle} cover`}
                       title={issueTitle}
                       seriesTitle={entry.canonicalSeries?.title}
-                      issueNumber={entry.canonicalIssue?.issueNumber ?? matchedIssue?.issueNumber}
+                      issueNumber={
+                        isCollection ? undefined : (entry.canonicalIssue?.issueNumber ?? matchedIssue?.issueNumber)
+                      }
                     />
                   </button>
                   <button
@@ -299,7 +312,7 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                   >
                     <TrashIcon />
                   </button>
-                  {downloadingEntryId === entry.id ? <DownloadBadge label="Preparing issue" /> : null}
+                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Preparing ${entryNoun}`} /> : null}
                 </div>
               ) : entry.canonicalIssue ? (
                 <div className={`poster-tile__media ${isRead ? 'poster-tile__media--complete' : ''}`}>
@@ -314,7 +327,7 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                       alt={`${issueTitle} cover`}
                       title={issueTitle}
                       seriesTitle={entry.canonicalSeries?.title}
-                      issueNumber={entry.canonicalIssue.issueNumber}
+                      issueNumber={isCollection ? undefined : entry.canonicalIssue.issueNumber}
                     />
                   </button>
                   <button
@@ -329,7 +342,7 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                   >
                     <span aria-hidden="true">👀</span>
                   </button>
-                  {downloadingEntryId === entry.id ? <DownloadBadge label="Downloading issue" /> : null}
+                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Downloading ${entryNoun}`} /> : null}
                 </div>
               ) : (
                 <div className={`poster-tile__media ${isRead ? 'poster-tile__media--complete' : ''}`}>
@@ -358,8 +371,8 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                   <button
                     type="button"
                     className={`poster-tile__download ${downloadingEntryId === entry.id ? 'poster-tile__download--loading' : ''}`}
-                    aria-label="Download issue"
-                    title="Download issue"
+                    aria-label={`Download ${entryNoun}`}
+                    title={`Download ${entryNoun}`}
                     onClick={() => void handleEntryDownload(entry.id)}
                     disabled={downloadingEntryId === entry.id}
                   >
@@ -367,7 +380,7 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                       ↓
                     </span>
                   </button>
-                  {downloadingEntryId === entry.id ? <DownloadBadge label="Downloading issue" /> : null}
+                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Downloading ${entryNoun}`} /> : null}
                 </div>
               )}
               <div className="poster-tile__meta">

@@ -7,6 +7,7 @@ import {
   isCollectionIssueRead,
 } from '../lib/readingProgress';
 import type {
+  AppSettings,
   AuthSession,
   EventDetail,
   EventSummary,
@@ -574,6 +575,26 @@ export const apiClient = {
   async openDownloadsFolder(): Promise<OpenFolderResult> {
     const payload = await fetchJson<{ path: string }>('/library/open-downloads', { method: 'POST' });
     return { path: payload.path };
+  },
+
+  async getSettings(): Promise<AppSettings> {
+    const payload = await fetchJson<{ download_root: string; default_download_root: string }>('/settings');
+    return {
+      downloadRoot: payload.download_root,
+      defaultDownloadRoot: payload.default_download_root,
+    };
+  },
+
+  async updateSettings(settings: Pick<AppSettings, 'downloadRoot'>): Promise<AppSettings> {
+    const payload = await fetchJson<{ download_root: string; default_download_root: string }>('/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ download_root: settings.downloadRoot }),
+    });
+    return {
+      downloadRoot: payload.download_root,
+      defaultDownloadRoot: payload.default_download_root,
+    };
   },
 
   async listSeries(sort: 'title' | 'latest_published_desc' | 'latest_published_asc' = 'title'): Promise<Series[]> {
