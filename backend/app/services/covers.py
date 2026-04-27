@@ -136,6 +136,10 @@ def _issue_number_tokens(issue_number: str | None) -> set[str]:
     return {token for token in normalized.split() if token}
 
 
+def _is_expected_collected_edition(issue_number: str | None) -> bool:
+    return bool(issue_number and "-" in issue_number)
+
+
 def _score_candidate(
     candidate: GetComicsSearchCandidate,
     *,
@@ -146,6 +150,7 @@ def _score_candidate(
     title = _normalize_text(candidate.post_title)
     expected_series = _normalize_text(expected_series_title)
     expected_issue_tokens = _issue_number_tokens(expected_issue_number)
+    expected_collection = _is_expected_collected_edition(expected_issue_number)
 
     score = 0
     penalties = 0
@@ -171,7 +176,7 @@ def _score_candidate(
 
     if "infinity comic" in title and "infinity comic" not in expected_series:
         penalties += 90
-    if "omnibus" in title or "vol " in title or "tpb" in title:
+    if not expected_collection and ("omnibus" in title or "vol " in title or "tpb" in title):
         penalties += 25
 
     has_image = 1 if candidate.image_url else 0

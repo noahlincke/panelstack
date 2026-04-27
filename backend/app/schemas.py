@@ -14,6 +14,15 @@ class HealthResponse(APIBaseModel):
     database: str = "ok"
 
 
+class AppSettingsRead(APIBaseModel):
+    download_root: str
+    default_download_root: str
+
+
+class AppSettingsWrite(APIBaseModel):
+    download_root: str
+
+
 class ArchiveRead(APIBaseModel):
     id: int
     series_id: int | None

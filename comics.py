@@ -12,7 +12,7 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
-from urllib.parse import unquote, urljoin, urlparse
+from urllib.parse import quote_plus, unquote, urljoin, urlparse
 
 try:
     import requests
@@ -65,6 +65,8 @@ DOWNLOAD_TEXT_HINTS = {
     "ufile",
     "zippyshare",
 }
+DEFAULT_OUTPUT_DIR = "~/Documents/panelstack-downloads"
+GETCOMICS_SEARCH_URL = "https://getcomics.org/?s={query}"
 
 
 class ComicDownloadError(RuntimeError):
@@ -99,6 +101,12 @@ class DownloadPlan:
     resolved_url: str
 
 
+@dataclass
+class SearchCandidate:
+    title: str
+    url: str
+
+
 def supports_interaction() -> bool:
     return sys.stdin.isatty() and sys.stdout.isatty()
 
@@ -123,7 +131,7 @@ def print_rule(title: str = "") -> None:
 def print_banner() -> None:
     print_rule()
     print("getcomics-dl")
-    print("Download a GetComics post, mirror link, or direct archive.")
+    print("Download a GetComics post, mirror link, direct archive, or search title.")
     print_rule()
 
 
@@ -231,6 +239,63 @@ def filename_from_url(url: str) -> str | None:
     if not path.name:
         return None
     return normalize_filename(path.name)
+
+
+def looks_like_url(value: str) -> bool:
+    parsed = urlparse(value)
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def normalize_search_text(value: str) -> str:
+    normalized = value.lower().replace("&", " and ")
+    normalized = re.sub(r"[^a-z0-9]+", " ", normalized)
+    return " ".join(normalized.split())
+
+
+def parse_search_candidates(raw_html: str, base_url: str) -> list[SearchCandidate]:
+    soup = BeautifulSoup(raw_html, "html.parser")
+    candidates: list[SearchCandidate] = []
+    seen: set[str] = set()
+    for article in soup.find_all("article"):
+        link = article.select_one("h1.post-title a, h2.post-title a, .post-title a")
+        if not link or not link.get("href"):
+            continue
+        url = urljoin(base_url, str(link["href"]))
+        title = link.get_text(" ", strip=True)
+        if not title or url in seen:
+            continue
+        seen.add(url)
+        candidates.append(SearchCandidate(title=title, url=url))
+    return candidates
+
+
+def score_search_candidate(query: str, candidate: SearchCandidate) -> tuple[int, int, int]:
+    normalized_query = normalize_search_text(query)
+    normalized_title = normalize_search_text(candidate.title)
+    query_tokens = set(normalized_query.split())
+    title_tokens = set(normalized_title.split())
+    overlap = len(query_tokens & title_tokens)
+    score = overlap * 10
+    if normalized_query and normalized_query in normalized_title:
+        score += 120
+    if normalized_title and normalized_title in normalized_query:
+        score += 80
+    if "tpb" in query_tokens and "tpb" in title_tokens:
+        score += 20
+    if "omnibus" in title_tokens and "omnibus" not in query_tokens:
+        score -= 20
+    return (score, overlap, -len(candidate.title))
+
+
+def resolve_getcomics_search(session: requests.Session, query: str) -> str:
+    search_url = GETCOMICS_SEARCH_URL.format(query=quote_plus(query.strip()))
+    response = fetch(session, search_url)
+    ensure_success(response, search_url)
+    candidates = parse_search_candidates(response.text, response.url)
+    if not candidates:
+        raise ComicDownloadError(f"No GetComics search results found for: {query}")
+    best = max(candidates, key=lambda candidate: score_search_candidate(query, candidate))
+    return best.url
 
 
 def infer_filename(post_title: str, response: requests.Response, resolved_url: str) -> str:
@@ -505,6 +570,10 @@ def resolve_download_plan(
     preferred_host: str | None,
     choose_mirror: bool = False,
 ) -> DownloadPlan:
+    source_url = source_url.strip()
+    if not looks_like_url(source_url):
+        source_url = resolve_getcomics_search(session, source_url)
+
     source_host = urlparse(source_url).netloc.lower()
 
     if looks_like_archive_url(source_url):
@@ -550,7 +619,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default="downloads",
+        default=DEFAULT_OUTPUT_DIR,
         help="Where downloaded files should be written (default: %(default)s)",
     )
     parser.add_argument(
@@ -589,23 +658,26 @@ def parse_args() -> argparse.Namespace:
 def run_tui(args: argparse.Namespace) -> int:
     print_banner()
     default_url = args.url if args.url else None
-    url = ask_text("URL", default_url)
+    url = ask_text("Search or URL", default_url)
     if not url:
-        print("No URL provided.", file=sys.stderr)
+        print("No search or URL provided.", file=sys.stderr)
         return 1
 
+    print()
+    print("Press Enter to accept defaults.")
     output_dir_text = ask_text("Download folder", args.output_dir)
-    host = ask_text("Preferred mirror host", args.host or "auto")
-    if host.lower() == "auto":
-        host = ""
-    extract = ask_yes_no("Extract .cbz/.zip after download", not args.no_extract)
-    choose = ask_yes_no("Choose mirror manually when available", args.choose)
-    dry_run = ask_yes_no("Dry run only", args.dry_run)
-    open_result = False if dry_run else ask_yes_no("Open result when done", args.open)
+    print("Options: download, open, choose, dry-run, archive-only")
+    option_text = ask_text("Options", "download")
+    option_tokens = {token.strip().lower() for token in re.split(r"[,\\s]+", option_text) if token.strip()}
+    dry_run = args.dry_run or bool(option_tokens & {"dry", "dry-run", "inspect"})
+    choose = args.choose or bool(option_tokens & {"choose", "mirror", "mirrors"})
+    open_result = args.open or bool(option_tokens & {"open"})
+    extract = not args.no_extract and "archive-only" not in option_tokens and "no-extract" not in option_tokens
+    host = args.host
 
     args.url = url
     args.output_dir = output_dir_text
-    args.host = host or None
+    args.host = host
     args.no_extract = not extract
     args.choose = choose
     args.dry_run = dry_run
@@ -636,7 +708,7 @@ def print_result(result: DownloadResult, dry_run: bool = False) -> None:
 
 
 def run_download(args: argparse.Namespace, interactive: bool = False) -> int:
-    url = args.url or input("URL: ").strip()
+    url = args.url or input("Search or URL: ").strip()
     if not url:
         print("No URL provided.", file=sys.stderr)
         return 1

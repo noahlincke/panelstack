@@ -2,7 +2,7 @@
 
 Local comic downloader, catalog, and reader for a personal library.
 
-Panel Stack is intentionally undeployed for now. It runs as a local Vite + FastAPI app, stores catalog data in SQLite, and keeps downloaded archives in `downloads/`.
+Panel Stack is intentionally undeployed for now. It runs as a local Vite + FastAPI app, stores catalog data in SQLite, and keeps downloaded archives in `~/Documents/panelstack-downloads` by default.
 
 ## Quick Start
 
@@ -24,7 +24,7 @@ npm run dev -- --port 5174
 
 ## Downloader
 
-`comics.py` can download from GetComics posts, supported mirror links, or direct archive URLs.
+`comics.py` can download from GetComics posts, search titles, supported mirror links, or direct archive URLs.
 
 Install the downloader dependencies first:
 
@@ -51,6 +51,7 @@ Direct command:
 
 ```bash
 python3 comics.py 'https://getcomics.org/dc/absolute-batman-17-2026/'
+python3 comics.py 'Batman - Detective Comics Vol. 1 - Mercy of the Father (TPB)'
 ```
 
 Useful options:
@@ -72,4 +73,4 @@ Supported automated mirrors are best-effort. Some hosts still require browser-on
 - `scripts/dev.py`: combined local dev launcher
 - `backend/data/curation/reading_paths.json`: checked-in seed catalog
 
-Generated data is ignored by git: `downloads/`, local SQLite databases, cached provider data, virtualenvs, `node_modules/`, and frontend build output.
+Generated data is ignored by git: local app settings, local SQLite databases, cached provider data, virtualenvs, `node_modules/`, and frontend build output.

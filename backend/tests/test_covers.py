@@ -157,6 +157,37 @@ class CoverParsingTests(unittest.TestCase):
         self.assertEqual(result.post_title, "The Ultimates #6 (2024)")
         self.assertEqual(result.image_url, "https://img.test/current-ultimates.jpg")
 
+    def test_fetch_getcomics_cover_allows_collected_edition_titles(self) -> None:
+        html = """
+        <html><body>
+          <article>
+            <div class="post-header-image"><img src="https://img.test/issue-1096.jpg"></div>
+            <div class="post-info"><h1 class="post-title"><a href="https://getcomics.org/dc/detective-comics-1096-2025/">Detective Comics #1096 (2025)</a></h1></div>
+          </article>
+          <article>
+            <div class="post-header-image"><img src="https://img.test/mercy-tpb.jpg"></div>
+            <div class="post-info"><h1 class="post-title"><a href="https://getcomics.org/dc/batman-detective-comics-vol-1-mercy-of-the-father-tpb-2025/">Batman - Detective Comics Vol. 1 - Mercy of the Father (TPB) (2025)</a></h1></div>
+          </article>
+        </body></html>
+        """
+
+        mock_response = MagicMock()
+        mock_response.read.return_value = html.encode("utf-8")
+        mock_response.__enter__.return_value = mock_response
+        mock_response.__exit__.return_value = False
+
+        with patch("backend.app.services.covers.urlopen", return_value=mock_response):
+            fetch_getcomics_cover.cache_clear()
+            result = fetch_getcomics_cover(
+                "Batman - Detective Comics Vol. 1 - Mercy of the Father (TPB)",
+                expected_series_title="Batman - Detective Comics Vol. 1 - Mercy of the Father (TPB)",
+                expected_issue_number="1090-1096",
+                expected_year=2025,
+            )
+
+        self.assertEqual(result.post_title, "Batman - Detective Comics Vol. 1 - Mercy of the Father (TPB) (2025)")
+        self.assertEqual(result.image_url, "https://img.test/mercy-tpb.jpg")
+
 
 class CoverAssetTests(unittest.TestCase):
     def setUp(self) -> None:
