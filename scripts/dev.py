@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import os
 import signal
+import socket
 import subprocess
 import sys
 import threading
@@ -39,7 +40,7 @@ def parse_args() -> argparse.Namespace:
 
 def prefixed_stream(prefix: str, stream: TextIO) -> None:
     for line in iter(stream.readline, ""):
-        print(f"[{prefix}] {line.rstrip()}")
+        print(f"[{prefix}] {line.rstrip()}", flush=True)
     stream.close()
 
 
@@ -53,6 +54,37 @@ def fail_prereq(message: str) -> int:
     print(message, file=sys.stderr)
     print("Run `npm install` first.", file=sys.stderr)
     return 1
+
+
+def is_port_available(host: str, port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            probe.bind((host, port))
+        except OSError:
+            return False
+    return True
+
+
+def find_available_port(host: str, preferred_port: int) -> int:
+    port = preferred_port
+    while port < 65535:
+        if is_port_available(host, port):
+            return port
+        port += 1
+    raise RuntimeError(f"No available ports found at or above {preferred_port}.")
+
+
+def assign_available_ports(args: argparse.Namespace) -> None:
+    backend_port = find_available_port(args.backend_host, args.backend_port)
+    frontend_port = find_available_port(args.frontend_host, args.frontend_port)
+
+    if backend_port != args.backend_port:
+        print(f"Backend port {args.backend_port} is in use; using {backend_port} instead.", flush=True)
+        args.backend_port = backend_port
+    if frontend_port != args.frontend_port:
+        print(f"Frontend port {args.frontend_port} is in use; using {frontend_port} instead.", flush=True)
+        args.frontend_port = frontend_port
 
 
 def wait_for_backend_ready(
@@ -109,6 +141,7 @@ def launch_processes(args: argparse.Namespace) -> tuple[subprocess.Popen[str], s
         args.frontend_host,
         "--port",
         str(args.frontend_port),
+        "--strictPort",
     ]
 
     frontend_env = os.environ.copy()
@@ -166,6 +199,7 @@ def terminate(process: subprocess.Popen[str], name: str) -> None:
 
 def main() -> int:
     args = parse_args()
+    assign_available_ports(args)
     backend, frontend = launch_processes(args)
     processes = {"backend": backend, "frontend": frontend}
     stop_requested = False
@@ -182,7 +216,8 @@ def main() -> int:
     print(
         "Starting development stack:\n"
         f"  API:    http://{args.backend_host}:{args.backend_port}\n"
-        f"  Viewer: http://{args.frontend_host}:{args.frontend_port}"
+        f"  Viewer: http://{args.frontend_host}:{args.frontend_port}",
+        flush=True,
     )
 
     exit_code = 0
