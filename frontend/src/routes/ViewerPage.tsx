@@ -3,13 +3,21 @@ import { useParams } from 'react-router-dom';
 import { apiClient } from '../api/client';
 import type { Issue } from '../api/types';
 
+type WebkitDocument = Document & {
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void> | void;
+};
+
+type WebkitElement = HTMLDivElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+
 export function ViewerPage() {
   const { issueId = '', canonicalIssueId = '' } = useParams();
   const [issue, setIssue] = useState<Issue | undefined>();
   const [pageIndex, setPageIndex] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string>('');
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,6 +67,10 @@ export function ViewerPage() {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'f' || event.key === 'F') {
+        event.preventDefault();
+        void toggleFullscreen();
+      }
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
         goBack();
@@ -76,34 +88,40 @@ export function ViewerPage() {
   }, [issue?.pages.length]);
 
   useEffect(() => {
-    function onFullscreenChange() {
-      setIsFullscreen(document.fullscreenElement === stageRef.current);
-    }
-
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', onFullscreenChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    document.body.classList.toggle('viewer-fullscreen', isFullscreen);
+    document.body.classList.add('viewer-fullscreen');
     return () => {
       document.body.classList.remove('viewer-fullscreen');
     };
-  }, [isFullscreen]);
+  }, []);
 
   async function toggleFullscreen() {
-    if (!stageRef.current) {
+    const stage = stageRef.current as WebkitElement | null;
+    const fullscreenDocument = document as WebkitDocument;
+    if (!stage) {
       return;
     }
 
-    if (document.fullscreenElement === stageRef.current) {
-      await document.exitFullscreen();
+    if (document.fullscreenElement === stage || fullscreenDocument.webkitFullscreenElement === stage) {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else {
+        await fullscreenDocument.webkitExitFullscreen?.();
+      }
       return;
     }
 
-    await stageRef.current.requestFullscreen();
+    try {
+      if (stage.requestFullscreen) {
+        await stage.requestFullscreen();
+        return;
+      }
+      if (stage.webkitRequestFullscreen) {
+        await stage.webkitRequestFullscreen();
+        return;
+      }
+    } catch {
+      // Mobile Safari may reject fullscreen requests for non-video elements.
+    }
   }
 
   if (!loaded) {
@@ -120,7 +138,34 @@ export function ViewerPage() {
 
   return (
     <section className="view view--viewer">
-      <div ref={stageRef} className={isFullscreen ? 'viewer-stage viewer-stage--fullscreen' : 'viewer-stage'}>
+      <div
+        ref={stageRef}
+        className="viewer-stage viewer-stage--fullscreen viewer-stage--immersive"
+      >
+        <header className="viewer-titlebar" aria-label="Issue navigation">
+          <button
+            type="button"
+            className="viewer-titlebar__nav"
+            disabled={!canGoBack}
+            onClick={goBack}
+            aria-label="Previous page"
+          >
+            <span className="viewer-titlebar__chevron viewer-titlebar__chevron--left" aria-hidden="true" />
+          </button>
+          <div className="viewer-titlebar__title" title={issue.title}>
+            {issue.title}
+          </div>
+          <button
+            type="button"
+            className="viewer-titlebar__nav"
+            disabled={!canGoForward}
+            onClick={goForward}
+            aria-label="Next page"
+          >
+            <span className="viewer-titlebar__chevron viewer-titlebar__chevron--right" aria-hidden="true" />
+          </button>
+        </header>
+
         <article className="page-canvas" aria-label={`Page ${pageIndex + 1}`}>
           {currentPage?.imageUrl ? (
             <img
@@ -139,31 +184,24 @@ export function ViewerPage() {
           )}
         </article>
 
-        {!isFullscreen ? (
-          <div className="viewer-toolbar">
-            <div className="viewer-controls" aria-label="Page navigation">
-              <button
-                type="button"
-                className="button viewer-button"
-                disabled={!canGoBack}
-                onClick={goBack}
-              >
-                ← Previous
-              </button>
-              <button type="button" className="button viewer-button viewer-button--utility" onClick={toggleFullscreen}>
-                Fullscreen
-              </button>
-              <button
-                type="button"
-                className="button button--primary viewer-button"
-                disabled={!canGoForward}
-                onClick={goForward}
-              >
-                Next →
-              </button>
-            </div>
-          </div>
-        ) : null}
+        <div className="viewer-hit-zones" aria-label="Reader controls">
+          <button
+            type="button"
+            className="viewer-hit-zone viewer-hit-zone--back"
+            disabled={!canGoBack}
+            onClick={goBack}
+            aria-label="Previous page"
+          >
+          </button>
+          <button
+            type="button"
+            className="viewer-hit-zone viewer-hit-zone--forward"
+            disabled={!canGoForward}
+            onClick={goForward}
+            aria-label="Next page"
+          >
+          </button>
+        </div>
       </div>
     </section>
   );

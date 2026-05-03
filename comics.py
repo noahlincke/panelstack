@@ -427,11 +427,33 @@ def resolve_ufile(session: requests.Session, url: str) -> str:
     raise ComicDownloadError("Could not resolve a direct Ufile download link.")
 
 
+def resolve_getcomics_redirect(session: requests.Session, url: str) -> str:
+    try:
+        response = session.get(url, timeout=60, allow_redirects=False, stream=False)
+    except requests.RequestException as exc:
+        raise ComicDownloadError(f"Request failed for {url}: {exc}") from exc
+
+    if response.status_code in {301, 302, 303, 307, 308}:
+        location = response.headers.get("location")
+        if not location:
+            raise ComicDownloadError("GetComics redirect wrapper did not include a target URL.")
+        redirected_url = urljoin(url, location)
+        return resolve_candidate_url(session, DownloadCandidate(label="GetComics redirect", url=redirected_url))
+
+    ensure_success(response, url)
+    if response.url != url:
+        return resolve_candidate_url(session, DownloadCandidate(label="GetComics redirect", url=response.url))
+
+    raise ComicDownloadError("GetComics redirect wrapper did not lead to a supported mirror.")
+
+
 def resolve_candidate_url(session: requests.Session, candidate: DownloadCandidate) -> str:
     host = candidate.host
 
     if looks_like_archive_url(candidate.url):
         return candidate.url
+    if host == "getcomics.org" and urlparse(candidate.url).path.startswith("/dls/"):
+        return resolve_getcomics_redirect(session, candidate.url)
     if "pixeldrain.com" in host:
         return resolve_pixeldrain(candidate.url)
     if "mediafire.com" in host:
@@ -462,6 +484,9 @@ def download_file(
     total = int(response.headers.get("content-length") or 0)
     written = 0
     last_paint = 0.0
+
+    if destination.exists() and total > 0 and destination.stat().st_size == total:
+        return destination
 
     with destination.open("wb") as file_handle:
         for chunk in response.iter_content(chunk_size=1024 * 1024):
