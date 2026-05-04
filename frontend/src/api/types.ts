@@ -84,6 +84,7 @@ export type ReadingPath = {
   eventTitle?: string;
   sourceName?: string;
   sourceUrl?: string;
+  coverUrl?: string;
   latestIssueLabel?: string;
   firstPublishedOn?: string;
   latestPublishedOn?: string;
@@ -181,6 +182,7 @@ export type AuthSession = {
 export type AppSettings = {
   downloadRoot: string;
   defaultDownloadRoot: string;
+  hostedDeployment: boolean;
 };
 
 export type OpenFolderResult = {
