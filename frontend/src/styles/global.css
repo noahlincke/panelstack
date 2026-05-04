@@ -1728,68 +1728,60 @@ h2 {
 
 .viewer-titlebar {
   position: absolute;
-  top: 16px;
+  top: 22px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 4;
-  width: min(calc(100vw - 32px), 760px);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  max-width: calc(100vw - 32px);
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   pointer-events: none;
 }
 
 .viewer-titlebar__title {
   min-width: 0;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.32);
+  max-width: min(72vw, 640px);
   color: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(16px);
-  font-size: 0.92rem;
+  font-size: clamp(0.92rem, 1.5vw, 1.05rem);
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
 }
 
 .viewer-titlebar__nav {
   pointer-events: auto;
   appearance: none;
-  width: 40px;
-  height: 40px;
+  width: 18px;
+  height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.38);
-  color: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(16px);
+  padding: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
   cursor: pointer;
-  transition: background-color 160ms ease, transform 160ms ease, opacity 160ms ease;
+  transition: color 160ms ease, transform 160ms ease, opacity 160ms ease;
 }
 
 .viewer-titlebar__nav:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.96);
   transform: translateY(-1px);
 }
 
 .viewer-titlebar__nav:disabled {
-  opacity: 0.34;
+  opacity: 0.22;
   cursor: default;
 }
 
 .viewer-titlebar__chevron {
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-top: 1.5px solid currentColor;
   border-right: 1.5px solid currentColor;
 }
@@ -1884,20 +1876,18 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 
 @media (max-width: 640px) {
   .viewer-titlebar {
-    top: 12px;
-    width: min(calc(100vw - 20px), 760px);
+    top: 16px;
+    max-width: calc(100vw - 20px);
     gap: 10px;
   }
 
   .viewer-titlebar__title {
-    height: 36px;
-    padding: 0 14px;
     font-size: 0.84rem;
   }
 
   .viewer-titlebar__nav {
-    width: 36px;
-    height: 36px;
+    width: 16px;
+    height: 16px;
   }
 }
 
