@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiClient } from '../api/client';
-import type { ReadingPathDetail } from '../api/types';
+import type { AppSettings, ReadingPathDetail } from '../api/types';
 
 type ReadingPathDetailPageProps = {
   onLibraryMutated: () => void;
@@ -16,6 +16,7 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
   const [downloadStatus, setDownloadStatus] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadingEntryId, setDownloadingEntryId] = useState<string | null>(null);
+  const [settings, setSettings] = useState<AppSettings | undefined>();
 
   async function loadReadingPath(currentReadingPathId: string, mountedRef?: { current: boolean }) {
     setLoaded(false);
@@ -45,6 +46,22 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
     };
   }, [readingPathId]);
 
+  useEffect(() => {
+    let mounted = true;
+    apiClient.getSettings().then((payload) => {
+      if (mounted) {
+        setSettings(payload);
+      }
+    }).catch(() => {
+      if (mounted) {
+        setSettings(undefined);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const availabilityCount = useMemo(
     () => path?.entries.filter((entry) => entry.matchedIssue).length ?? 0,
     [path],
@@ -54,6 +71,7 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
     [path],
   );
   const localSeriesId = path?.entries.find((entry) => entry.matchedIssue)?.matchedIssue?.seriesId;
+  const isHostedDeployment = settings?.hostedDeployment === true;
 
   async function handleDownload() {
     try {
@@ -96,7 +114,13 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
       const updatedPath = await refreshReadingPath(readingPathId);
       const updatedEntry = updatedPath?.entries.find((entry) => entry.id === entryId);
       if (openWhenDone && updatedEntry?.matchedIssue) {
-        navigate(`/viewer/${updatedEntry.matchedIssue.id}`);
+        if (await canOpenLocalIssue(updatedEntry.matchedIssue.id)) {
+          navigate(`/viewer/${updatedEntry.matchedIssue.id}`);
+          return;
+        }
+        setDownloadStatus(
+          `${entryNoun} downloaded to My Library, but this archive is not streamable in the viewer on this server.`,
+        );
       }
     } catch (reason: unknown) {
       setDownloadStatus(reason instanceof Error ? reason.message : 'Unable to download this issue right now.');
@@ -237,9 +261,11 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
           <Link to="/all" className="button">
             Back to All
           </Link>
-          <button type="button" className="button" onClick={() => void handleOpenDownloadsFolder()}>
-            Open Downloads
-          </button>
+          {!isHostedDeployment ? (
+            <button type="button" className="button" onClick={() => void handleOpenDownloadsFolder()}>
+              Open Downloads
+            </button>
+          ) : null}
         </div>
       </div>
       {downloadStatus ? <p className="catalog-detail-status">{downloadStatus}</p> : null}

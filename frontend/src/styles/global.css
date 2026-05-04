@@ -1726,74 +1726,6 @@ h2 {
   z-index: 2;
 }
 
-.viewer-titlebar {
-  position: absolute;
-  top: 22px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 4;
-  max-width: calc(100vw - 32px);
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  pointer-events: none;
-}
-
-.viewer-titlebar__title {
-  min-width: 0;
-  max-width: min(72vw, 640px);
-  color: rgba(255, 255, 255, 0.94);
-  font-size: clamp(0.92rem, 1.5vw, 1.05rem);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
-}
-
-.viewer-titlebar__nav {
-  pointer-events: auto;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.72);
-  cursor: pointer;
-  transition: color 160ms ease, transform 160ms ease, opacity 160ms ease;
-}
-
-.viewer-titlebar__nav:hover:not(:disabled) {
-  color: rgba(255, 255, 255, 0.96);
-  transform: translateY(-1px);
-}
-
-.viewer-titlebar__nav:disabled {
-  opacity: 0.22;
-  cursor: default;
-}
-
-.viewer-titlebar__chevron {
-  display: block;
-  width: 11px;
-  height: 11px;
-  border-top: 1.5px solid currentColor;
-  border-right: 1.5px solid currentColor;
-}
-
-.viewer-titlebar__chevron--left {
-  transform: rotate(-135deg);
-}
-
-.viewer-titlebar__chevron--right {
-  transform: rotate(45deg);
-}
-
 .viewer-hit-zone {
   appearance: none;
   border: 0;
@@ -1872,23 +1804,6 @@ body.viewer-fullscreen .viewer-stage:fullscreen .page-canvas__art,
 body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
   border-radius: 0;
   box-shadow: none;
-}
-
-@media (max-width: 640px) {
-  .viewer-titlebar {
-    top: 16px;
-    max-width: calc(100vw - 20px);
-    gap: 10px;
-  }
-
-  .viewer-titlebar__title {
-    font-size: 0.84rem;
-  }
-
-  .viewer-titlebar__nav {
-    width: 16px;
-    height: 16px;
-  }
 }
 
 .page-canvas__art--amber {
