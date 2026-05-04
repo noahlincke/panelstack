@@ -142,30 +142,6 @@ export function ViewerPage() {
         ref={stageRef}
         className="viewer-stage viewer-stage--fullscreen viewer-stage--immersive"
       >
-        <header className="viewer-titlebar" aria-label="Issue navigation">
-          <button
-            type="button"
-            className="viewer-titlebar__nav"
-            disabled={!canGoBack}
-            onClick={goBack}
-            aria-label="Previous page"
-          >
-            <span className="viewer-titlebar__chevron viewer-titlebar__chevron--left" aria-hidden="true" />
-          </button>
-          <div className="viewer-titlebar__title" title={issue.title}>
-            {issue.title}
-          </div>
-          <button
-            type="button"
-            className="viewer-titlebar__nav"
-            disabled={!canGoForward}
-            onClick={goForward}
-            aria-label="Next page"
-          >
-            <span className="viewer-titlebar__chevron viewer-titlebar__chevron--right" aria-hidden="true" />
-          </button>
-        </header>
-
         <article className="page-canvas" aria-label={`Page ${pageIndex + 1}`}>
           {currentPage?.imageUrl ? (
             <img

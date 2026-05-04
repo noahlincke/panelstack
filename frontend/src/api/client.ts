@@ -25,7 +25,9 @@ import type {
 } from './types';
 
 const latency = 120;
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? '/api' : '');
+const appBaseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const defaultApiBaseUrl = import.meta.env.DEV ? '/api' : `${appBaseUrl}/api`;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? defaultApiBaseUrl;
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 export const AUTH_REQUIRED_EVENT = 'app-auth-required';
 
@@ -117,6 +119,7 @@ type BackendReadingPathSummary = {
   publisher_name?: string | null;
   source_name?: string | null;
   source_url?: string | null;
+  cover_url?: string | null;
   issue_count?: number;
   series_count?: number;
   latest_issue_label?: string | null;
@@ -392,6 +395,7 @@ function mapReadingPathSummary(item: BackendReadingPathSummary, eventTitle?: str
     eventTitle,
     sourceName: item.source_name ?? undefined,
     sourceUrl: item.source_url ?? undefined,
+    coverUrl: item.cover_url ? resolveApiUrl(item.cover_url) : undefined,
     latestIssueLabel: item.latest_issue_label ?? undefined,
     firstPublishedOn: item.first_published_on ?? undefined,
     latestPublishedOn: item.latest_published_on ?? undefined,
@@ -578,15 +582,24 @@ export const apiClient = {
   },
 
   async getSettings(): Promise<AppSettings> {
-    const payload = await fetchJson<{ download_root: string; default_download_root: string }>('/settings');
+    const payload = await fetchJson<{
+      download_root: string;
+      default_download_root: string;
+      hosted_deployment?: boolean;
+    }>('/settings');
     return {
       downloadRoot: payload.download_root,
       defaultDownloadRoot: payload.default_download_root,
+      hostedDeployment: Boolean(payload.hosted_deployment),
     };
   },
 
   async updateSettings(settings: Pick<AppSettings, 'downloadRoot'>): Promise<AppSettings> {
-    const payload = await fetchJson<{ download_root: string; default_download_root: string }>('/settings', {
+    const payload = await fetchJson<{
+      download_root: string;
+      default_download_root: string;
+      hosted_deployment?: boolean;
+    }>('/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ download_root: settings.downloadRoot }),
@@ -594,6 +607,7 @@ export const apiClient = {
     return {
       downloadRoot: payload.download_root,
       defaultDownloadRoot: payload.default_download_root,
+      hostedDeployment: Boolean(payload.hosted_deployment),
     };
   },
 
