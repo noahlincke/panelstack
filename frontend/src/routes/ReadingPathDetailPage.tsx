@@ -241,11 +241,20 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
             {path.latestPublishedOn ? ` · latest ${path.latestPublishedOn}` : ''}
           </p>
           {path.previousCollectionId || path.nextCollectionId ? (
-            <p className="catalog-detail-head__meta">
-              {path.previousCollectionId ? <Link to={`/all/${path.previousCollectionId}`}>Previous volume</Link> : null}
-              {path.previousCollectionId && path.nextCollectionId ? ' · ' : ''}
-              {path.nextCollectionId ? <Link to={`/all/${path.nextCollectionId}`}>Next volume</Link> : null}
-            </p>
+            <div className="catalog-collection-nav" aria-label="Volume navigation">
+              {path.previousCollectionId ? (
+                <Link className="catalog-collection-nav__link" to={`/all/${path.previousCollectionId}`}>
+                  <span className="catalog-collection-nav__arrow" aria-hidden="true">←</span>
+                  <span>Previous volume</span>
+                </Link>
+              ) : null}
+              {path.nextCollectionId ? (
+                <Link className="catalog-collection-nav__link catalog-collection-nav__link--next" to={`/all/${path.nextCollectionId}`}>
+                  <span>Next volume</span>
+                  <span className="catalog-collection-nav__arrow" aria-hidden="true">→</span>
+                </Link>
+              ) : null}
+            </div>
           ) : null}
         </div>
         <div className="catalog-detail-head__actions">
