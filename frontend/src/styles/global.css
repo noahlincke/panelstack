@@ -1148,6 +1148,44 @@ h2 {
   justify-self: end;
 }
 
+.catalog-collection-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.catalog-collection-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(92, 68, 49, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--text);
+  box-shadow: 0 10px 22px rgba(49, 39, 31, 0.08);
+  transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.catalog-collection-nav__link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(92, 68, 49, 0.24);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 28px rgba(49, 39, 31, 0.1);
+}
+
+.catalog-collection-nav__arrow {
+  color: var(--accent-strong);
+  font-size: 0.98rem;
+  line-height: 1;
+}
+
+.catalog-collection-nav__link--next {
+  padding-right: 16px;
+}
+
 .catalog-issue-list {
   display: grid;
   gap: 10px;
