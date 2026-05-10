@@ -19,6 +19,7 @@ from backend.app.main import (
 )
 from backend.app.models import Archive, Base, Issue, Series
 from backend.app.schemas import AppSettingsWrite
+from backend.app.services.archive_tools import ArchiveTool
 from backend.app.services.ingest import scan_source
 from backend.app.services.library import persist_scans
 from backend.app.services.reader import archive_page_bytes, list_archive_pages
@@ -99,7 +100,10 @@ class LibraryPersistenceTests(unittest.TestCase):
         archive_path.write_bytes(b"rar")
 
         with patch(
-            "backend.app.services.ingest.subprocess.run",
+            "backend.app.services.archive_tools.find_rar_tool",
+            return_value=ArchiveTool(kind="bsdtar", path="/usr/bin/bsdtar"),
+        ), patch(
+            "backend.app.services.archive_tools.subprocess.run",
             return_value=type("Completed", (), {"stdout": "Sample 001/001.jpg\nSample 001/002.jpg\n"})(),
         ):
             scan = scan_source(archive_path)
@@ -109,7 +113,10 @@ class LibraryPersistenceTests(unittest.TestCase):
             archive = db.scalar(select(Archive))
 
         with patch(
-            "backend.app.services.ingest.subprocess.run",
+            "backend.app.services.archive_tools.find_rar_tool",
+            return_value=ArchiveTool(kind="bsdtar", path="/usr/bin/bsdtar"),
+        ), patch(
+            "backend.app.services.archive_tools.subprocess.run",
             return_value=type("Completed", (), {"stdout": "Sample 001/001.jpg\nSample 001/002.jpg\n"})(),
         ):
             pages = list_archive_pages(archive)
@@ -118,7 +125,7 @@ class LibraryPersistenceTests(unittest.TestCase):
             "backend.app.services.reader.scan_source",
             return_value=scan,
         ), patch(
-            "backend.app.services.reader.subprocess.run",
+            "backend.app.services.archive_tools.subprocess.run",
             return_value=type("Completed", (), {"returncode": 0, "stdout": b"page-one", "stderr": b""})(),
         ):
             content, media_type, filename = archive_page_bytes(archive, 1)
@@ -128,6 +135,49 @@ class LibraryPersistenceTests(unittest.TestCase):
         self.assertEqual(content, b"page-one")
         self.assertEqual(media_type, "image/jpeg")
         self.assertEqual(filename, "001.jpg")
+
+    def test_cbr_archive_is_streamable_via_7zz(self) -> None:
+        root = Path(self.temp_dir.name)
+        archive_path = root / "Sample 001.cbr"
+        archive_path.write_bytes(b"rar")
+        sevenzip_output = """
+Path = sample.cbr
+Type = Rar
+
+Path = Sample 001/001.jpg
+Size = 8
+Folder = -
+"""
+        with patch(
+            "backend.app.services.archive_tools.find_rar_tool",
+            return_value=ArchiveTool(kind="sevenzip", path="/app/bin/7zz"),
+        ), patch(
+            "backend.app.services.archive_tools.subprocess.run",
+            return_value=type("Completed", (), {"stdout": sevenzip_output})(),
+        ):
+            scan = scan_source(archive_path)
+
+        with self.session_factory() as db:
+            persist_scans(db, [scan])
+            archive = db.scalar(select(Archive))
+
+        with patch("backend.app.services.archive_tools.rar_support_available", return_value=True), patch(
+            "backend.app.services.reader.scan_source",
+            return_value=scan,
+        ), patch(
+            "backend.app.services.archive_tools.find_rar_tool",
+            return_value=ArchiveTool(kind="sevenzip", path="/app/bin/7zz"),
+        ), patch(
+            "backend.app.services.archive_tools.subprocess.run",
+            return_value=type("Completed", (), {"returncode": 0, "stdout": b"page-one", "stderr": b""})(),
+        ) as run_command:
+            content, media_type, filename = archive_page_bytes(archive, 1)
+
+        self.assertEqual(content, b"page-one")
+        self.assertEqual(media_type, "image/jpeg")
+        self.assertEqual(filename, "001.jpg")
+        run_command.assert_called_once()
+        self.assertEqual(run_command.call_args.args[0][:3], ["/app/bin/7zz", "x", "-so"])
 
     def test_delete_issue_removes_files_and_deletes_series_when_last_issue(self) -> None:
         root = Path(self.temp_dir.name)

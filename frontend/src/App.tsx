@@ -35,6 +35,7 @@ export default function App() {
           <Route path="/series/:seriesId" element={<SeriesDetailPage />} />
           <Route path="/viewer/:issueId" element={<ViewerPage />} />
           <Route path="/viewer/canonical/:canonicalIssueId" element={<ViewerPage />} />
+          <Route path="/viewer/reading-path/:readingPathId/entries/:entryId" element={<ViewerPage />} />
           <Route path="*" element={<Navigate to="/all" replace />} />
         </Routes>
       </Shell>

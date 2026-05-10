@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from ..models import (
@@ -18,6 +18,7 @@ from ..models import (
     IssueMatch,
     Publisher,
     ReadingPath,
+    ReadingPathCoverAsset,
     ReadingPathEntry,
     Series,
     StoryArc,
@@ -280,6 +281,7 @@ def _upsert_canonical_issue(
     issue.sort_order = payload.get("sort_order", issue_sort_order(payload["issue_number"]))
     issue.published_on = _parse_date(payload.get("published_on"))
     issue.summary = payload.get("summary")
+    issue.cover_url = payload.get("cover_url")
     db.flush()
     return issue
 
@@ -302,6 +304,23 @@ def _upsert_reading_path(
     reading_path.source_name = payload.get("source_name")
     reading_path.source_url = payload.get("source_url")
     db.flush()
+    cover_url = payload.get("cover_url")
+    if cover_url:
+        cover_asset = db.scalar(
+            select(ReadingPathCoverAsset).where(ReadingPathCoverAsset.reading_path_id == reading_path.id)
+        )
+        if cover_asset is None:
+            cover_asset = ReadingPathCoverAsset(reading_path_id=reading_path.id)
+            db.add(cover_asset)
+        cover_asset.query = reading_path.title
+        cover_asset.source_image_url = cover_url
+        cover_asset.cached_path = None
+        cover_asset.content_type = None
+        cover_asset.post_url = reading_path.source_url
+        cover_asset.post_title = reading_path.title
+        cover_asset.status = "ready"
+        cover_asset.error = None
+        db.flush()
     return reading_path
 
 
@@ -593,30 +612,39 @@ def sync_curation_data(db: Session, data_path: Path | None = None) -> CurationSy
     reading_path_entries_count = 0
     for reading_path_payload in payload.get("reading_paths", []):
         reading_path = _upsert_reading_path(db, reading_path_payload, events)
-        db.execute(delete(ReadingPathEntry).where(ReadingPathEntry.reading_path_id == reading_path.id))
-        db.flush()
+        existing_entries = db.scalars(
+            select(ReadingPathEntry).where(ReadingPathEntry.reading_path_id == reading_path.id)
+        ).all()
+        existing_by_sort_order = {entry.sort_order: entry for entry in existing_entries}
+        incoming_sort_orders: set[int] = set()
 
         for entry_payload in reading_path_payload.get("entries", []):
             canonical_issue = canonical_issues.get(entry_payload.get("canonical_issue_key", ""))
             canonical_series_ref = canonical_series.get(entry_payload.get("canonical_series_slug", ""))
             story_arc = story_arcs.get(entry_payload.get("story_arc_slug", ""))
+            sort_order = entry_payload["sort_order"]
+            incoming_sort_orders.add(sort_order)
 
-            entry = ReadingPathEntry(
-                reading_path_id=reading_path.id,
-                canonical_series_id=canonical_series_ref.id if canonical_series_ref else None,
-                canonical_issue_id=canonical_issue.id if canonical_issue else None,
-                story_arc_id=story_arc.id if story_arc else None,
-                series_id=None,
-                issue_id=None,
-                sort_order=entry_payload["sort_order"],
-                entry_type=entry_payload.get("entry_type", "issue"),
-                importance=entry_payload.get("importance", "main"),
-                label=entry_payload.get("label"),
-                note=entry_payload.get("note"),
-                is_optional=entry_payload.get("is_optional", False),
-            )
-            db.add(entry)
+            entry = existing_by_sort_order.get(sort_order)
+            if entry is None:
+                entry = ReadingPathEntry(reading_path_id=reading_path.id, sort_order=sort_order)
+                db.add(entry)
+
+            entry.canonical_series_id = canonical_series_ref.id if canonical_series_ref else None
+            entry.canonical_issue_id = canonical_issue.id if canonical_issue else None
+            entry.story_arc_id = story_arc.id if story_arc else None
+            entry.series_id = None
+            entry.issue_id = None
+            entry.entry_type = entry_payload.get("entry_type", "issue")
+            entry.importance = entry_payload.get("importance", "main")
+            entry.label = entry_payload.get("label")
+            entry.note = entry_payload.get("note")
+            entry.is_optional = entry_payload.get("is_optional", False)
             reading_path_entries_count += 1
+
+        for stale_entry in existing_entries:
+            if stale_entry.sort_order not in incoming_sort_orders:
+                db.delete(stale_entry)
 
     issue_matches_synced = sync_issue_matches(db)
     sync_series_matches(db)

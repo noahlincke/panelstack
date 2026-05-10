@@ -17,6 +17,7 @@ export type Issue = {
   id: string;
   seriesId: string;
   readingPathId?: string;
+  readingPathEntryId?: string;
   canonicalIssueId?: string;
   isRead?: boolean;
   number: string;
@@ -137,6 +138,7 @@ export type ReadingPathEntry = {
   canonicalSeries?: CanonicalReference;
   canonicalIssue?: {
     id: string;
+    providerName?: string;
     issueNumber: string;
     title: string;
     publishedOn?: string;

@@ -290,8 +290,8 @@ export const FILTER_GROUPS: CatalogFilterGroup[] = [
   },
   {
     id: 'anime',
-    publisher: 'Anime',
-    label: 'Anime',
+    publisher: 'Manga',
+    label: 'Manga',
     items: [
       {
         id: 'jujutsu-kaisen',

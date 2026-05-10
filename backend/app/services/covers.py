@@ -229,16 +229,35 @@ def fetch_getcomics_cover(
 def _guess_extension(source_url: str | None, content_type: str | None) -> str:
     if content_type:
         normalized = content_type.split(";", 1)[0].strip().lower()
-        if normalized == "image/jpeg":
-            return ".jpg"
-        guessed = mimetypes.guess_extension(normalized)
-        if guessed:
-            return guessed
+        if normalized.startswith("image/"):
+            if normalized == "image/jpeg":
+                return ".jpg"
+            guessed = mimetypes.guess_extension(normalized)
+            if guessed:
+                return guessed
     if source_url:
         suffix = Path(urlparse(source_url).path).suffix.lower()
         if suffix in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"}:
             return suffix
     return ".img"
+
+
+def _content_type_for_extension(extension: str) -> str | None:
+    if extension == ".webp":
+        return "image/webp"
+    if extension == ".avif":
+        return "image/avif"
+    return mimetypes.types_map.get(extension)
+
+
+def _normalize_image_content_type(source_url: str | None, content_type: str | None) -> str | None:
+    normalized = content_type.split(";", 1)[0].strip().lower() if content_type else None
+    if normalized and normalized.startswith("image/"):
+        return normalized
+    extension = _guess_extension(source_url, content_type)
+    if extension != ".img":
+        return _content_type_for_extension(extension)
+    return None
 
 
 def _download_binary(url: str) -> tuple[bytes, str | None]:
@@ -318,7 +337,7 @@ def ensure_reading_path_cover_asset(
     destination.write_bytes(content)
 
     asset.cached_path = str(destination)
-    asset.content_type = content_type.split(";", 1)[0].strip().lower() if content_type else None
+    asset.content_type = _normalize_image_content_type(cover.image_url, content_type)
     asset.status = "ready"
     asset.error = None
     db.flush()
@@ -369,7 +388,7 @@ def ensure_query_cover_image(
             sibling.unlink(missing_ok=True)
 
     destination.write_bytes(content)
-    normalized_content_type = content_type.split(";", 1)[0].strip().lower() if content_type else None
+    normalized_content_type = _normalize_image_content_type(cover.image_url, content_type)
     return destination, normalized_content_type, cover
 
 
@@ -392,7 +411,7 @@ def ensure_remote_cover_image(
 
     if destination.exists() and not force_refresh:
         existing_path = destination
-        return existing_path, mimetypes.guess_type(existing_path.name)[0]
+        return existing_path, _content_type_for_extension(existing_path.suffix.lower())
 
     try:
         content, content_type = _download_binary_with_headers(image_url, referer_url=referer_url)
@@ -406,5 +425,5 @@ def ensure_remote_cover_image(
             sibling.unlink(missing_ok=True)
 
     destination.write_bytes(content)
-    normalized_content_type = content_type.split(";", 1)[0].strip().lower() if content_type else None
+    normalized_content_type = _normalize_image_content_type(image_url, content_type)
     return destination, normalized_content_type

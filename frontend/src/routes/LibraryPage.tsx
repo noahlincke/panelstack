@@ -19,6 +19,7 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
   const [paths, setPaths] = useState<ReadingPath[]>([]);
   const [coversById, setCoversById] = useState<Record<string, ReadingPathCover>>({});
   const [status, setStatus] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [posterSize, setPosterSize] = usePersistentPosterSize('library-poster-size', 130);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settings, setSettings] = useState<AppSettings | undefined>();
@@ -79,15 +80,17 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
   useEffect(() => {
     let mounted = true;
     setStatus('');
+    setIsLoading(true);
     apiClient.listReadingPaths('latest_published_desc').then((items) => {
       if (mounted) {
         setPaths(items);
+        setIsLoading(false);
       }
-    }).catch(() => {
+    }).catch((reason: unknown) => {
       if (mounted) {
-        setStatus(
-          'Unable to reach the backend. Start `npm run dev` in the repo root, or run the API separately on http://localhost:8000.',
-        );
+        const detail = reason instanceof Error ? reason.message : 'Unable to load catalog.';
+        setStatus(import.meta.env.DEV ? `Unable to reach the backend. ${detail}` : `Unable to load catalog. ${detail}`);
+        setIsLoading(false);
       }
     });
     return () => {
@@ -153,6 +156,7 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
     return left.title.localeCompare(right.title);
   });
   const renderedPaths = visiblePaths.slice(0, visibleCount);
+  const isHostedDeployment = settings?.hostedDeployment === true;
 
   useEffect(() => {
     setVisibleCount(Math.min(INITIAL_VISIBLE_COUNT, visiblePaths.length));
@@ -213,7 +217,11 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
         <section>
           <div className="settings-drawer__section-head">
             <h3>Download folder</h3>
-            <p>Choose where downloaded issues and MangaPill chapters are saved.</p>
+            <p>
+              {isHostedDeployment
+                ? 'Hosted deployments save downloads on the server.'
+                : 'Choose where downloaded issues and MangaPill chapters are saved.'}
+            </p>
           </div>
           <div className="settings-field">
             <input
@@ -249,21 +257,25 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
 
       <div className="catalog-toolbar catalog-toolbar--library">
         <div className="catalog-toolbar__left" />
-        <button type="button" className="button" onClick={() => void handleOpenDownloadsFolder()}>
-          Open Downloads
-        </button>
+        {!isHostedDeployment ? (
+          <button type="button" className="button" onClick={() => void handleOpenDownloadsFolder()}>
+            Open Downloads
+          </button>
+        ) : null}
       </div>
       {status ? <p className="catalog-detail-status">{status}</p> : null}
 
-      {renderedPaths.length > 0 ? (
+      {isLoading && paths.length === 0 ? (
+        <div className="empty-state empty-state--loading">Loading your library...</div>
+      ) : renderedPaths.length > 0 ? (
         <>
+          {isLoading ? <div className="loading-inline-status">Refreshing your library...</div> : null}
           <div className="poster-grid" style={{ '--poster-min-width': `${posterSize}px` } as CSSProperties}>
             {renderedPaths.map((path) => (
               <ReadingPathPoster
                 key={path.id}
                 path={path}
                 cover={coversById[path.id]}
-                onLibraryMutated={onLibraryMutated}
                 dimIfComplete
                 metaMode="library"
               />
