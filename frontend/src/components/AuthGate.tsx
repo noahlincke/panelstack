@@ -107,7 +107,7 @@ export function AuthGate({ children }: AuthGateProps) {
               <div className="catalog-toolbar">
                 <div className="catalog-toolbar__left">
                   <div className="filter-groups">
-                    {['DC Comics', 'Marvel', 'Anime'].map((label) => (
+                    {['DC Comics', 'Marvel', 'Manga'].map((label) => (
                       <div key={label} className="filter-group-card auth-lock__filter">
                         <span className="publisher-filter publisher-filter--brand">{label}</span>
                         <span className="publisher-filter publisher-filter--expand" />
@@ -136,6 +136,10 @@ export function AuthGate({ children }: AuthGateProps) {
         <div className="auth-card" role="dialog" aria-modal="true" aria-labelledby="auth-card-title">
           <p className="auth-card__eyebrow">Panel Stack</p>
           <h1 id="auth-card-title">Enter password</h1>
+          <p className="auth-card__hint">
+            This hosted library is private. Panel Stack is open source, so you can run your own local copy with your
+            own downloads and catalog.
+          </p>
           <form className="auth-form" onSubmit={handleSubmit}>
             <input
               type="password"
@@ -155,6 +159,14 @@ export function AuthGate({ children }: AuthGateProps) {
               {submitting ? 'Unlocking...' : 'Unlock'}
             </button>
           </form>
+          <a
+            className="button auth-card__github"
+            href="https://github.com/noahlincke/panelstack"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View GitHub Project
+          </a>
           {error ? <p className="auth-card__error">{error}</p> : null}
         </div>
       </div>

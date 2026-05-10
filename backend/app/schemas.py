@@ -17,6 +17,7 @@ class HealthResponse(APIBaseModel):
 class AppSettingsRead(APIBaseModel):
     download_root: str
     default_download_root: str
+    hosted_deployment: bool = False
 
 
 class AppSettingsWrite(APIBaseModel):
@@ -102,6 +103,7 @@ class CanonicalIssueSummary(APIBaseModel):
     series_id: int
     event_id: int | None
     legacy_key: str
+    provider_name: str | None = None
     issue_number: str
     issue_kind: str
     title: str | None
@@ -160,6 +162,21 @@ class IssueRead(IssueSummary):
     canonical_matches: list[IssueMatchRead] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
+
+
+class ReaderIssueRead(APIBaseModel):
+    id: str
+    issue_number: str
+    title: str
+    published_on: date | None = None
+    summary: str | None = None
+    page_count: int = 0
+    cover_url: str | None = None
+    reading_path_id: int | None = None
+    reading_path_entry_id: int | None = None
+    canonical_issue_id: int | None = None
+    is_read: bool = False
+    pages: list[ArchivePageRead] = Field(default_factory=list)
 
 
 class SeriesSummary(APIBaseModel):
@@ -224,6 +241,7 @@ class ReadingPathSummary(APIBaseModel):
     publisher_name: str | None = None
     source_name: str | None
     source_url: str | None
+    cover_url: str | None = None
     issue_count: int = 0
     series_count: int = 0
     latest_issue_label: str | None = None

@@ -73,4 +73,14 @@ Supported automated mirrors are best-effort. Some hosts still require browser-on
 - `scripts/dev.py`: combined local dev launcher
 - `backend/data/curation/reading_paths.json`: checked-in seed catalog
 
+## Hostineer Deployment
+
+The hosted app runs FastAPI under Passenger through an ASGI-to-WSGI adapter. Build and deploy to `/panels` with:
+
+```bash
+APP_PASSWORD_HASH='<pbkdf2 hash>' ./deploy_panels.sh
+```
+
+The password hash is written to a remote `.env` on the first deploy and is not tracked by git. Passenger uses the remote virtualenv created from Python 3.11.11 because Hostineer's current Passenger WSGI loader imports Python's removed `imp` module and cannot start under Python 3.12.
+
 Generated data is ignored by git: local app settings, local SQLite databases, cached provider data, virtualenvs, `node_modules/`, and frontend build output.

@@ -13,7 +13,7 @@ type WebkitElement = HTMLDivElement & {
 };
 
 export function ViewerPage() {
-  const { issueId = '', canonicalIssueId = '' } = useParams();
+  const { issueId = '', canonicalIssueId = '', readingPathId = '', entryId = '' } = useParams();
   const [issue, setIssue] = useState<Issue | undefined>();
   const [pageIndex, setPageIndex] = useState(0);
   const [loaded, setLoaded] = useState(false);
@@ -24,7 +24,11 @@ export function ViewerPage() {
     let mounted = true;
     setLoaded(false);
     setError('');
-    const request = canonicalIssueId ? apiClient.getCanonicalIssue(canonicalIssueId) : apiClient.getIssue(issueId);
+    const request = readingPathId && entryId
+      ? apiClient.getReadingPathEntryViewerIssue(readingPathId, entryId)
+      : canonicalIssueId
+        ? apiClient.getCanonicalIssue(canonicalIssueId)
+        : apiClient.getIssue(issueId);
     request.then((item) => {
       if (mounted) {
         setIssue(item);
@@ -40,7 +44,7 @@ export function ViewerPage() {
     return () => {
       mounted = false;
     };
-  }, [issueId, canonicalIssueId]);
+  }, [issueId, canonicalIssueId, readingPathId, entryId]);
 
   const currentPage = issue?.pages[pageIndex];
   const canGoBack = pageIndex > 0;
@@ -48,6 +52,10 @@ export function ViewerPage() {
 
   useEffect(() => {
     if (!issue) {
+      return;
+    }
+    if (issue.readingPathId && issue.readingPathEntryId) {
+      void apiClient.setReadingPathEntryReadState(issue.readingPathId, issue.readingPathEntryId, true);
       return;
     }
     if (issue.canonicalIssueId && issue.id.startsWith('canonical:')) {

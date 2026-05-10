@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiClient } from '../api/client';
-import type { AppSettings, ReadingPathDetail } from '../api/types';
+import type { ReadingPathDetail } from '../api/types';
 
 type ReadingPathDetailPageProps = {
   onLibraryMutated: () => void;
@@ -14,9 +14,8 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
   const [error, setError] = useState('');
   const [loaded, setLoaded] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState('');
-  const [isDownloading, setIsDownloading] = useState(false);
   const [downloadingEntryId, setDownloadingEntryId] = useState<string | null>(null);
-  const [settings, setSettings] = useState<AppSettings | undefined>();
+  const [deviceDownloadEntryId, setDeviceDownloadEntryId] = useState<string | null>(null);
 
   async function loadReadingPath(currentReadingPathId: string, mountedRef?: { current: boolean }) {
     setLoaded(false);
@@ -46,22 +45,6 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
     };
   }, [readingPathId]);
 
-  useEffect(() => {
-    let mounted = true;
-    apiClient.getSettings().then((payload) => {
-      if (mounted) {
-        setSettings(payload);
-      }
-    }).catch(() => {
-      if (mounted) {
-        setSettings(undefined);
-      }
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
   const availabilityCount = useMemo(
     () => path?.entries.filter((entry) => entry.matchedIssue).length ?? 0,
     [path],
@@ -71,71 +54,29 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
     [path],
   );
   const localSeriesId = path?.entries.find((entry) => entry.matchedIssue)?.matchedIssue?.seriesId;
-  const isHostedDeployment = settings?.hostedDeployment === true;
 
-  async function handleDownload() {
-    try {
-      setIsDownloading(true);
-      setDownloadStatus('');
-      const result = await apiClient.downloadReadingPath(readingPathId);
-      onLibraryMutated();
-      setDownloadStatus(
-        result.downloadedIssueCount > 0
-          ? 'Downloaded to My Library.'
-          : `No new issues were downloaded. ${result.skippedIssueCount} issue${result.skippedIssueCount === 1 ? '' : 's'} were already available or unresolved.`,
-      );
-      await loadReadingPath(readingPathId);
-    } catch (reason: unknown) {
-      setDownloadStatus(reason instanceof Error ? reason.message : 'Unable to download this reading path right now.');
-    } finally {
-      setIsDownloading(false);
-    }
+  function triggerBrowserDownload(url: string): void {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = '';
+    anchor.rel = 'noreferrer';
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
   }
 
-  async function refreshReadingPath(currentReadingPathId: string): Promise<ReadingPathDetail | undefined> {
-    const payload = await apiClient.getReadingPath(currentReadingPathId);
-    setPath(payload);
-    return payload;
+  function handleEntryDeviceDownload(entry: ReadingPathDetail['entries'][number]) {
+    setDeviceDownloadEntryId(entry.id);
+    setDownloadStatus('');
+    triggerBrowserDownload(apiClient.getReadingPathEntryDownloadUrl(readingPathId, entry.id));
+    window.setTimeout(() => {
+      setDeviceDownloadEntryId((current) => (current === entry.id ? null : current));
+    }, 1400);
   }
 
-  async function handleEntryDownload(entryId: string, openWhenDone = false) {
-    try {
-      const currentEntry = path?.entries.find((entry) => entry.id === entryId);
-      const entryNoun = currentEntry?.entryType === 'collection' ? 'Collected edition' : 'Issue';
-      setDownloadingEntryId(entryId);
-      setDownloadStatus('');
-      const result = await apiClient.downloadReadingPathEntry(readingPathId, entryId);
-      onLibraryMutated();
-      setDownloadStatus(
-        result.downloadedIssueCount > 0
-          ? `${entryNoun} downloaded to My Library.`
-          : `This ${entryNoun.toLowerCase()} is already available locally.`,
-      );
-      const updatedPath = await refreshReadingPath(readingPathId);
-      const updatedEntry = updatedPath?.entries.find((entry) => entry.id === entryId);
-      if (openWhenDone && updatedEntry?.matchedIssue) {
-        if (await canOpenLocalIssue(updatedEntry.matchedIssue.id)) {
-          navigate(`/viewer/${updatedEntry.matchedIssue.id}`);
-          return;
-        }
-        setDownloadStatus(
-          `${entryNoun} downloaded to My Library, but this archive is not streamable in the viewer on this server.`,
-        );
-      }
-    } catch (reason: unknown) {
-      setDownloadStatus(reason instanceof Error ? reason.message : 'Unable to download this issue right now.');
-    } finally {
-      setDownloadingEntryId(null);
-    }
-  }
-
-  async function handleOpenDownloadsFolder() {
-    try {
-      const result = await apiClient.openDownloadsFolder();
-      setDownloadStatus(`Opened ${result.path}`);
-    } catch (reason: unknown) {
-      setDownloadStatus(reason instanceof Error ? reason.message : 'Unable to open the downloads folder.');
-    }
+  function isEntryDownloaded(entry: ReadingPathDetail['entries'][number]): boolean {
+    return Boolean(entry.matchedIssue);
   }
 
   async function handleDeleteSeries() {
@@ -206,13 +147,26 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
           return;
         }
       } catch {
-        // Fall through to saving provider records that cannot stream right now.
+        // Fall through to buffered remote reading.
       } finally {
         setDownloadingEntryId(null);
       }
     }
 
-    await handleEntryDownload(entry.id, true);
+    try {
+      setDownloadingEntryId(entry.id);
+      setDownloadStatus('Preparing stream...');
+      const issue = await apiClient.getReadingPathEntryViewerIssue(readingPathId, entry.id);
+      if (!issue?.pages.length) {
+        setDownloadStatus('This issue could not be prepared for streaming right now.');
+        return;
+      }
+      navigate(`/viewer/reading-path/${readingPathId}/entries/${entry.id}`);
+    } catch (reason: unknown) {
+      setDownloadStatus(reason instanceof Error ? reason.message : 'Unable to open this issue right now.');
+    } finally {
+      setDownloadingEntryId(null);
+    }
   }
 
   if (!loaded) {
@@ -258,9 +212,6 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
           ) : null}
         </div>
         <div className="catalog-detail-head__actions">
-          <button type="button" className="button button--primary" onClick={handleDownload} disabled={isDownloading}>
-            {isDownloading ? 'Downloading...' : 'Download all'}
-          </button>
           {localSeriesId ? (
             <button type="button" className="button button--stacked" onClick={() => void handleDeleteSeries()}>
               <TrashIcon />
@@ -270,11 +221,6 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
           <Link to="/all" className="button">
             Back to All
           </Link>
-          {!isHostedDeployment ? (
-            <button type="button" className="button" onClick={() => void handleOpenDownloadsFolder()}>
-              Open Downloads
-            </button>
-          ) : null}
         </div>
       </div>
       {downloadStatus ? <p className="catalog-detail-status">{downloadStatus}</p> : null}
@@ -291,7 +237,9 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
         {path.entries.map((entry) => {
           const matchedIssue = entry.matchedIssue;
           const isRead = Boolean(entry.isRead);
+          const isDownloaded = isEntryDownloaded(entry);
           const isCollection = entry.entryType === 'collection';
+          const isMangaPill = entry.canonicalIssue?.providerName === 'MangaPill';
           const issueTitle = entry.canonicalIssue?.title ?? entry.label ?? 'Issue';
           const issueSubtitle = `${isCollection ? 'Collected edition' : entry.canonicalIssue ? `#${entry.canonicalIssue.issueNumber}` : 'Issue'}${entry.canonicalIssue?.publishedOn ? ` · ${entry.canonicalIssue.publishedOn}` : ''}`;
           const entryNoun = isCollection ? 'collected edition' : 'issue';
@@ -335,6 +283,23 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                   >
                     <span aria-hidden="true">👀</span>
                   </button>
+                  {!isDownloaded ? (
+                    <button
+                      type="button"
+                      className={`poster-tile__download ${deviceDownloadEntryId === entry.id ? 'poster-tile__download--loading' : ''}`}
+                      aria-label={`Download ${entryNoun}`}
+                      title={`Download ${entryNoun}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        handleEntryDeviceDownload(entry);
+                      }}
+                      disabled={deviceDownloadEntryId === entry.id}
+                    >
+                      <span className="poster-tile__download-icon" aria-hidden="true">
+                        ↓
+                      </span>
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="poster-tile__download"
@@ -347,7 +312,8 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                   >
                     <TrashIcon />
                   </button>
-                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Preparing ${entryNoun}`} /> : null}
+                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Preparing ${entryNoun} stream`} /> : null}
+                  {deviceDownloadEntryId === entry.id ? <DownloadBadge label={`Downloading ${entryNoun}`} /> : null}
                 </div>
               ) : entry.canonicalIssue ? (
                 <div className={`poster-tile__media ${isRead ? 'poster-tile__media--complete' : ''}`}>
@@ -377,7 +343,25 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                   >
                     <span aria-hidden="true">👀</span>
                   </button>
-                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Downloading ${entryNoun}`} /> : null}
+                  {!isDownloaded && !isMangaPill ? (
+                    <button
+                      type="button"
+                      className={`poster-tile__download ${deviceDownloadEntryId === entry.id ? 'poster-tile__download--loading' : ''}`}
+                      aria-label={`Download ${entryNoun}`}
+                      title={`Download ${entryNoun}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        handleEntryDeviceDownload(entry);
+                      }}
+                      disabled={deviceDownloadEntryId === entry.id}
+                    >
+                      <span className="poster-tile__download-icon" aria-hidden="true">
+                        ↓
+                      </span>
+                    </button>
+                  ) : null}
+                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Preparing ${entryNoun} stream`} /> : null}
+                  {deviceDownloadEntryId === entry.id ? <DownloadBadge label={`Downloading ${entryNoun}`} /> : null}
                 </div>
               ) : (
                 <div className={`poster-tile__media ${isRead ? 'poster-tile__media--complete' : ''}`}>
@@ -403,24 +387,27 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                   >
                     <span aria-hidden="true">👀</span>
                   </button>
-                  <button
-                    type="button"
-                    className={`poster-tile__download ${downloadingEntryId === entry.id ? 'poster-tile__download--loading' : ''}`}
-                    aria-label={`Download ${entryNoun}`}
-                    title={`Download ${entryNoun}`}
-                    onClick={() => void handleEntryDownload(entry.id)}
-                    disabled={downloadingEntryId === entry.id}
-                  >
-                    <span className="poster-tile__download-icon" aria-hidden="true">
-                      ↓
-                    </span>
-                  </button>
-                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Downloading ${entryNoun}`} /> : null}
+                  {!isDownloaded ? (
+                    <button
+                      type="button"
+                      className={`poster-tile__download ${deviceDownloadEntryId === entry.id ? 'poster-tile__download--loading' : ''}`}
+                      aria-label={`Download ${entryNoun}`}
+                      title={`Download ${entryNoun}`}
+                      onClick={() => handleEntryDeviceDownload(entry)}
+                      disabled={deviceDownloadEntryId === entry.id}
+                    >
+                      <span className="poster-tile__download-icon" aria-hidden="true">
+                        ↓
+                      </span>
+                    </button>
+                  ) : null}
+                  {downloadingEntryId === entry.id ? <DownloadBadge label={`Preparing ${entryNoun} stream`} /> : null}
+                  {deviceDownloadEntryId === entry.id ? <DownloadBadge label={`Downloading ${entryNoun}`} /> : null}
                 </div>
               )}
               <div className="poster-tile__meta">
                 <span>{issueSubtitle}</span>
-                <span>{matchedIssue ? 'In Library' : 'Not downloaded'}</span>
+                <span>{isDownloaded ? 'In Library' : (isMangaPill ? 'Streaming only' : 'Available to download')}</span>
               </div>
               {entry.note ? <p className="poster-tile__status">{entry.note}</p> : null}
             </article>

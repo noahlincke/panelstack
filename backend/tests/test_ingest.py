@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from backend.app.routers import ingest as ingest_router
+from backend.app.services.archive_tools import ArchiveTool
 from backend.app.services import IngestService, discover_sources, infer_metadata_from_name, scan_source
 
 
@@ -68,7 +69,10 @@ class IngestServiceTests(unittest.TestCase):
             archive_path.write_bytes(b"rar")
 
             with patch(
-                "backend.app.services.ingest.subprocess.run",
+                "backend.app.services.archive_tools.find_rar_tool",
+                return_value=ArchiveTool(kind="bsdtar", path="/usr/bin/bsdtar"),
+            ), patch(
+                "backend.app.services.archive_tools.subprocess.run",
                 return_value=type("Completed", (), {"stdout": "folder/001.jpg\nfolder/002.png\nreadme.txt\n"})(),
             ):
                 result = scan_source(archive_path)
@@ -77,6 +81,56 @@ class IngestServiceTests(unittest.TestCase):
         self.assertEqual(result.archive_format, "rar")
         self.assertEqual(result.page_count, 2)
         self.assertEqual([page.relative_path for page in result.pages], ["folder/001.jpg", "folder/002.png"])
+
+    def test_cbr_scan_indexes_archive_when_bsdtar_is_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            archive_path = root / "sample.cbr"
+            archive_path.write_bytes(b"rar")
+
+            with patch("backend.app.services.archive_tools.find_rar_tool", return_value=None):
+                result = scan_source(archive_path)
+
+        self.assertEqual(result.source_kind, "archive")
+        self.assertEqual(result.archive_format, "rar")
+        self.assertEqual(result.page_count, 0)
+        self.assertTrue(result.warnings)
+
+    def test_cbr_scan_counts_archive_pages_via_7zz(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            archive_path = root / "sample.cbr"
+            archive_path.write_bytes(b"rar")
+            sevenzip_output = """
+Path = sample.cbr
+Type = Rar
+
+Path = folder/002.png
+Size = 12
+Folder = -
+
+Path = folder
+Folder = +
+
+Path = folder/001.jpg
+Size = 10
+Folder = -
+"""
+
+            with patch(
+                "backend.app.services.archive_tools.find_rar_tool",
+                return_value=ArchiveTool(kind="sevenzip", path="/app/bin/7zz"),
+            ), patch(
+                "backend.app.services.archive_tools.subprocess.run",
+                return_value=type("Completed", (), {"stdout": sevenzip_output})(),
+            ):
+                result = scan_source(archive_path)
+
+        self.assertEqual(result.source_kind, "archive")
+        self.assertEqual(result.archive_format, "rar")
+        self.assertEqual(result.page_count, 2)
+        self.assertEqual([page.relative_path for page in result.pages], ["folder/001.jpg", "folder/002.png"])
+        self.assertEqual([page.size_bytes for page in result.pages], [10, 12])
 
     def test_job_lifecycle_runs_synchronously(self) -> None:
         service = IngestService()
