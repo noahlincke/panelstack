@@ -149,6 +149,7 @@ class CurationSyncTests(unittest.TestCase):
 
         with self.session_factory() as db:
             first = sync_curation_data(db, payload_path)
+            first_entry_id = db.scalar(select(ReadingPathEntry.id))
 
         with self.session_factory() as db:
             second = sync_curation_data(db, payload_path)
@@ -171,6 +172,7 @@ class CurationSyncTests(unittest.TestCase):
         self.assertEqual(canonical_issue.legacy_key, "sample-hero-2024#1")
         self.assertEqual(reading_path.slug, "sample-event-main")
         self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0].id, first_entry_id)
         self.assertEqual(entries[0].canonical_issue_id, canonical_issue.id)
 
     def test_persisted_issue_is_matched_to_canonical_issue(self) -> None:

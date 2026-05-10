@@ -1985,37 +1985,44 @@
         {
           "issue_number": "1090",
           "title": "Detective Comics #1090",
-          "published_on": "2024-10-01"
+          "published_on": "2024-10-01",
+          "cover_url": "https://i0.wp.com/getcomics.org/share/uploads/2024/10/Detective-Comics-1090-2024.jpg?fit=400%2C614&ssl=1"
         },
         {
           "issue_number": "1091",
           "title": "Detective Comics #1091",
-          "published_on": "2024-11-01"
+          "published_on": "2024-11-01",
+          "cover_url": "https://i0.wp.com/getcomics.org/share/uploads/2024/11/Detective-Comics-1091-2024.jpg?fit=400%2C615&ssl=1"
         },
         {
           "issue_number": "1092",
           "title": "Detective Comics #1092",
-          "published_on": "2024-12-01"
+          "published_on": "2024-12-01",
+          "cover_url": "https://i0.wp.com/getcomics.org/share/uploads/2024/12/Detective-Comics-1092-2024.jpg?fit=400%2C615&ssl=1"
         },
         {
           "issue_number": "1093",
           "title": "Detective Comics #1093",
-          "published_on": "2025-01-01"
+          "published_on": "2025-01-01",
+          "cover_url": "https://i0.wp.com/getcomics.org/share/uploads/2025/01/Detective-Comics-1093-2025.jpg?fit=400%2C615&ssl=1"
         },
         {
           "issue_number": "1094",
           "title": "Detective Comics #1094",
-          "published_on": "2025-02-01"
+          "published_on": "2025-02-01",
+          "cover_url": "https://i0.wp.com/getcomics.org/share/uploads/2025/02/Detective-Comics-1094-2025.jpg?fit=400%2C615&ssl=1"
         },
         {
           "issue_number": "1095",
           "title": "Detective Comics #1095",
-          "published_on": "2025-03-01"
+          "published_on": "2025-03-01",
+          "cover_url": "https://i0.wp.com/getcomics.org/share/uploads/2025/03/Detective-Comics-1095-2025.jpg?fit=400%2C615&ssl=1"
         },
         {
           "issue_number": "1096",
           "title": "Detective Comics #1096",
-          "published_on": "2025-04-01"
+          "published_on": "2025-04-01",
+          "cover_url": "https://i0.wp.com/getcomics.org/share/uploads/2025/04/Detective-Comics-1096-2025.jpg?fit=400%2C615&ssl=1"
         },
         {
           "issue_number": "1090-1096",
@@ -4558,7 +4565,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://static.dc.com/2025-08/ABS-MM_Cv6_00611_DIGITAL.jpg"
     },
     {
       "slug": "absolute-superman-2024-vol-1",
@@ -4832,7 +4840,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://static.dc.com/2024-12/ACTIONCOMICS_Cv1081_08111_DIGITAL.jpg"
     },
     {
       "slug": "action-comics-2016-vol-2",
@@ -5040,7 +5049,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/3/f0/6997713b5b19a/portrait_uncanny.jpg"
     },
     {
       "slug": "avengers-2023-vol-2",
@@ -5153,6 +5163,7 @@
       "status": "published",
       "source_name": "DC",
       "source_url": "https://www.dc.com/blog/2024/12/17/hush-returns-in-batman-158",
+      "cover_url": "https://static.dc.com/2024-12/BM_Cv158_main.jpg",
       "entries": [
         {
           "sort_order": 10,
@@ -5205,6 +5216,7 @@
       "status": "published",
       "source_name": "DC",
       "source_url": "https://www.dc.com/blog/2024/12/17/hush-returns-in-batman-158",
+      "cover_url": "https://static.dc.com/2024-12/batman%20158%20to%20163%20dell_otto_connecting%20cov_REV.jpg",
       "entries": [
         {
           "sort_order": 10,
@@ -5473,7 +5485,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/1/30/5e99d71942155/clean.jpg"
     },
     {
       "slug": "civil-war-spider-man-companion",
@@ -5607,7 +5620,8 @@
           "importance": "epilogue",
           "is_optional": true
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/1/30/5e99d71942155/clean.jpg"
     },
     {
       "slug": "crisis-on-infinite-earths-core",
@@ -5702,7 +5716,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://www.comicbookherald.com/wp-content/uploads/2018/10/crisis-cosmic-tuning-fork.png"
     },
     {
       "slug": "crisis-on-infinite-earths-expanded",
@@ -5796,7 +5811,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://www.comicbookherald.com/wp-content/uploads/2018/10/crisis-cosmic-tuning-fork.png"
     },
     {
       "slug": "daredevil-2023-vol-1",
@@ -5848,7 +5864,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/3/d0/68c1c61e92439/portrait_uncanny.jpg"
     },
     {
       "slug": "daredevil-2023-vol-2",
@@ -5945,7 +5962,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/9/70/67dc403f0f7f2/portrait_uncanny.jpg"
     },
     {
       "slug": "deadpool-2024-vol-2",
@@ -5990,7 +6008,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/9/70/67dc403f0f7f2/portrait_uncanny.jpg"
     },
     {
       "slug": "deadpool-2024-vol-3",
@@ -6035,7 +6054,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/9/70/67dc403f0f7f2/portrait_uncanny.jpg"
     },
     {
       "slug": "detective-comics-1937-vol-1",
@@ -6296,7 +6316,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "exceptional-x-men-2024-vol-2",
@@ -6400,7 +6421,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/3/90/685c541490d2e/portrait_uncanny.jpg"
     },
     {
       "slug": "fantastic-four-2022-vol-2",
@@ -6504,7 +6526,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://static.dc.com/2025-02/GA_Cv21_02111_DIGITAL.jpg"
     },
     {
       "slug": "green-arrow-2023-vol-2",
@@ -6608,7 +6631,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://static.dc.com/2025-03/GL_Cv21_02111_DIGITAL.jpg"
     },
     {
       "slug": "green-lantern-2023-vol-2",
@@ -6797,7 +6821,8 @@
           "is_optional": true,
           "note": "Best immediate bridge into Decimation."
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/b/e0/54a70b6f4c0be/clean.jpg"
     },
     {
       "slug": "house-of-m-core",
@@ -6864,7 +6889,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/b/e0/54a70b6f4c0be/clean.jpg"
     },
     {
       "slug": "immortal-thor-2023-vol-1",
@@ -6916,7 +6942,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/3/90/64e518673c43a/portrait_uncanny.jpg"
     },
     {
       "slug": "immortal-thor-2023-vol-2",
@@ -6968,7 +6995,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/3/90/64e518673c43a/portrait_uncanny.jpg"
     },
     {
       "slug": "incredible-hulk-2023-vol-1",
@@ -7020,7 +7048,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/a/30/68de9bf33509f/portrait_uncanny.jpg"
     },
     {
       "slug": "incredible-hulk-2023-vol-2",
@@ -7140,7 +7169,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://www.comicbookherald.com/wp-content/uploads/2018/11/infinite-crisis-dc-e1541106820258.jpg"
     },
     {
       "slug": "infinite-crisis-countdown-companion",
@@ -7416,7 +7446,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://www.comicbookherald.com/wp-content/uploads/2018/11/infinite-crisis-dc-e1541106820258.jpg"
     },
     {
       "slug": "iron-man-2024-vol-1",
@@ -7461,7 +7492,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/2/10/6876786f59c36/portrait_uncanny.jpg"
     },
     {
       "slug": "iron-man-2024-vol-2",
@@ -7759,7 +7791,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "nyx-2024-vol-2",
@@ -7856,7 +7889,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "phoenix-2024-vol-2",
@@ -7960,7 +7994,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "storm-2024-vol-2",
@@ -8272,7 +8307,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://static.dc.com/2025-04/FLS_Cv20_02011_DIGITAL.jpg"
     },
     {
       "slug": "the-flash-2023-vol-2",
@@ -8376,7 +8412,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/5/d0/6630060fa28ae/portrait_uncanny.jpg"
     },
     {
       "slug": "ultimate-black-panther-2024-vol-2",
@@ -8428,7 +8465,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/5/d0/6630060fa28ae/portrait_uncanny.jpg"
     },
     {
       "slug": "ultimate-spider-man-2024-first-year",
@@ -8480,7 +8518,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/d/80/69949edfe1ae7/portrait_uncanny.jpg"
     },
     {
       "slug": "ultimate-spider-man-2024-vol-2",
@@ -8532,7 +8571,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/d/80/69949edfe1ae7/portrait_uncanny.jpg"
     },
     {
       "slug": "ultimate-spider-man-2024-vol-3",
@@ -8584,7 +8624,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/d/80/69949edfe1ae7/portrait_uncanny.jpg"
     },
     {
       "slug": "ultimate-spider-man-2024-vol-4",
@@ -8792,7 +8833,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/9/e0/696a54dbe439c/portrait_uncanny.jpg"
     },
     {
       "slug": "ultimates-2024-vol-2",
@@ -8896,7 +8938,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "uncanny-x-men-2024-vol-2",
@@ -8993,7 +9036,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "wolverine-2024-vol-1",
@@ -9038,7 +9082,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "wolverine-2024-vol-2",
@@ -9083,7 +9128,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "wonder-woman-2023-vol-1",
@@ -9135,7 +9181,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://static.dc.com/2025-03/WW_Cv19_01911_DIGITAL-1.jpg"
     },
     {
       "slug": "wonder-woman-2023-vol-2",
@@ -9291,7 +9338,8 @@
           "entry_type": "issue",
           "importance": "main"
         }
-      ]
+      ],
+      "cover_url": "https://cdn.marvel.com/u/prod/marvel/i/mg/6/70/019d9c8b5a8d/portrait_uncanny.jpg"
     },
     {
       "slug": "x-men-2024-vol-2",

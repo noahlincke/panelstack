@@ -2,22 +2,29 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timezone
+import errno
+import fcntl
 from functools import lru_cache
+import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 import re
 import shutil
 import subprocess
 import sys
+import threading
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
+import mimetypes
 import requests
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
+import comics
 
 from .db import SessionLocal, engine, ensure_runtime_schema, get_db
 from .auth import (
@@ -71,6 +78,7 @@ from .schemas import (
     PublisherListResponse,
     PublisherRead,
     PublisherSummary,
+    ReaderIssueRead,
     ReadingPathCoverBatchResponse,
     ReadingPathCoverRead,
     ReadingPathDownloadResponse,
@@ -103,12 +111,30 @@ from .services import (
     sync_mangapill_catalog,
 )
 from .services.ingest import ComicMetadata, PageRecord, ScanResult
+from .services.stream_buffer import (
+    StreamBufferTooLargeError,
+    find_stream_archive,
+    store_stream_archive,
+    stream_buffer_key,
+    stream_buffer_max_bytes,
+)
 
 SeriesSort = Literal["title", "latest_published_desc", "latest_published_asc"]
 ReadingPathSort = Literal["title", "latest_published_desc", "latest_published_asc"]
 REPO_ROOT = Path(__file__).resolve().parents[2]
 APP_SETTINGS_PATH = REPO_ROOT / "backend" / "data" / "app_settings.json"
 logger = logging.getLogger(__name__)
+_INITIALIZATION_LOCK = threading.Lock()
+_INITIALIZED = False
+SQLITE_IN_CLAUSE_CHUNK_SIZE = 500
+
+
+def _hosted_deployment() -> bool:
+    return os.getenv("PANELSTACK_HOSTED_DEPLOYMENT") == "1"
+
+
+def _remote_cover_fetch_enabled() -> bool:
+    return os.getenv("PANELSTACK_ENABLE_REMOTE_COVER_FETCH", "1") != "0"
 
 
 def _default_download_root() -> Path:
@@ -190,13 +216,18 @@ def _mangapill_first_page_image(chapter_url: str) -> str | None:
 
 
 def _provider_issue_cover_url(issue: CanonicalIssue) -> str | None:
-    if issue.provider_name == "MangaPill" and issue.provider_url:
+    if issue.provider_name == "MangaPill" and issue.provider_url and _remote_cover_fetch_enabled():
         return _mangapill_first_page_image(issue.provider_url) or _canonical_issue_cover_url(issue)
     return _canonical_issue_cover_url(issue)
 
 
 def _canonical_issue_pages(issue: CanonicalIssue) -> list[ArchivePageRead]:
     if issue.provider_name != "MangaPill" or not issue.provider_url:
+        return []
+    try:
+        page_urls = fetch_mangapill_chapter_pages(issue.provider_url)
+    except Exception:
+        logger.exception("Failed to resolve MangaPill pages for canonical issue %s", issue.id)
         return []
     return [
         ArchivePageRead(
@@ -205,7 +236,7 @@ def _canonical_issue_pages(issue: CanonicalIssue) -> list[ArchivePageRead]:
             media_type="image/jpeg",
             image_url=f"/canonical-issues/{issue.id}/pages/{index}",
         )
-        for index, image_url in enumerate(fetch_mangapill_chapter_pages(issue.provider_url), start=1)
+        for index, image_url in enumerate(page_urls, start=1)
     ]
 
 
@@ -237,14 +268,19 @@ def _read_state_map(
     if not canonical_issue_ids and not issue_ids:
         return {}
 
-    clauses = []
-    if canonical_issue_ids:
-        clauses.append(UserIssueState.canonical_issue_id.in_(canonical_issue_ids))
-    if issue_ids:
-        clauses.append(UserIssueState.issue_id.in_(issue_ids))
-
-    states = db.scalars(select(UserIssueState).where(or_(*clauses))).all()
+    states: list[UserIssueState] = []
+    for id_batch in _chunked_ids(canonical_issue_ids):
+        states.extend(
+            db.scalars(select(UserIssueState).where(UserIssueState.canonical_issue_id.in_(id_batch))).all()
+        )
+    for id_batch in _chunked_ids(issue_ids):
+        states.extend(db.scalars(select(UserIssueState).where(UserIssueState.issue_id.in_(id_batch))).all())
     return {state.issue_key: state for state in states}
+
+
+def _chunked_ids(values: set[int], chunk_size: int = SQLITE_IN_CLAUSE_CHUNK_SIZE) -> list[list[int]]:
+    ordered_values = sorted(values)
+    return [ordered_values[index : index + chunk_size] for index in range(0, len(ordered_values), chunk_size)]
 
 
 def _upsert_issue_state(
@@ -425,6 +461,39 @@ def _reading_path_provider_cover_url(reading_path: ReadingPath) -> str | None:
     return _provider_issue_cover_url(latest_entry.canonical_issue)
 
 
+def _reading_path_curated_cover_url(reading_path: ReadingPath) -> str | None:
+    asset = reading_path.cover_asset
+    if asset is not None and asset.status == "ready" and asset.source_image_url:
+        return asset.source_image_url
+    return None
+
+
+def _reading_path_ready_cover_url(reading_path: ReadingPath) -> str | None:
+    curated_cover_url = _reading_path_curated_cover_url(reading_path)
+    if curated_cover_url:
+        return curated_cover_url
+    asset = reading_path.cover_asset
+    if asset is not None and asset.status == "ready" and asset.cached_path:
+        return f"/reading-paths/{reading_path.id}/cover-image"
+    provider_cover_url = _reading_path_provider_cover_url(reading_path)
+    if provider_cover_url:
+        return (
+            f"/reading-paths/{reading_path.id}/cover-image"
+            if _remote_cover_fetch_enabled() or _should_proxy_provider_cover_url(provider_cover_url)
+            else provider_cover_url
+        )
+    return None
+
+
+def _should_proxy_provider_cover_url(image_url: str) -> bool:
+    lowered = image_url.lower()
+    return "cdn.readdetectiveconan.com/file/mangapill/" in lowered
+
+
+def _provider_cover_cache_key(image_url: str) -> str:
+    return f"provider-cover-{hashlib.sha1(image_url.encode('utf-8')).hexdigest()[:16]}"
+
+
 def _provider_cover_referer(image_url: str, fallback_referer: str | None) -> str | None:
     lowered = image_url.lower()
     if "static.wikia.nocookie.net" in lowered or "fandom.com" in lowered:
@@ -456,11 +525,26 @@ def _reading_path_entry_cover_context(entry: ReadingPathEntry) -> tuple[str, str
 
 
 def _entry_has_local_match(entry: ReadingPathEntry) -> bool:
+    return _entry_local_issue(entry) is not None
+
+
+def _entry_local_issue(entry: ReadingPathEntry) -> Issue | None:
     if entry.issue is not None:
-        return True
+        return entry.issue
     if entry.canonical_issue is None:
-        return False
-    return any(match.local_issue is not None for match in entry.canonical_issue.issue_matches)
+        return None
+    primary_match = next(
+        (
+            match
+            for match in entry.canonical_issue.issue_matches
+            if match.is_primary and match.local_issue is not None
+        ),
+        None,
+    )
+    if primary_match is not None:
+        return primary_match.local_issue
+    fallback_match = next((match for match in entry.canonical_issue.issue_matches if match.local_issue is not None), None)
+    return fallback_match.local_issue if fallback_match is not None else None
 
 
 def _issue_has_streamable_archive(issue: Issue) -> bool:
@@ -496,6 +580,127 @@ def _entry_streamable_local_issue(entry: ReadingPathEntry) -> Issue | None:
 
 def _entry_has_streamable_local_match(entry: ReadingPathEntry) -> bool:
     return _entry_streamable_local_issue(entry) is not None
+
+
+def _entry_resolved_getcomics_post_url(entry: ReadingPathEntry) -> str:
+    query, expected_series_title, expected_issue_number, expected_year = _reading_path_entry_download_context(entry)
+    cover = fetch_getcomics_cover(
+        query,
+        expected_series_title=expected_series_title,
+        expected_issue_number=expected_issue_number,
+        expected_year=expected_year,
+    )
+    if not cover.post_url:
+        raise HTTPException(status_code=502, detail="No downloadable GetComics post was resolved for this issue.")
+    return cover.post_url
+
+
+def _issue_downloadable_archive(issue: Issue) -> Archive | None:
+    return next(
+        (
+            archive
+            for archive in issue.archives
+            if archive.storage_path and Path(archive.storage_path).exists() and Path(archive.storage_path).is_file()
+        ),
+        None,
+    )
+
+
+def _iter_local_file(path: Path, *, chunk_size: int = 1024 * 1024):
+    with path.open("rb") as handle:
+        while True:
+            chunk = handle.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
+
+
+def _iter_remote_response(response: requests.Response, session: requests.Session, *, chunk_size: int = 1024 * 1024):
+    try:
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            if chunk:
+                yield chunk
+    finally:
+        response.close()
+        session.close()
+
+
+def _prepare_entry_device_download(entry: ReadingPathEntry) -> tuple[object, str, str, int | None]:
+    local_issue = _entry_local_issue(entry)
+    if local_issue is not None:
+        archive = _issue_downloadable_archive(local_issue)
+        if archive is not None:
+            path = Path(archive.storage_path)
+            media_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+            return _iter_local_file(path), archive.original_filename or path.name, media_type, path.stat().st_size
+
+    if entry.canonical_issue is not None and entry.canonical_issue.provider_name == "MangaPill":
+        raise HTTPException(status_code=409, detail="This source supports in-browser streaming only right now.")
+
+    source_url = _entry_resolved_getcomics_post_url(entry)
+    session = comics.build_session(False)
+    try:
+        plan = comics.resolve_download_plan(source_url, session, preferred_host=None)
+        response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
+        comics.ensure_success(response, plan.resolved_url)
+    except comics.ComicDownloadError as exc:
+        session.close()
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except requests.RequestException as exc:
+        session.close()
+        raise HTTPException(status_code=502, detail=f"Request failed for {source_url}: {exc}") from exc
+
+    filename = comics.infer_filename(plan.post_title, response, plan.resolved_url)
+    media_type = response.headers.get("content-type", "").split(";", 1)[0].strip() or (
+        mimetypes.guess_type(filename)[0] or "application/octet-stream"
+    )
+    try:
+        size_bytes = int(response.headers.get("content-length") or 0) or None
+    except ValueError:
+        size_bytes = None
+    return _iter_remote_response(response, session), filename, media_type, size_bytes
+
+
+def _buffered_entry_archive(entry: ReadingPathEntry) -> Archive:
+    cache_key = stream_buffer_key(entry.reading_path_id, entry.id)
+    cached_archive = find_stream_archive(cache_key)
+    if cached_archive is not None:
+        return cached_archive
+
+    source_url = _entry_resolved_getcomics_post_url(entry)
+    session = comics.build_session(False)
+    try:
+        plan = comics.resolve_download_plan(source_url, session, preferred_host=None)
+        response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
+        comics.ensure_success(response, plan.resolved_url)
+        filename = comics.infer_filename(plan.post_title, response, plan.resolved_url)
+        archive = store_stream_archive(
+            cache_key=cache_key,
+            filename=filename,
+            chunks=response.iter_content(chunk_size=1024 * 1024),
+            source_url=plan.resolved_url,
+            max_bytes=stream_buffer_max_bytes(),
+        )
+        response.close()
+        session.close()
+        return archive
+    except comics.ComicDownloadError as exc:
+        session.close()
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except StreamBufferTooLargeError as exc:
+        session.close()
+        raise HTTPException(
+            status_code=413,
+            detail="This archive is too large to stream from this server. Download it to your device instead.",
+        ) from exc
+    except OSError as exc:
+        session.close()
+        if _is_storage_full_os_error(exc):
+            raise HTTPException(status_code=507, detail=_storage_full_detail()) from exc
+        raise
+    except requests.RequestException as exc:
+        session.close()
+        raise HTTPException(status_code=502, detail=f"Request failed for {source_url}: {exc}") from exc
 
 
 def _catalog_collection_neighbors(collection: CatalogCollection | None) -> tuple[int | None, int | None]:
@@ -645,10 +850,22 @@ def _download_post_to_library(db: Session, post_url: str) -> tuple[list[str], Pe
     )
     if completed.returncode != 0:
         error_output = completed.stderr.strip() or completed.stdout.strip() or "Downloader failed."
+        if _is_storage_full_error(error_output):
+            raise HTTPException(status_code=507, detail=_storage_full_detail())
         raise HTTPException(status_code=502, detail=error_output)
 
     imported_paths = _parse_download_output(completed.stdout)
-    return _import_downloaded_paths(db, imported_paths)
+    try:
+        return _import_downloaded_paths(db, imported_paths)
+    except OSError as exc:
+        if _is_storage_full_os_error(exc):
+            raise HTTPException(status_code=507, detail=_storage_full_detail()) from exc
+        raise
+    except Exception as exc:
+        if _is_storage_full_error(str(exc)):
+            raise HTTPException(status_code=507, detail=_storage_full_detail()) from exc
+        logger.exception("Downloaded GetComics archive could not be imported from %s", post_url)
+        raise HTTPException(status_code=502, detail=f"Downloaded archive could not be imported: {exc}") from exc
 
 
 def _sanitize_download_name(value: str) -> str:
@@ -685,6 +902,19 @@ def _provider_download_binary(url: str, *, referer_url: str | None = None) -> tu
     response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
     return response.content, response.headers.get("Content-Type")
+
+
+def _is_storage_full_error(value: str) -> bool:
+    lowered = value.lower()
+    return "disk quota exceeded" in lowered or "no space left on device" in lowered
+
+
+def _is_storage_full_os_error(exc: OSError) -> bool:
+    return exc.errno in {errno.EDQUOT, errno.ENOSPC}
+
+
+def _storage_full_detail() -> str:
+    return "Server download storage is full. Free space on the hosted account before downloading more issues."
 
 
 def _provider_extension(image_url: str, content_type: str | None) -> str:
@@ -763,10 +993,25 @@ def _download_provider_issue_to_library(db: Session, issue: CanonicalIssue) -> t
         content, content_type = _provider_download_binary(page_url, referer_url=issue.provider_url)
         extension = _provider_extension(page_url, content_type)
         page_path = target_dir / f"{index:04d}{extension}"
-        page_path.write_bytes(content)
+        try:
+            page_path.write_bytes(content)
+        except OSError as exc:
+            if _is_storage_full_os_error(exc):
+                raise HTTPException(status_code=507, detail=_storage_full_detail()) from exc
+            raise
 
-    scan = _provider_scan(issue, target_dir)
-    result = persist_scans(db, [scan])
+    try:
+        scan = _provider_scan(issue, target_dir)
+        result = persist_scans(db, [scan])
+    except OSError as exc:
+        if _is_storage_full_os_error(exc):
+            raise HTTPException(status_code=507, detail=_storage_full_detail()) from exc
+        raise
+    except Exception as exc:
+        if _is_storage_full_error(str(exc)):
+            raise HTTPException(status_code=507, detail=_storage_full_detail()) from exc
+        logger.exception("Downloaded provider issue could not be imported for canonical issue %s", issue.id)
+        raise HTTPException(status_code=502, detail=f"Downloaded issue could not be imported: {exc}") from exc
 
     local_issue = next(
         (
@@ -920,14 +1165,31 @@ def _natural_text_sort_key(value: str) -> tuple[tuple[int, str | float], ...]:
     return tuple(tokens)
 
 
+def initialize_application() -> None:
+    global _INITIALIZED
+    with _INITIALIZATION_LOCK:
+        if _INITIALIZED:
+            return
+        lock_path = REPO_ROOT / "backend" / ".panelstack-init.lock"
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with lock_path.open("w", encoding="utf-8") as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                Base.metadata.create_all(bind=engine)
+                ensure_runtime_schema()
+                with SessionLocal() as db:
+                    sync_curation_data(db)
+                    if os.getenv("PANELSTACK_SYNC_PROVIDERS_ON_STARTUP", "1") != "0":
+                        sync_mangapill_catalog(db, MANGAPILL_DATA_PATH)
+                    sync_catalog_data(db)
+                _INITIALIZED = True
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    ensure_runtime_schema()
-    with SessionLocal() as db:
-        sync_curation_data(db)
-        sync_mangapill_catalog(db, MANGAPILL_DATA_PATH)
-        sync_catalog_data(db)
+    initialize_application()
     yield
 
 
@@ -942,7 +1204,11 @@ app = FastAPI(
 async def require_authentication(request: Request, call_next):
     if request.method == "OPTIONS" or not auth_enabled():
         return await call_next(request)
-    if request.url.path in {"/auth/session", "/auth/login", "/health"} or request.url.path.startswith("/auth/"):
+    request_path = request.url.path
+    api_prefix_index = request_path.find("/api/")
+    if api_prefix_index >= 0:
+        request_path = request_path[api_prefix_index + len("/api") :]
+    if request_path in {"/auth/session", "/auth/login", "/health"} or request_path.startswith("/auth/"):
         return await call_next(request)
 
     session_state = verify_session_cookie(request.cookies.get(SESSION_COOKIE_NAME))
@@ -1043,6 +1309,8 @@ def library_summary(db: Session = Depends(get_db)) -> LibrarySummaryResponse:
 
 @app.post("/library/open-downloads")
 def open_downloads_folder() -> dict[str, str]:
+    if _hosted_deployment():
+        raise HTTPException(status_code=400, detail="Open Downloads is only available when Panel Stack is running locally.")
     downloads_root = _downloads_root()
     try:
         _open_path_in_file_manager(downloads_root)
@@ -1058,6 +1326,7 @@ def get_app_settings() -> AppSettingsRead:
     return AppSettingsRead(
         download_root=str(_downloads_root()),
         default_download_root=str(_default_download_root()),
+        hosted_deployment=_hosted_deployment(),
     )
 
 
@@ -1075,6 +1344,7 @@ def update_app_settings(payload: AppSettingsWrite) -> AppSettingsRead:
     return AppSettingsRead(
         download_root=str(download_root),
         default_download_root=str(_default_download_root()),
+        hosted_deployment=_hosted_deployment(),
     )
 
 
@@ -1241,6 +1511,120 @@ def delete_issue(issue_id: int, db: Session = Depends(get_db)) -> dict[str, int 
         "series_id": series_id,
         "series_deleted": series_deleted,
     }
+
+
+@app.get("/reading-paths/{reading_path_id}/entries/{entry_id}/download")
+def download_reading_path_entry_file(reading_path_id: int, entry_id: int, db: Session = Depends(get_db)) -> StreamingResponse:
+    entry = db.scalars(
+        select(ReadingPathEntry)
+        .options(
+            selectinload(ReadingPathEntry.issue).selectinload(Issue.archives),
+            selectinload(ReadingPathEntry.canonical_issue)
+            .selectinload(CanonicalIssue.issue_matches)
+            .selectinload(IssueMatch.local_issue)
+            .selectinload(Issue.archives),
+        )
+        .where(ReadingPathEntry.reading_path_id == reading_path_id, ReadingPathEntry.id == entry_id)
+    ).first()
+    if entry is None or entry.entry_type not in {"issue", "collection"}:
+        raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
+
+    chunks, filename, media_type, size_bytes = _prepare_entry_device_download(entry)
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    if size_bytes is not None:
+        headers["Content-Length"] = str(size_bytes)
+    return StreamingResponse(chunks, media_type=media_type, headers=headers)
+
+
+@app.get("/reading-paths/{reading_path_id}/entries/{entry_id}/viewer", response_model=ReaderIssueRead)
+def get_reading_path_entry_viewer_issue(
+    reading_path_id: int,
+    entry_id: int,
+    db: Session = Depends(get_db),
+) -> ReaderIssueRead:
+    entry = db.scalars(
+        select(ReadingPathEntry)
+        .options(
+            selectinload(ReadingPathEntry.reading_path),
+            selectinload(ReadingPathEntry.canonical_series),
+            selectinload(ReadingPathEntry.canonical_issue),
+        )
+        .where(ReadingPathEntry.reading_path_id == reading_path_id, ReadingPathEntry.id == entry_id)
+    ).first()
+    if entry is None or entry.entry_type not in {"issue", "collection"}:
+        raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
+    if _entry_local_issue(entry) is not None:
+        raise HTTPException(status_code=409, detail="This entry should be opened through the local library viewer.")
+    if entry.canonical_issue is not None and entry.canonical_issue.provider_name == "MangaPill":
+        raise HTTPException(status_code=409, detail="This entry should be opened through provider streaming.")
+
+    archive = _buffered_entry_archive(entry)
+    try:
+        pages = list_archive_pages(archive)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    title = entry.canonical_issue.title if entry.canonical_issue is not None and entry.canonical_issue.title else (
+        entry.label or "Issue"
+    )
+    issue_number = (
+        entry.canonical_issue.issue_number
+        if entry.canonical_issue is not None
+        else (entry.issue.issue_number if entry.issue is not None else str(entry.sort_order))
+    )
+    published_on = entry.canonical_issue.published_on if entry.canonical_issue is not None else None
+    issue_key = _issue_state_key(issue_id=entry.issue_id, canonical_issue_id=entry.canonical_issue_id)
+    state = db.scalar(select(UserIssueState).where(UserIssueState.issue_key == issue_key)) if issue_key is not None else None
+
+    return ReaderIssueRead(
+        id=f"reading-path-entry:{reading_path_id}:{entry_id}",
+        issue_number=issue_number,
+        title=title,
+        published_on=published_on,
+        summary=entry.note,
+        page_count=len(pages),
+        cover_url=_provider_issue_cover_url(entry.canonical_issue) if entry.canonical_issue is not None else None,
+        reading_path_id=reading_path_id,
+        reading_path_entry_id=entry_id,
+        canonical_issue_id=entry.canonical_issue_id,
+        is_read=bool(state is not None and state.is_read),
+        pages=[
+            ArchivePageRead(
+                index=page.index,
+                relative_path=page.relative_path,
+                media_type=page.media_type,
+                image_url=f"/reading-paths/{reading_path_id}/entries/{entry_id}/pages/{page.index}",
+            )
+            for page in pages
+        ],
+    )
+
+
+@app.get("/reading-paths/{reading_path_id}/entries/{entry_id}/pages/{page_number}")
+def get_reading_path_entry_page_image(
+    reading_path_id: int,
+    entry_id: int,
+    page_number: int,
+    db: Session = Depends(get_db),
+) -> Response:
+    entry = db.get(ReadingPathEntry, entry_id)
+    if entry is None or entry.reading_path_id != reading_path_id:
+        raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
+
+    archive = _buffered_entry_archive(entry)
+    try:
+        content, media_type, filename = archive_page_bytes(archive, page_number)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except IndexError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    headers = {"Content-Disposition": f'inline; filename="{filename}"'}
+    return Response(content=content, media_type=media_type, headers=headers)
 
 
 @app.get("/archives/{archive_id}/pages", response_model=ArchivePageListResponse)
@@ -1498,7 +1882,11 @@ def get_canonical_issue_page_image(issue_id: int, page_index: int, db: Session =
     if issue.provider_name != "MangaPill" or not issue.provider_url:
         raise HTTPException(status_code=404, detail="This issue does not expose provider-backed pages.")
 
-    pages = fetch_mangapill_chapter_pages(issue.provider_url)
+    try:
+        pages = fetch_mangapill_chapter_pages(issue.provider_url)
+    except Exception as exc:
+        logger.exception("Failed to resolve MangaPill pages for canonical issue %s", issue_id)
+        raise HTTPException(status_code=502, detail="Provider pages are unavailable right now.") from exc
     if page_index < 1 or page_index > len(pages):
         raise HTTPException(status_code=404, detail=f"Page {page_index} not found")
 
@@ -1633,13 +2021,47 @@ def get_reading_path_covers(
             continue
         fallback_query = _reading_path_cover_query(reading_path)
         try:
-            provider_cover_url = _reading_path_provider_cover_url(reading_path)
-            if provider_cover_url:
+            curated_cover_url = _reading_path_curated_cover_url(reading_path)
+            if curated_cover_url:
+                asset = reading_path.cover_asset
                 items.append(
                     ReadingPathCoverRead(
                         reading_path_id=reading_path_id,
-                        image_url=f"/reading-paths/{reading_path_id}/cover-image",
+                        image_url=curated_cover_url,
+                        post_url=asset.post_url if asset is not None else reading_path.source_url,
+                        post_title=asset.post_title if asset is not None else reading_path.title,
+                        query=asset.query if asset is not None else fallback_query,
+                    )
+                )
+                continue
+            provider_cover_url = _reading_path_provider_cover_url(reading_path)
+            if provider_cover_url:
+                should_proxy_provider_cover = _should_proxy_provider_cover_url(provider_cover_url)
+                items.append(
+                    ReadingPathCoverRead(
+                        reading_path_id=reading_path_id,
+                        image_url=(
+                            f"/reading-paths/{reading_path_id}/cover-image"
+                            if _remote_cover_fetch_enabled() or should_proxy_provider_cover
+                            else provider_cover_url
+                        ),
                         query=fallback_query,
+                    )
+                )
+                continue
+            if not _remote_cover_fetch_enabled():
+                asset = reading_path.cover_asset
+                items.append(
+                    ReadingPathCoverRead(
+                        reading_path_id=reading_path_id,
+                        image_url=(
+                            f"/reading-paths/{reading_path_id}/cover-image"
+                            if asset is not None and asset.status == "ready" and asset.cached_path
+                            else None
+                        ),
+                        post_url=asset.post_url if asset is not None else None,
+                        post_title=asset.post_title if asset is not None else None,
+                        query=asset.query if asset is not None else fallback_query,
                     )
                 )
                 continue
@@ -1687,8 +2109,10 @@ def get_reading_path_cover_image(reading_path_id: int, db: Session = Depends(get
 
     provider_cover_url = _reading_path_provider_cover_url(reading_path)
     if provider_cover_url:
+        if not _remote_cover_fetch_enabled() and not _should_proxy_provider_cover_url(provider_cover_url):
+            raise HTTPException(status_code=404, detail="Cover image proxying is disabled")
         cached_path, content_type = ensure_remote_cover_image(
-            cache_key=f"reading-path-{reading_path_id}-provider-cover",
+            cache_key=_provider_cover_cache_key(provider_cover_url),
             image_url=provider_cover_url,
             referer_url=_provider_cover_referer(provider_cover_url, reading_path.source_url),
         )
@@ -1696,22 +2120,25 @@ def get_reading_path_cover_image(reading_path_id: int, db: Session = Depends(get
             raise HTTPException(status_code=404, detail="Cover image unavailable")
         return FileResponse(cached_path, media_type=content_type, filename=cached_path.name)
 
-    query, expected_series_title, expected_issue_number, expected_year = _reading_path_download_context(reading_path)
-    try:
-        asset = ensure_reading_path_cover_asset(
-            db,
-            reading_path_id=reading_path.id,
-            query=query,
-            expected_series_title=expected_series_title,
-            expected_issue_number=expected_issue_number,
-            expected_year=expected_year,
-        )
-    except Exception as exc:
-        db.rollback()
-        logger.exception("Failed to resolve cached cover image for collection %s", reading_path_id)
-        raise HTTPException(status_code=404, detail="Cover image unavailable") from exc
+    if _remote_cover_fetch_enabled():
+        query, expected_series_title, expected_issue_number, expected_year = _reading_path_download_context(reading_path)
+        try:
+            asset = ensure_reading_path_cover_asset(
+                db,
+                reading_path_id=reading_path.id,
+                query=query,
+                expected_series_title=expected_series_title,
+                expected_issue_number=expected_issue_number,
+                expected_year=expected_year,
+            )
+        except Exception as exc:
+            db.rollback()
+            logger.exception("Failed to resolve cached cover image for collection %s", reading_path_id)
+            raise HTTPException(status_code=404, detail="Cover image unavailable") from exc
+    else:
+        asset = reading_path.cover_asset
 
-    if asset.status != "ready" or not asset.cached_path:
+    if asset is None or asset.status != "ready" or not asset.cached_path:
         raise HTTPException(status_code=404, detail="Cover image unavailable")
 
     cached_path = Path(asset.cached_path)
@@ -1744,7 +2171,7 @@ def download_reading_path_issue(reading_path_id: int, db: Session = Depends(get_
     if reading_path is None:
         raise HTTPException(status_code=404, detail=f"Reading path {reading_path_id} not found")
     issue_entries = [entry for entry in reading_path.entries if entry.entry_type == "issue"]
-    missing_entries = [entry for entry in issue_entries if not _entry_has_streamable_local_match(entry)]
+    missing_entries = [entry for entry in issue_entries if not _entry_has_local_match(entry)]
     if not missing_entries:
         return ReadingPathDownloadResponse(
             reading_path_id=reading_path_id,
@@ -1819,7 +2246,7 @@ def download_reading_path_entry(reading_path_id: int, entry_id: int, db: Session
     entry = next((item for item in reading_path.entries if item.id == entry_id), None)
     if entry is None or entry.entry_type not in {"issue", "collection"}:
         raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
-    if _entry_has_streamable_local_match(entry):
+    if _entry_has_local_match(entry):
         return ReadingPathDownloadResponse(
             reading_path_id=reading_path_id,
             entry_id=entry_id,
@@ -1879,6 +2306,7 @@ def get_reading_path(reading_path_id: int, db: Session = Depends(get_db)) -> Rea
         .options(
             selectinload(ReadingPath.event),
             selectinload(ReadingPath.event).selectinload(Event.publisher),
+            selectinload(ReadingPath.cover_asset),
             selectinload(ReadingPath.catalog_collection).selectinload(CatalogCollection.tags),
             selectinload(ReadingPath.catalog_collection).selectinload(CatalogCollection.items),
             selectinload(ReadingPath.catalog_collection)
@@ -1929,24 +2357,41 @@ def get_reading_path(reading_path_id: int, db: Session = Depends(get_db)) -> Rea
     response.previous_collection_id = summary.previous_collection_id
     response.next_collection_id = summary.next_collection_id
     response.tags = summary.tags
+    response.cover_url = _reading_path_ready_cover_url(reading_path)
     response.access_mode = summary.access_mode
     for orm_entry, response_entry in zip(reading_path.entries, response.entries, strict=False):
+        canonical_cover_url = (
+            _canonical_issue_cover_url(orm_entry.canonical_issue)
+            if orm_entry.canonical_issue is not None
+            else None
+        )
         if (
             orm_entry.canonical_issue is not None
             and orm_entry.canonical_issue.provider_name
-            and _canonical_issue_cover_url(orm_entry.canonical_issue)
+            and canonical_cover_url
         ):
-            response_entry.cover_url = f"/reading-paths/{reading_path.id}/entries/{orm_entry.id}/cover-image"
-        elif orm_entry.canonical_issue is not None and _canonical_issue_cover_url(orm_entry.canonical_issue):
-            response_entry.cover_url = _canonical_issue_cover_url(orm_entry.canonical_issue)
+            should_proxy_provider_cover = _should_proxy_provider_cover_url(canonical_cover_url)
+            response_entry.cover_url = (
+                f"/reading-paths/{reading_path.id}/entries/{orm_entry.id}/cover-image"
+                if _remote_cover_fetch_enabled() or should_proxy_provider_cover
+                else canonical_cover_url
+            )
+        elif canonical_cover_url:
+            response_entry.cover_url = canonical_cover_url
         else:
-            response_entry.cover_url = f"/reading-paths/{reading_path.id}/entries/{orm_entry.id}/cover-image"
+            response_entry.cover_url = (
+                f"/reading-paths/{reading_path.id}/entries/{orm_entry.id}/cover-image"
+                if _remote_cover_fetch_enabled()
+                else None
+            )
+        if response_entry.cover_url is None and orm_entry.entry_type == "collection":
+            response_entry.cover_url = response.cover_url
         response_entry.issue_key = _issue_state_key(issue_id=orm_entry.issue_id, canonical_issue_id=orm_entry.canonical_issue_id)
         state = state_map.get(response_entry.issue_key) if response_entry.issue_key is not None else None
         response_entry.is_read = bool(state is not None and state.is_read)
-        streamable_issue = _entry_streamable_local_issue(orm_entry)
-        if streamable_issue is not None:
-            response_entry.matched_issue = _issue_summary(streamable_issue)
+        local_issue = _entry_local_issue(orm_entry)
+        if local_issue is not None:
+            response_entry.matched_issue = _issue_summary(local_issue)
     return response
 
 
@@ -1994,9 +2439,11 @@ def get_reading_path_entry_cover_image(
 
     if entry.canonical_issue is not None and entry.canonical_issue.provider_name and _canonical_issue_cover_url(entry.canonical_issue):
         image_url = _provider_issue_cover_url(entry.canonical_issue) or _canonical_issue_cover_url(entry.canonical_issue)
+        if not _remote_cover_fetch_enabled() and not _should_proxy_provider_cover_url(image_url):
+            raise HTTPException(status_code=404, detail="Cover image proxying is disabled")
         referer_source = entry.reading_path.source_url if entry.reading_path is not None else entry.canonical_issue.provider_url
         cached_path, content_type = ensure_remote_cover_image(
-            cache_key=f"reading-path-{reading_path_id}-entry-{entry_id}-provider-cover",
+            cache_key=_provider_cover_cache_key(image_url),
             image_url=image_url,
             referer_url=_provider_cover_referer(image_url, referer_source),
         )
@@ -2005,6 +2452,8 @@ def get_reading_path_entry_cover_image(
         return FileResponse(cached_path, media_type=content_type, filename=cached_path.name)
 
     query, expected_series_title, expected_issue_number, expected_year = _reading_path_entry_cover_context(entry)
+    if not _remote_cover_fetch_enabled():
+        raise HTTPException(status_code=404, detail="Cover image lookup is disabled")
     try:
         cached_path, content_type, cover = ensure_query_cover_image(
             cache_key=f"reading-path-{reading_path_id}-entry-{entry_id}",

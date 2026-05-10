@@ -25,6 +25,7 @@ export function ReadingPathsPage({ onLibraryMutated, searchQuery }: ReadingPaths
   const [paths, setPaths] = useState<ReadingPath[]>([]);
   const [coversById, setCoversById] = useState<Record<string, ReadingPathCover>>({});
   const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
   const [sort, setSort] = useState<'title' | 'latest_published_desc' | 'latest_published_asc'>('latest_published_desc');
   const [activeFilterIds, setActiveFilterIds] = useState<string[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
@@ -46,13 +47,16 @@ export function ReadingPathsPage({ onLibraryMutated, searchQuery }: ReadingPaths
   useEffect(() => {
     let mounted = true;
     setError('');
+    setIsLoading(true);
     apiClient.listReadingPaths(sort).then((items) => {
       if (mounted) {
         setPaths(items);
+        setIsLoading(false);
       }
     }).catch((reason: unknown) => {
       if (mounted) {
         setError(reason instanceof Error ? reason.message : 'Unable to load reading paths.');
+        setIsLoading(false);
       }
     });
     return () => {
@@ -173,7 +177,7 @@ export function ReadingPathsPage({ onLibraryMutated, searchQuery }: ReadingPaths
                         });
                       }}
                     >
-                      {group.id === 'dc' ? <DcLogo /> : group.id === 'marvel' ? <MarvelLogo /> : <AnimeLogo />}
+                      {group.id === 'dc' ? <DcLogo /> : group.id === 'marvel' ? <MarvelLogo /> : <MangaLogo />}
                     </button>
                     <button
                       type="button"
@@ -238,15 +242,17 @@ export function ReadingPathsPage({ onLibraryMutated, searchQuery }: ReadingPaths
 
       {error ? (
         <div className="empty-state">{error}</div>
+      ) : isLoading && paths.length === 0 ? (
+        <div className="empty-state empty-state--loading">Loading collections...</div>
       ) : renderedPaths.length > 0 ? (
         <>
+          {isLoading ? <div className="loading-inline-status">Refreshing collections...</div> : null}
           <div className="poster-grid" style={{ '--poster-min-width': `${posterSize}px` } as CSSProperties}>
             {renderedPaths.map((path) => (
               <ReadingPathPoster
                 key={path.id}
                 path={path}
                 cover={coversById[path.id]}
-                onLibraryMutated={onLibraryMutated}
               />
             ))}
           </div>
@@ -272,12 +278,12 @@ function MarvelLogo() {
   );
 }
 
-function AnimeLogo() {
+function MangaLogo() {
   return (
-    <svg viewBox="0 0 94 28" aria-hidden="true" className="publisher-logo publisher-logo--anime">
+    <svg viewBox="0 0 94 28" aria-hidden="true" className="publisher-logo publisher-logo--manga">
       <rect width="94" height="28" rx="6" fill="#111" />
-      <text x="47" y="19" textAnchor="middle" fill="#fff" fontSize="15" fontWeight="900" letterSpacing="1.1">
-        ANIME
+      <text x="47" y="19" textAnchor="middle" fill="#fff" fontSize="15" fontWeight="900" letterSpacing="0.6">
+        MANGA
       </text>
     </svg>
   );

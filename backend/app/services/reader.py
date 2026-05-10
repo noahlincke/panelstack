@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import mimetypes
-import subprocess
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
 from ..models import Archive
+from .archive_tools import ArchiveToolError, extract_rar_member_bytes, rar_support_available
 from .ingest import scan_source
-
-BSDTAR_BIN = "/usr/bin/bsdtar"
 
 
 @dataclass(frozen=True)
@@ -31,7 +29,9 @@ def archive_root(archive: Archive) -> Path:
 
 
 def archive_is_streamable(archive: Archive) -> bool:
-    return archive.archive_format in {"directory", "image", "zip", "rar"}
+    if archive.archive_format == "rar":
+        return rar_support_available()
+    return archive.archive_format in {"directory", "image", "zip"}
 
 
 def list_archive_pages(archive: Archive) -> list[ArchivePage]:
@@ -67,15 +67,10 @@ def archive_page_bytes(archive: Archive, page_number: int) -> tuple[bytes, str, 
             return zipped.read(page.relative_path), page.media_type, Path(page.relative_path).name
 
     if root.is_file() and root.suffix.lower() in {".cbr", ".rar"}:
-        result = subprocess.run(
-            [BSDTAR_BIN, "-xOf", str(root), page.relative_path],
-            check=False,
-            capture_output=True,
-        )
-        if result.returncode != 0:
-            error_message = result.stderr.decode("utf-8", errors="replace").strip()
-            raise FileNotFoundError(error_message or f"Unable to extract {page.relative_path} from {root}")
-        return result.stdout, page.media_type, Path(page.relative_path).name
+        try:
+            return extract_rar_member_bytes(root, page.relative_path), page.media_type, Path(page.relative_path).name
+        except ArchiveToolError as exc:
+            raise FileNotFoundError(str(exc)) from exc
 
     if root.is_file():
         return root.read_bytes(), page.media_type, root.name

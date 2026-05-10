@@ -8,6 +8,7 @@ fixture-downloads/
 backend/.venv/
 backend/__pycache__/
 backend/*.db
+backend/.panelstack-init.lock
 backend/data/*
 !backend/data/curation/
 !backend/data/curation/reading_paths.json

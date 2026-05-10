@@ -5,15 +5,15 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 import re
-import subprocess
 import threading
 import zipfile
 from typing import Iterable, Sequence
 
+from .archive_tools import ArchiveToolError, list_rar_members
+
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".bmp"}
 ARCHIVE_EXTENSIONS = {".cbz", ".zip", ".cbr", ".rar", ".pdf"}
-BSDTAR_BIN = "/usr/bin/bsdtar"
 KNOWN_MARKER_TOKENS = {
     "digital",
     "cbz",
@@ -303,29 +303,19 @@ def _collect_zip_pages(path: Path) -> tuple[PageRecord, ...]:
 
 def _collect_rar_pages(path: Path) -> tuple[PageRecord, ...]:
     try:
-        result = subprocess.run(
-            [BSDTAR_BIN, "-tf", str(path)],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-    except (FileNotFoundError, subprocess.CalledProcessError) as exc:
+        members = list_rar_members(path)
+    except ArchiveToolError as exc:
         raise IngestError(f"Unable to inspect RAR/CBR archive {path}: {exc}") from exc
 
-    stdout = result.stdout.decode("utf-8", errors="replace") if isinstance(result.stdout, bytes) else result.stdout
     pages: list[PageRecord] = []
-    names = [
-        name.strip()
-        for name in stdout.splitlines()
-        if name.strip() and not name.strip().endswith("/") and not Path(name.strip()).name.startswith(".")
-    ]
-    for name in sorted((name for name in names if Path(name).suffix.lower() in IMAGE_EXTENSIONS), key=_natural_key):
+    image_members = [member for member in members if Path(member.path).suffix.lower() in IMAGE_EXTENSIONS]
+    for member in sorted(image_members, key=lambda item: _natural_key(item.path)):
         pages.append(
             PageRecord(
                 index=len(pages) + 1,
-                relative_path=Path(name).as_posix(),
-                size_bytes=None,
-                extension=Path(name).suffix.lower(),
+                relative_path=Path(member.path).as_posix(),
+                size_bytes=member.size_bytes,
+                extension=Path(member.path).suffix.lower(),
             )
         )
     return tuple(pages)
@@ -410,7 +400,13 @@ def scan_archive(path: Path) -> ScanResult:
         )
 
     if suffix in {".cbr", ".rar"}:
-        pages = _collect_rar_pages(path)
+        try:
+            pages = _collect_rar_pages(path)
+        except IngestError as exc:
+            if "no rar/cbr extractor" not in str(exc).lower():
+                raise
+            warnings.append(f"RAR/CBR page listing unavailable: {exc}")
+            pages = ()
         return ScanResult(
             source_path=str(path),
             source_kind="archive",

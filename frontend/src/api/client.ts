@@ -95,6 +95,7 @@ type BackendCanonicalSeriesSummary = {
 
 type BackendCanonicalIssueSummary = {
   id: number;
+  provider_name?: string | null;
   issue_number: string;
   title: string | null;
   published_on: string | null;
@@ -107,6 +108,21 @@ type BackendCanonicalIssueRead = BackendCanonicalIssueSummary & {
   summary?: string | null;
   pages?: BackendArchivePage[];
   series?: BackendCanonicalSeriesSummary | null;
+};
+
+type BackendReaderIssueRead = {
+  id: string;
+  issue_number: string;
+  title: string;
+  published_on?: string | null;
+  summary?: string | null;
+  page_count?: number | null;
+  cover_url?: string | null;
+  reading_path_id?: number | null;
+  reading_path_entry_id?: number | null;
+  canonical_issue_id?: number | null;
+  is_read?: boolean;
+  pages?: BackendArchivePage[];
 };
 
 type BackendReadingPathSummary = {
@@ -293,6 +309,7 @@ function baseIssue(item: BackendIssue): Issue {
     id: String(item.id),
     seriesId: String(item.series_id),
     readingPathId: item.reading_path_id ? String(item.reading_path_id) : undefined,
+    readingPathEntryId: undefined,
     canonicalIssueId: item.primary_canonical_issue_id ? String(item.primary_canonical_issue_id) : undefined,
     isRead: item.is_read ?? false,
     number: item.issue_number,
@@ -309,6 +326,32 @@ function baseIssue(item: BackendIssue): Issue {
       tone: 'bone',
       imageUrl: resolveApiUrl(page.image_url),
     })),
+  };
+}
+
+function readerIssue(payload: BackendReaderIssueRead): Issue {
+  const pages = (payload.pages ?? []).map((page) => ({
+    index: page.index,
+    title: `Page ${page.index}`,
+    caption: page.relative_path,
+    tone: 'bone',
+    imageUrl: resolveApiUrl(page.image_url),
+  }));
+  return {
+    id: payload.id,
+    seriesId: payload.reading_path_id ? `reading-path:${payload.reading_path_id}` : `reading-path-entry:${payload.id}`,
+    readingPathId: payload.reading_path_id ? String(payload.reading_path_id) : undefined,
+    readingPathEntryId: payload.reading_path_entry_id ? String(payload.reading_path_entry_id) : undefined,
+    canonicalIssueId: payload.canonical_issue_id ? String(payload.canonical_issue_id) : undefined,
+    isRead: payload.is_read ?? false,
+    number: payload.issue_number,
+    title: payload.title,
+    releaseDate: payload.published_on ?? 'Unknown date',
+    pageCount: payload.page_count ?? pages.length,
+    summary: payload.summary ?? 'No issue summary has been indexed yet.',
+    cover: payload.title,
+    coverUrl: payload.cover_url ? resolveApiUrl(payload.cover_url) : undefined,
+    pages,
   };
 }
 
@@ -428,12 +471,13 @@ function mapReadingPathEntry(item: BackendReadingPathEntry): ReadingPathEntry {
     canonicalSeries: item.canonical_series
       ? { id: String(item.canonical_series.id), slug: item.canonical_series.slug, title: item.canonical_series.title }
       : undefined,
-    canonicalIssue: item.canonical_issue
-      ? {
-          id: String(item.canonical_issue.id),
-          issueNumber: item.canonical_issue.issue_number,
-          title: item.canonical_issue.title ?? `Issue ${item.canonical_issue.issue_number}`,
-          publishedOn: item.canonical_issue.published_on ?? undefined,
+        canonicalIssue: item.canonical_issue
+          ? {
+              id: String(item.canonical_issue.id),
+              providerName: item.canonical_issue.provider_name ?? undefined,
+              issueNumber: item.canonical_issue.issue_number,
+              title: item.canonical_issue.title ?? `Issue ${item.canonical_issue.issue_number}`,
+              publishedOn: item.canonical_issue.published_on ?? undefined,
           coverUrl: item.canonical_issue.cover_url ? resolveApiUrl(item.canonical_issue.cover_url) : undefined,
         }
       : undefined,
@@ -688,6 +732,11 @@ export const apiClient = {
     };
   },
 
+  async getReadingPathEntryViewerIssue(readingPathId: string, entryId: string): Promise<Issue | undefined> {
+    const payload = await fetchJson<BackendReaderIssueRead>(`/reading-paths/${readingPathId}/entries/${entryId}/viewer`);
+    return readerIssue(payload);
+  },
+
   async listEvents(): Promise<EventSummary[]> {
     try {
       const [eventsPayload, publishersPayload] = await Promise.all([
@@ -847,6 +896,10 @@ export const apiClient = {
       archivesCreated: payload.archives_created,
       archivesUpdated: payload.archives_updated,
     };
+  },
+
+  getReadingPathEntryDownloadUrl(readingPathId: string, entryId: string): string {
+    return resolveApiUrl(`/reading-paths/${readingPathId}/entries/${entryId}/download`);
   },
 
   async deleteSeries(seriesId: string): Promise<void> {
