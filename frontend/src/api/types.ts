@@ -241,3 +241,48 @@ export type ChronologyEntry = {
   readingPathId?: string;
   coverUrl?: string;
 };
+
+export type FlightPrepTarget = {
+  readingPathId: string;
+  entryId: string;
+  title: string;
+};
+
+export type FlightPrepEstimateItem = FlightPrepTarget & {
+  sizeBytes?: number;
+  status: string;
+  detail?: string;
+};
+
+export type DestinationSpace = {
+  path: string;
+  totalBytes: number;
+  freeBytes: number;
+  exists: boolean;
+};
+
+export type FlightPrepEstimate = {
+  targets: FlightPrepEstimateItem[];
+  totalBytes: number;
+  resolvedCount: number;
+  unavailableCount: number;
+  destination: DestinationSpace;
+  fits: boolean;
+};
+
+export type FlightPrepQueueItem = FlightPrepTarget & {
+  sizeBytes?: number;
+  status: string;
+  detail?: string;
+};
+
+export type FlightPrepQueue = {
+  id: string;
+  destination: string;
+  status: string;
+  items: FlightPrepQueueItem[];
+  startedAt: string;
+  finishedAt?: string;
+  completedCount: number;
+  totalCount: number;
+};
