@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthGate } from './components/AuthGate';
 import { Shell } from './components/Shell';
+import { CataloguePage } from './routes/CataloguePage';
+import { ChronologyPage } from './routes/ChronologyPage';
 import { LibraryPage } from './routes/LibraryPage';
 import { ReadingPathDetailPage } from './routes/ReadingPathDetailPage';
 import { ReadingPathsPage } from './routes/ReadingPathsPage';
@@ -32,6 +34,8 @@ export default function App() {
             path="/library"
             element={<LibraryPage refreshToken={libraryRefreshToken} searchQuery={searchQuery} onLibraryMutated={markLibraryDirty} />}
           />
+          <Route path="/catalogue" element={<CataloguePage searchQuery={searchQuery} />} />
+          <Route path="/chronology" element={<ChronologyPage searchQuery={searchQuery} />} />
           <Route path="/series/:seriesId" element={<SeriesDetailPage />} />
           <Route path="/viewer/:issueId" element={<ViewerPage />} />
           <Route path="/viewer/canonical/:canonicalIssueId" element={<ViewerPage />} />

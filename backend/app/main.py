@@ -65,6 +65,12 @@ from .schemas import (
     CanonicalSeriesListResponse,
     CanonicalSeriesRead,
     CanonicalSeriesSummary,
+    CatalogCollectionListResponse,
+    CatalogCollectionSummary,
+    CatalogFacetRead,
+    CatalogFacetsResponse,
+    ChronologyEntryRead,
+    ChronologyResponse,
     EventListResponse,
     EventRead,
     EventSummary,
@@ -110,6 +116,7 @@ from .services import (
     sync_curation_data,
     sync_mangapill_catalog,
 )
+from .services.catalog_query import catalog_chronology, catalog_collections, catalog_facets
 from .services.ingest import ComicMetadata, PageRecord, ScanResult
 from .services.stream_buffer import (
     StreamBufferTooLargeError,
@@ -1686,6 +1693,107 @@ def get_archive_page_image(
 
     headers = {"Content-Disposition": f'inline; filename="{filename}"'}
     return Response(content=content, media_type=media_type, headers=headers)
+
+
+@app.get("/catalog/facets", response_model=CatalogFacetsResponse)
+def get_catalog_facets(db: Session = Depends(get_db)) -> CatalogFacetsResponse:
+    facets = catalog_facets(db)
+    return CatalogFacetsResponse(
+        publishers=[CatalogFacetRead(value=f.value, label=f.label, count=f.count) for f in facets.publishers],
+        lines=[CatalogFacetRead(value=f.value, label=f.label, count=f.count) for f in facets.lines],
+        characters=[CatalogFacetRead(value=f.value, label=f.label, count=f.count) for f in facets.characters],
+        min_year=facets.min_year,
+        max_year=facets.max_year,
+    )
+
+
+@app.get("/catalog/collections", response_model=CatalogCollectionListResponse)
+def list_catalog_collections(
+    db: Session = Depends(get_db),
+    publisher: list[str] | None = Query(None),
+    line: str | None = Query(None),
+    character: str | None = Query(None),
+    start: date | None = Query(None),
+    end: date | None = Query(None),
+    search: str | None = Query(None),
+    limit: int = Query(60, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+) -> CatalogCollectionListResponse:
+    collections, total = catalog_collections(
+        db,
+        publisher=publisher,
+        line=line,
+        character=character,
+        start=start,
+        end=end,
+        search=search,
+        limit=limit,
+        offset=offset,
+    )
+    return CatalogCollectionListResponse(
+        items=[
+            CatalogCollectionSummary(
+                id=collection.id,
+                slug=collection.slug,
+                title=collection.title,
+                publisher=collection.publisher.name if collection.publisher else None,
+                line=collection.line,
+                collection_type=collection.collection_type,
+                volume_number=collection.volume_number,
+                issue_count=len(collection.items),
+                first_published_on=collection.first_published_on,
+                latest_published_on=collection.latest_published_on,
+                reading_path_id=collection.reading_path_id,
+                cover_url=_reading_path_ready_cover_url(collection.reading_path) if collection.reading_path else None,
+            )
+            for collection in collections
+        ],
+        total=total,
+    )
+
+
+@app.get("/catalog/chronology", response_model=ChronologyResponse)
+def get_catalog_chronology(
+    db: Session = Depends(get_db),
+    publisher: list[str] | None = Query(None),
+    line: str | None = Query(None),
+    character: str | None = Query(None),
+    start: date | None = Query(None),
+    end: date | None = Query(None),
+    search: str | None = Query(None),
+    limit: int = Query(200, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+) -> ChronologyResponse:
+    rows, total = catalog_chronology(
+        db,
+        publisher=publisher,
+        line=line,
+        character=character,
+        start=start,
+        end=end,
+        search=search,
+        limit=limit,
+        offset=offset,
+    )
+    return ChronologyResponse(
+        items=[
+            ChronologyEntryRead(
+                canonical_issue_id=row.canonical_issue.id,
+                title=row.canonical_issue.title or f"Issue {row.canonical_issue.issue_number}",
+                issue_number=row.canonical_issue.issue_number,
+                published_on=row.published_on,
+                publisher=row.collection.publisher.name if row.collection.publisher else None,
+                line=row.collection.line,
+                collection_id=row.collection.id,
+                collection_title=row.collection.title,
+                reading_path_id=row.collection.reading_path_id,
+                cover_url=_canonical_issue_cover_url(row.canonical_issue)
+                or (_reading_path_ready_cover_url(row.collection.reading_path) if row.collection.reading_path else None),
+            )
+            for row in rows
+        ],
+        total=total,
+    )
 
 
 @app.get("/publishers", response_model=PublisherListResponse)

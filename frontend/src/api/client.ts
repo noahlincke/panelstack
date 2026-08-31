@@ -9,6 +9,10 @@ import {
 import type {
   AppSettings,
   AuthSession,
+  CatalogCollection,
+  CatalogFacets,
+  CatalogFilterState,
+  ChronologyEntry,
   EventDetail,
   EventSummary,
   ImportResult,
@@ -554,7 +558,118 @@ function mockEvents(): EventSummary[] {
   }));
 }
 
+
+type BackendCatalogFacet = { value: string; label: string; count: number };
+
+function catalogQuery(filters: CatalogFilterState, extra: Record<string, string> = {}): string {
+  const params = new URLSearchParams();
+  Object.entries({ ...filters, ...extra }).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => params.append(key, item));
+    } else if (value) {
+      params.set(key, value);
+    }
+  });
+  const query = params.toString();
+  return query ? `?${query}` : '';
+}
+
 export const apiClient = {
+  async getCatalogFacets(): Promise<CatalogFacets> {
+    const payload = await fetchJson<{
+      publishers: BackendCatalogFacet[];
+      lines: BackendCatalogFacet[];
+      characters: BackendCatalogFacet[];
+      min_year: number | null;
+      max_year: number | null;
+    }>('/catalog/facets');
+    return {
+      publishers: payload.publishers,
+      lines: payload.lines,
+      characters: payload.characters,
+      minYear: payload.min_year ?? undefined,
+      maxYear: payload.max_year ?? undefined,
+    };
+  },
+
+  async getCatalogCollections(
+    filters: CatalogFilterState,
+    limit = 60,
+    offset = 0,
+  ): Promise<{ items: CatalogCollection[]; total: number }> {
+    const payload = await fetchJson<{
+      items: {
+        id: number;
+        slug: string;
+        title: string;
+        publisher: string | null;
+        line: string;
+        collection_type: string;
+        volume_number: number | null;
+        issue_count: number;
+        first_published_on: string | null;
+        latest_published_on: string | null;
+        reading_path_id: number | null;
+        cover_url: string | null;
+      }[];
+      total: number;
+    }>(`/catalog/collections${catalogQuery(filters, { limit: String(limit), offset: String(offset) })}`);
+    return {
+      total: payload.total,
+      items: payload.items.map((item) => ({
+        id: String(item.id),
+        slug: item.slug,
+        title: item.title,
+        publisher: item.publisher ?? undefined,
+        line: item.line,
+        collectionType: item.collection_type,
+        volumeNumber: item.volume_number ?? undefined,
+        issueCount: item.issue_count,
+        firstPublishedOn: item.first_published_on ?? undefined,
+        latestPublishedOn: item.latest_published_on ?? undefined,
+        readingPathId: item.reading_path_id ? String(item.reading_path_id) : undefined,
+        coverUrl: item.cover_url ? resolveApiUrl(item.cover_url) : undefined,
+      })),
+    };
+  },
+
+  async getChronology(
+    filters: CatalogFilterState,
+    limit = 200,
+    offset = 0,
+  ): Promise<{ items: ChronologyEntry[]; total: number }> {
+    const payload = await fetchJson<{
+      items: {
+        canonical_issue_id: number;
+        title: string;
+        issue_number: string;
+        published_on: string;
+        publisher: string | null;
+        line: string;
+        collection_id: number;
+        collection_title: string;
+        reading_path_id: number | null;
+        cover_url: string | null;
+      }[];
+      total: number;
+    }>(`/catalog/chronology${catalogQuery(filters, { limit: String(limit), offset: String(offset) })}`);
+    return {
+      total: payload.total,
+      items: payload.items.map((item) => ({
+        canonicalIssueId: String(item.canonical_issue_id),
+        title: item.title,
+        issueNumber: item.issue_number,
+        publishedOn: item.published_on,
+        publisher: item.publisher ?? undefined,
+        line: item.line,
+        collectionId: String(item.collection_id),
+        collectionTitle: item.collection_title,
+        readingPathId: item.reading_path_id ? String(item.reading_path_id) : undefined,
+        coverUrl: item.cover_url ? resolveApiUrl(item.cover_url) : undefined,
+      })),
+    };
+  },
+
   async getSession(): Promise<AuthSession> {
     return fetchJson<AuthSession>('/auth/session');
   },
