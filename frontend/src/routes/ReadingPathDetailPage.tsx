@@ -263,6 +263,7 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
                   >
                     <IssueCover
                       src={matchedIssue?.coverUrl ?? entry.coverUrl}
+                      fallbackSrc={entry.coverUrl}
                       alt={`${matchedIssue?.title ?? issueTitle} cover`}
                       title={issueTitle}
                       seriesTitle={entry.canonicalSeries?.title}
@@ -420,27 +421,34 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
 
 type IssueCoverProps = {
   src?: string;
+  fallbackSrc?: string;
   alt: string;
   title: string;
   seriesTitle?: string;
   issueNumber?: string;
 };
 
-function IssueCover({ src, alt, title, seriesTitle, issueNumber }: IssueCoverProps) {
-  const [hasFailed, setHasFailed] = useState(false);
+function IssueCover({ src, fallbackSrc, alt, title, seriesTitle, issueNumber }: IssueCoverProps) {
+  const sources = useMemo(
+    () => [src, fallbackSrc].filter((value): value is string => Boolean(value)),
+    [src, fallbackSrc],
+  );
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    setHasFailed(false);
-  }, [src]);
+    setAttempt(0);
+  }, [sources]);
 
-  if (src && !hasFailed) {
+  const currentSrc = sources[attempt];
+  if (currentSrc) {
     return (
       <img
-        src={src}
+        key={currentSrc}
+        src={currentSrc}
         alt={alt}
         className="poster-tile__image"
         loading="lazy"
-        onError={() => setHasFailed(true)}
+        onError={() => setAttempt((value) => value + 1)}
       />
     );
   }

@@ -37,7 +37,10 @@ def archive_is_streamable(archive: Archive) -> bool:
 def list_archive_pages(archive: Archive) -> list[ArchivePage]:
     if not archive_is_streamable(archive):
         raise ValueError(f"Archive format '{archive.archive_format}' is indexed but not streamable in the viewer.")
-    scan = scan_source(archive_root(archive))
+    root = archive_root(archive)
+    if not root.exists():
+        raise FileNotFoundError(f"Archive source is not available: {root}")
+    scan = scan_source(root)
     return [
         ArchivePage(
             index=page.index,
