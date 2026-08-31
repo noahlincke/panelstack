@@ -11,7 +11,7 @@ from .ingest import scan_source
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 STREAM_BUFFER_DIR = BASE_DIR / "data" / "cache" / "stream_buffer"
-DEFAULT_STREAM_BUFFER_MAX_BYTES = 500 * 1024 * 1024
+DEFAULT_STREAM_BUFFER_MAX_BYTES = 128 * 1024 * 1024
 
 
 class StreamBufferTooLargeError(RuntimeError):
@@ -48,7 +48,7 @@ def store_stream_archive(
     root = stream_buffer_root(cache_root)
     root.mkdir(parents=True, exist_ok=True)
     limit = max_bytes or stream_buffer_max_bytes()
-    prune_stream_buffer(max_bytes=limit, cache_root=root)
+    _clear_stream_buffer(root)
 
     entry_dir = root / _safe_cache_key(cache_key)
     temp_dir = root / f".{entry_dir.name}.tmp"
@@ -59,20 +59,24 @@ def store_stream_archive(
 
     temp_dir.mkdir(parents=True, exist_ok=True)
     archive_path = temp_dir / filename
-    with archive_path.open("wb") as handle:
-        for chunk in chunks:
-            if chunk:
+    written_bytes = 0
+    try:
+        with archive_path.open("wb") as handle:
+            for chunk in chunks:
+                if not chunk:
+                    continue
+                written_bytes += len(chunk)
+                if written_bytes > limit:
+                    raise StreamBufferTooLargeError("Archive exceeds the configured stream buffer size limit.")
                 handle.write(chunk)
+    except Exception:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        raise
 
     temp_dir.replace(entry_dir)
     archive_path = entry_dir / filename
     _touch_entry(entry_dir, archive_path)
-    archive = _archive_for_path(archive_path, source_url=source_url, status="buffered")
-    if (archive.size_bytes or 0) > limit:
-        shutil.rmtree(entry_dir, ignore_errors=True)
-        raise StreamBufferTooLargeError("Archive exceeds the configured stream buffer size limit.")
-    prune_stream_buffer(max_bytes=limit, cache_root=root, exclude_keys={cache_key})
-    return archive
+    return _archive_for_path(archive_path, source_url=source_url, status="buffered")
 
 
 def find_stream_archive(cache_key: str, *, cache_root: Path | None = None) -> Archive | None:
@@ -146,6 +150,11 @@ def _buffer_entries(root: Path) -> list[tuple[Path, int, float]]:
         )
         entries.append((candidate, size_bytes, touched_at))
     return entries
+
+
+def _clear_stream_buffer(root: Path) -> None:
+    for entry_dir, _, _ in _buffer_entries(root):
+        shutil.rmtree(entry_dir, ignore_errors=True)
 
 
 def _directory_size(path: Path) -> int:

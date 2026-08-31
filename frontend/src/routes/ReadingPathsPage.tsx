@@ -31,7 +31,7 @@ export function ReadingPathsPage({ onLibraryMutated, searchQuery }: ReadingPaths
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const [posterSize, setPosterSize] = usePersistentPosterSize('reading-path-poster-size', 130);
+  const [posterSize, setPosterSize] = usePersistentPosterSize('reading-path-poster-size-v2', 104);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const openSettings = useCallback(() => {

@@ -133,6 +133,27 @@ class StreamBufferTests(unittest.TestCase):
                 cache_root=cache_root,
                 max_bytes=120,
             )
+        self.assertEqual(list(cache_root.iterdir()), [])
+
+    def test_store_stream_archive_keeps_only_the_current_archive(self) -> None:
+        cache_root = Path(self.temp_dir.name) / "stream-buffer"
+        first = store_stream_archive(
+            cache_key="reading-path-1-entry-10",
+            filename="first.cbz",
+            chunks=[self._cbz_bytes({"001.jpg": b"a" * 50})],
+            cache_root=cache_root,
+            max_bytes=10 * 1024 * 1024,
+        )
+        second = store_stream_archive(
+            cache_key="reading-path-1-entry-11",
+            filename="second.cbz",
+            chunks=[self._cbz_bytes({"001.jpg": b"b" * 50})],
+            cache_root=cache_root,
+            max_bytes=10 * 1024 * 1024,
+        )
+
+        self.assertFalse(Path(first.storage_path).exists())
+        self.assertTrue(Path(second.storage_path).exists())
 
     def test_entry_device_download_headers(self) -> None:
         payload_path = self._write_payload(sample_curation_payload())

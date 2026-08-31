@@ -20,7 +20,7 @@ export function LibraryPage({ refreshToken, searchQuery, onLibraryMutated }: Lib
   const [coversById, setCoversById] = useState<Record<string, ReadingPathCover>>({});
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [posterSize, setPosterSize] = usePersistentPosterSize('library-poster-size', 130);
+  const [posterSize, setPosterSize] = usePersistentPosterSize('library-poster-size-v2', 104);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settings, setSettings] = useState<AppSettings | undefined>();
   const [downloadRootDraft, setDownloadRootDraft] = useState('');
