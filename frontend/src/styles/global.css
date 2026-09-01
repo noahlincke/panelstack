@@ -3117,3 +3117,173 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 .filter-chip[aria-pressed='true'] .filter-chip__hint {
   color: rgba(213, 168, 95, 0.8);
 }
+
+/* ---- Chronology lanes -------------------------------------------------- */
+
+.view__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.view-switch {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-soft);
+}
+
+.view-switch button {
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.view-switch button[aria-pressed='true'] {
+  color: var(--text);
+  background: rgba(240, 236, 227, 0.08);
+}
+
+.lane-picker {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  margin: -8px 0 20px;
+}
+
+.lanes {
+  --lane-width: 210px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.lanes__head,
+.lanes__row {
+  display: grid;
+  grid-template-columns: 58px repeat(var(--lane-count), var(--lane-width));
+  gap: 10px;
+  min-width: min-content;
+}
+
+.lanes__head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding-bottom: 8px;
+  background: var(--bg);
+}
+
+.lanes__column-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.lanes__column-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: rgba(240, 236, 227, 0.9);
+}
+
+.lanes__row {
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+
+.lanes__gutter {
+  padding-top: 4px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.lanes__gutter--head {
+  border: 0;
+}
+
+.lanes__cell {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.lane-card {
+  display: flex;
+  gap: 9px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.lane-card:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.lane-card--owned {
+  border-color: rgba(213, 168, 95, 0.34);
+}
+
+.lane-card__cover {
+  flex: 0 0 auto;
+  width: 30px;
+}
+
+.lane-card__image,
+.lane-card__cover .poster-tile__placeholder {
+  display: block;
+  width: 30px;
+  aspect-ratio: 400 / 615;
+  object-fit: cover;
+  border-radius: 4px;
+  background: rgba(240, 236, 227, 0.06);
+}
+
+.lane-card__body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lane-card__title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.lane-card__meta {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 720px) {
+  .lane-picker {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .lanes {
+    --lane-width: 160px;
+  }
+}

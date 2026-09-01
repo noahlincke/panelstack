@@ -144,6 +144,7 @@ def catalog_collections(
     stmt = _apply_filters(select(CatalogCollection), **filters).options(
         selectinload(CatalogCollection.publisher),
         selectinload(CatalogCollection.reading_path),
+        selectinload(CatalogCollection.tags),
     )
     # NULLS LAST needs SQLite 3.30; the host still ships 3.26, so sort the nulls
     # explicitly instead.
