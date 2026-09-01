@@ -508,13 +508,23 @@ def _reading_path_ready_cover_url(reading_path: ReadingPath) -> str | None:
     return None
 
 
+# Hosts whose covers are proxied even when remote cover fetching is otherwise off.
+# Publisher CDNs are included because they vary hotlink policy by referer, so a
+# direct <img> from the browser is far less reliable than fetching server-side.
+PROXIED_COVER_HOSTS = (
+    "cdn.readdetectiveconan.com/file/mangapill/",
+    "i0.wp.com/getcomics.org/",
+    "getcomics.org/share/uploads/",
+    "cdn.marvel.com/",
+    "static.dc.com/",
+    "i.annihil.us/",
+    "comicvine.gamespot.com/a/uploads/",
+)
+
+
 def _should_proxy_provider_cover_url(image_url: str) -> bool:
     lowered = image_url.lower()
-    return (
-        "cdn.readdetectiveconan.com/file/mangapill/" in lowered
-        or "i0.wp.com/getcomics.org/" in lowered
-        or "getcomics.org/share/uploads/" in lowered
-    )
+    return any(host in lowered for host in PROXIED_COVER_HOSTS)
 
 
 def _provider_cover_cache_key(image_url: str) -> str:
