@@ -2502,3 +2502,304 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
     grid-column: 2;
   }
 }
+
+/* ---- Flight prep ------------------------------------------------------ */
+
+.card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.flight-prep {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 300px;
+  gap: 18px;
+  align-items: start;
+}
+
+.flight-prep__heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.flight-prep__badge {
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(213, 168, 95, 0.16);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.flight-prep__collections,
+.flight-prep__entry-list,
+.flight-prep__queue-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flight-prep__collections,
+.flight-prep__entry-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.flight-prep__collection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.flight-prep__collection:hover {
+  color: var(--text);
+  background: rgba(240, 236, 227, 0.04);
+}
+
+.flight-prep__collection[aria-pressed='true'] {
+  color: var(--text);
+  border-color: rgba(213, 168, 95, 0.34);
+  background: rgba(213, 168, 95, 0.1);
+}
+
+.flight-prep__collection-count {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.flight-prep__entries-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.flight-prep__entry {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.flight-prep__entry:hover {
+  background: rgba(240, 236, 227, 0.04);
+}
+
+.flight-prep__entry--owned {
+  color: var(--muted);
+  cursor: default;
+}
+
+.flight-prep__entry-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flight-prep__entry input {
+  accent-color: var(--accent);
+}
+
+.flight-prep__tray {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 12px;
+}
+
+.flight-prep__field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.flight-prep__field input {
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.84rem;
+}
+
+.flight-prep__field input:focus {
+  outline: none;
+  border-color: rgba(213, 168, 95, 0.42);
+}
+
+.flight-prep__action {
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(240, 236, 227, 0.04);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 100ms ease;
+}
+
+.flight-prep__action:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.flight-prep__action--primary {
+  border-color: rgba(213, 168, 95, 0.44);
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #1b1710;
+}
+
+.flight-prep__action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.flight-prep__summary {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.flight-prep__summary > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.flight-prep__summary dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.flight-prep__summary dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.flight-prep__warning {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 147, 143, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 147, 143, 0.08);
+  color: #ffd7d5;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.flight-prep__queue {
+  margin-top: 22px;
+  display: grid;
+  gap: 10px;
+}
+
+.flight-prep__queue-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.flight-prep__queue-head .flight-prep__heading {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.flight-prep__queue-progress {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.flight-prep__queue-destination {
+  margin: 0;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.78rem;
+  word-break: break-all;
+}
+
+.flight-prep__queue-item {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 10px;
+  border-radius: 8px;
+}
+
+.flight-prep__queue-status {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.flight-prep__queue-item--downloading {
+  background: rgba(213, 168, 95, 0.1);
+}
+
+.flight-prep__queue-item--downloading .flight-prep__queue-status {
+  color: var(--accent);
+}
+
+.flight-prep__queue-item--done .flight-prep__queue-status {
+  color: #8fce9b;
+}
+
+.flight-prep__queue-item--failed .flight-prep__queue-status {
+  color: #ff938f;
+}
+
+.flight-prep__queue-detail {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 980px) {
+  .flight-prep {
+    grid-template-columns: 1fr;
+  }
+
+  .flight-prep__tray {
+    position: static;
+  }
+
+  .flight-prep__collections,
+  .flight-prep__entry-list {
+    max-height: 320px;
+  }
+}

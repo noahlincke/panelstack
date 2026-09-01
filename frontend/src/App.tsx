@@ -4,6 +4,7 @@ import { AuthGate } from './components/AuthGate';
 import { Shell } from './components/Shell';
 import { CataloguePage } from './routes/CataloguePage';
 import { ChronologyPage } from './routes/ChronologyPage';
+import { FlightPrepPage } from './routes/FlightPrepPage';
 import { LibraryPage } from './routes/LibraryPage';
 import { ReadingPathDetailPage } from './routes/ReadingPathDetailPage';
 import { ReadingPathsPage } from './routes/ReadingPathsPage';
@@ -36,6 +37,7 @@ export default function App() {
           />
           <Route path="/catalogue" element={<CataloguePage searchQuery={searchQuery} />} />
           <Route path="/chronology" element={<ChronologyPage searchQuery={searchQuery} />} />
+          <Route path="/flight-prep" element={<FlightPrepPage />} />
           <Route path="/series/:seriesId" element={<SeriesDetailPage />} />
           <Route path="/viewer/:issueId" element={<ViewerPage />} />
           <Route path="/viewer/canonical/:canonicalIssueId" element={<ViewerPage />} />

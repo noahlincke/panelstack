@@ -32,9 +32,21 @@ const navItems = [
   { to: '/all', label: 'All', icon: 'cart' as const },
   { to: '/catalogue', label: 'Catalogue', icon: 'catalogue' as const },
   { to: '/chronology', label: 'Chronology', icon: 'chronology' as const },
+  { to: '/flight-prep', label: 'Flight prep', icon: 'flight' as const },
 ];
 
-function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalogue' | 'chronology' }) {
+function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalogue' | 'chronology' | 'flight' }) {
+  if (kind === 'flight') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
+        <path
+          d="M11.2 3.4a1.3 1.3 0 0 1 2.5 0l.6 5.4 5.5 2.9a1 1 0 0 1 .5.9v1a.5.5 0 0 1-.65.48L13.9 12.4l-.5 4.2 1.9 1.5a.7.7 0 0 1 .26.55v.7a.4.4 0 0 1-.52.38l-2.6-.76-2.6.76a.4.4 0 0 1-.52-.38v-.7a.7.7 0 0 1 .26-.55l1.9-1.5-.5-4.2-5.75 1.68A.5.5 0 0 1 4.6 13.6v-1a1 1 0 0 1 .5-.9l5.5-2.9z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
   if (kind === 'catalogue') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">

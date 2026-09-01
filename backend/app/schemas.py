@@ -442,3 +442,64 @@ class ChronologyEntryRead(APIBaseModel):
 class ChronologyResponse(APIBaseModel):
     items: list[ChronologyEntryRead]
     total: int
+
+
+class FlightPrepTargetWrite(APIBaseModel):
+    reading_path_id: int
+    entry_id: int
+    title: str
+
+
+class FlightPrepEstimateWrite(APIBaseModel):
+    targets: list[FlightPrepTargetWrite]
+    destination: str | None = None
+
+
+class FlightPrepTargetRead(APIBaseModel):
+    reading_path_id: int
+    entry_id: int
+    title: str
+    size_bytes: int | None = None
+    status: str
+    detail: str | None = None
+
+
+class DestinationSpaceRead(APIBaseModel):
+    path: str
+    total_bytes: int
+    free_bytes: int
+    exists: bool
+
+
+class FlightPrepEstimateResponse(APIBaseModel):
+    targets: list[FlightPrepTargetRead]
+    total_bytes: int
+    resolved_count: int
+    unavailable_count: int
+    destination: DestinationSpaceRead
+    fits: bool
+
+
+class FlightPrepStartWrite(APIBaseModel):
+    targets: list[FlightPrepTargetWrite]
+    destination: str | None = None
+
+
+class FlightPrepQueueItemRead(APIBaseModel):
+    reading_path_id: int
+    entry_id: int
+    title: str
+    size_bytes: int | None = None
+    status: str
+    detail: str | None = None
+
+
+class FlightPrepQueueRead(APIBaseModel):
+    id: str
+    destination: str
+    status: str
+    items: list[FlightPrepQueueItemRead]
+    started_at: str
+    finished_at: str | None = None
+    completed_count: int
+    total_count: int

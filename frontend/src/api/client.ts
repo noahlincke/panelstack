@@ -13,6 +13,10 @@ import type {
   CatalogFacets,
   CatalogFilterState,
   ChronologyEntry,
+  DestinationSpace,
+  FlightPrepEstimate,
+  FlightPrepQueue,
+  FlightPrepTarget,
   EventDetail,
   EventSummary,
   ImportResult,
@@ -574,7 +578,112 @@ function catalogQuery(filters: CatalogFilterState, extra: Record<string, string>
   return query ? `?${query}` : '';
 }
 
+
+type BackendFlightPrepItem = {
+  reading_path_id: number;
+  entry_id: number;
+  title: string;
+  size_bytes: number | null;
+  status: string;
+  detail: string | null;
+};
+
+type BackendFlightPrepQueue = {
+  id: string;
+  destination: string;
+  status: string;
+  items: BackendFlightPrepItem[];
+  started_at: string;
+  finished_at: string | null;
+  completed_count: number;
+  total_count: number;
+};
+
+function flightPrepItem(item: BackendFlightPrepItem) {
+  return {
+    readingPathId: String(item.reading_path_id),
+    entryId: String(item.entry_id),
+    title: item.title,
+    sizeBytes: item.size_bytes ?? undefined,
+    status: item.status,
+    detail: item.detail ?? undefined,
+  };
+}
+
+function flightPrepQueue(payload: BackendFlightPrepQueue): FlightPrepQueue {
+  return {
+    id: payload.id,
+    destination: payload.destination,
+    status: payload.status,
+    items: payload.items.map(flightPrepItem),
+    startedAt: payload.started_at,
+    finishedAt: payload.finished_at ?? undefined,
+    completedCount: payload.completed_count,
+    totalCount: payload.total_count,
+  };
+}
+
+function flightPrepBody(targets: FlightPrepTarget[], destination?: string) {
+  return JSON.stringify({
+    destination: destination || null,
+    targets: targets.map((target) => ({
+      reading_path_id: Number(target.readingPathId),
+      entry_id: Number(target.entryId),
+      title: target.title,
+    })),
+  });
+}
+
 export const apiClient = {
+  async estimateFlightPrep(targets: FlightPrepTarget[], destination?: string): Promise<FlightPrepEstimate> {
+    const payload = await fetchJson<{
+      targets: BackendFlightPrepItem[];
+      total_bytes: number;
+      resolved_count: number;
+      unavailable_count: number;
+      destination: { path: string; total_bytes: number; free_bytes: number; exists: boolean };
+      fits: boolean;
+    }>('/flight-prep/estimate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: flightPrepBody(targets, destination),
+    });
+    const space: DestinationSpace = {
+      path: payload.destination.path,
+      totalBytes: payload.destination.total_bytes,
+      freeBytes: payload.destination.free_bytes,
+      exists: payload.destination.exists,
+    };
+    return {
+      targets: payload.targets.map(flightPrepItem),
+      totalBytes: payload.total_bytes,
+      resolvedCount: payload.resolved_count,
+      unavailableCount: payload.unavailable_count,
+      destination: space,
+      fits: payload.fits,
+    };
+  },
+
+  async startFlightPrep(targets: FlightPrepTarget[], destination?: string): Promise<FlightPrepQueue> {
+    return flightPrepQueue(
+      await fetchJson<BackendFlightPrepQueue>('/flight-prep/queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: flightPrepBody(targets, destination),
+      }),
+    );
+  },
+
+  async getFlightPrepQueue(): Promise<FlightPrepQueue | undefined> {
+    const payload = await fetchJson<BackendFlightPrepQueue | null>('/flight-prep/queue');
+    return payload ? flightPrepQueue(payload) : undefined;
+  },
+
+  async cancelFlightPrep(): Promise<FlightPrepQueue | undefined> {
+    const payload = await fetchJson<BackendFlightPrepQueue | null>('/flight-prep/queue/cancel', { method: 'POST' });
+    return payload ? flightPrepQueue(payload) : undefined;
+  },
+
   async getCatalogFacets(): Promise<CatalogFacets> {
     const payload = await fetchJson<{
       publishers: BackendCatalogFacet[];

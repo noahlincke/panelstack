@@ -71,6 +71,13 @@ from .schemas import (
     CatalogFacetsResponse,
     ChronologyEntryRead,
     ChronologyResponse,
+    DestinationSpaceRead,
+    FlightPrepEstimateResponse,
+    FlightPrepEstimateWrite,
+    FlightPrepQueueItemRead,
+    FlightPrepQueueRead,
+    FlightPrepStartWrite,
+    FlightPrepTargetRead,
     EventListResponse,
     EventRead,
     EventSummary,
@@ -117,6 +124,7 @@ from .services import (
     sync_mangapill_catalog,
 )
 from .services.catalog_query import catalog_chronology, catalog_collections, catalog_facets
+from .services.flight_prep import QUEUE, FlightPrepTarget, QueueItem, destination_space, resolve_targets
 from .services.ingest import ComicMetadata, PageRecord, ScanResult
 from .services.stream_buffer import (
     StreamBufferTooLargeError,
@@ -849,8 +857,10 @@ def _link_imported_paths_to_entry(db: Session, imported_paths: list[str], entry:
     db.commit()
 
 
-def _download_post_to_library(db: Session, post_url: str) -> tuple[list[str], PersistResult]:
-    downloads_root = _downloads_root()
+def _download_post_to_library(
+    db: Session, post_url: str, *, destination: Path | None = None
+) -> tuple[list[str], PersistResult]:
+    downloads_root = destination or _downloads_root()
     downloads_root.mkdir(parents=True, exist_ok=True)
     command = [
         sys.executable,
@@ -1794,6 +1804,183 @@ def get_catalog_chronology(
         ],
         total=total,
     )
+
+
+def _require_local_deployment() -> None:
+    if _hosted_deployment():
+        raise HTTPException(
+            status_code=410,
+            detail="Flight prep downloads run on your own machine. The hosted library is browse and preview only.",
+        )
+
+
+def _flight_prep_destination(destination: str | None) -> Path:
+    return _normalize_download_root(destination) if destination else _downloads_root()
+
+
+def _flight_prep_entry(db: Session, reading_path_id: int, entry_id: int) -> ReadingPathEntry:
+    entry = db.scalars(
+        select(ReadingPathEntry)
+        .options(
+            selectinload(ReadingPathEntry.canonical_issue).selectinload(CanonicalIssue.series),
+            selectinload(ReadingPathEntry.issue).selectinload(Issue.series),
+        )
+        .where(ReadingPathEntry.id == entry_id, ReadingPathEntry.reading_path_id == reading_path_id)
+    ).first()
+    if entry is None:
+        raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
+    return entry
+
+
+def _flight_prep_post_url(entry: ReadingPathEntry) -> str | None:
+    query, expected_series_title, expected_issue_number, expected_year = _reading_path_entry_download_context(entry)
+    cover = fetch_getcomics_cover(
+        query,
+        expected_series_title=expected_series_title,
+        expected_issue_number=expected_issue_number,
+        expected_year=expected_year,
+    )
+    return cover.post_url
+
+
+def _flight_prep_archive_size(post_url: str) -> int | None:
+    """Ask the mirror for the real archive size without downloading it."""
+    session = comics.build_session()
+    try:
+        plan = comics.resolve_download_plan(post_url, session, preferred_host=None)
+        response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
+        try:
+            comics.ensure_success(response, plan.resolved_url)
+            return _response_content_length(response)
+        finally:
+            response.close()
+    finally:
+        session.close()
+
+
+@app.post("/flight-prep/estimate", response_model=FlightPrepEstimateResponse)
+def estimate_flight_prep(payload: FlightPrepEstimateWrite) -> FlightPrepEstimateResponse:
+    _require_local_deployment()
+    destination = _flight_prep_destination(payload.destination)
+
+    def resolve(target: FlightPrepTarget) -> tuple[int | None, str | None]:
+        # Sizes resolve on a worker pool, and a Session is not thread safe.
+        with SessionLocal() as session:
+            entry = _flight_prep_entry(session, target.reading_path_id, target.entry_id)
+            post_url = _flight_prep_post_url(entry)
+        if not post_url:
+            return None, None
+        return _flight_prep_archive_size(post_url), post_url
+
+    resolved = resolve_targets(
+        [
+            FlightPrepTarget(reading_path_id=t.reading_path_id, entry_id=t.entry_id, title=t.title)
+            for t in payload.targets
+        ],
+        resolve,
+    )
+    total_bytes = sum(item.size_bytes or 0 for item in resolved)
+    space = destination_space(destination)
+    return FlightPrepEstimateResponse(
+        targets=[
+            FlightPrepTargetRead(
+                reading_path_id=item.reading_path_id,
+                entry_id=item.entry_id,
+                title=item.title,
+                size_bytes=item.size_bytes,
+                status=item.status,
+                detail=item.detail,
+            )
+            for item in resolved
+        ],
+        total_bytes=total_bytes,
+        resolved_count=sum(1 for item in resolved if item.status == "ready"),
+        unavailable_count=sum(1 for item in resolved if item.status != "ready"),
+        destination=DestinationSpaceRead(
+            path=space.path,
+            total_bytes=space.total_bytes,
+            free_bytes=space.free_bytes,
+            exists=space.exists,
+        ),
+        fits=total_bytes < space.free_bytes,
+    )
+
+
+def _flight_prep_snapshot_response(snapshot) -> FlightPrepQueueRead:
+    return FlightPrepQueueRead(
+        id=snapshot.id,
+        destination=snapshot.destination,
+        status=snapshot.status,
+        items=[
+            FlightPrepQueueItemRead(
+                reading_path_id=item.reading_path_id,
+                entry_id=item.entry_id,
+                title=item.title,
+                size_bytes=item.size_bytes,
+                status=item.status,
+                detail=item.detail,
+            )
+            for item in snapshot.items
+        ],
+        started_at=snapshot.started_at,
+        finished_at=snapshot.finished_at,
+        completed_count=snapshot.completed_count,
+        total_count=len(snapshot.items),
+    )
+
+
+@app.post("/flight-prep/queue", response_model=FlightPrepQueueRead)
+def start_flight_prep(payload: FlightPrepStartWrite) -> FlightPrepQueueRead:
+    _require_local_deployment()
+    if not payload.targets:
+        raise HTTPException(status_code=422, detail="Select at least one issue to download.")
+    destination = _flight_prep_destination(payload.destination)
+    destination.mkdir(parents=True, exist_ok=True)
+
+    def run(item: QueueItem) -> str | None:
+        with SessionLocal() as session:
+            entry = _flight_prep_entry(session, item.reading_path_id, item.entry_id)
+            if _entry_has_local_match(entry):
+                return "Already in the library."
+            post_url = _flight_prep_post_url(entry)
+            if not post_url:
+                raise RuntimeError("No downloadable source was found.")
+            imported_paths, _ = _download_post_to_library(session, post_url, destination=destination)
+            _link_imported_paths_to_entry(session, imported_paths, entry)
+            return None
+
+    try:
+        snapshot = QUEUE.start(
+            destination=destination,
+            items=[
+                QueueItem(
+                    reading_path_id=t.reading_path_id,
+                    entry_id=t.entry_id,
+                    title=t.title,
+                    size_bytes=None,
+                )
+                for t in payload.targets
+            ],
+            runner=run,
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return _flight_prep_snapshot_response(snapshot)
+
+
+@app.get("/flight-prep/queue", response_model=FlightPrepQueueRead | None)
+def get_flight_prep_queue() -> FlightPrepQueueRead | None:
+    _require_local_deployment()
+    snapshot = QUEUE.snapshot()
+    return _flight_prep_snapshot_response(snapshot) if snapshot else None
+
+
+@app.post("/flight-prep/queue/cancel", response_model=FlightPrepQueueRead | None)
+def cancel_flight_prep() -> FlightPrepQueueRead | None:
+    _require_local_deployment()
+    QUEUE.cancel()
+    snapshot = QUEUE.snapshot()
+    return _flight_prep_snapshot_response(snapshot) if snapshot else None
 
 
 @app.get("/publishers", response_model=PublisherListResponse)
