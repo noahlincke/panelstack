@@ -33,6 +33,7 @@ from .auth import (
     auth_enabled,
     create_session_cookie,
     verify_password,
+    verify_basic_auth,
     verify_session_cookie,
 )
 from .models import (
@@ -131,6 +132,7 @@ from .services import (
     sync_curation_data,
     sync_mangapill_catalog,
 )
+from .services import opds
 from .services.catalog_query import catalog_chronology, catalog_collections, catalog_facets, owned_counts
 from .services.downloads_queue import QUEUE, DownloadTarget, QueueItem, destination_space, resolve_targets
 from .services.ingest import ComicMetadata, PageRecord, ScanResult
@@ -704,9 +706,9 @@ def _prepare_entry_device_download(entry: ReadingPathEntry) -> tuple[object, str
         raise HTTPException(status_code=502, detail=f"Request failed for {source_url}: {exc}") from exc
 
     filename = comics.infer_filename(plan.post_title, response, plan.resolved_url)
-    media_type = response.headers.get("content-type", "").split(";", 1)[0].strip() or (
-        mimetypes.guess_type(filename)[0] or "application/octet-stream"
-    )
+    # Mirrors serve archives as octet-stream, which tells an OPDS reader nothing.
+    # The extension is the reliable signal for what this actually is.
+    media_type = opds.archive_media_type(filename)
     size_bytes = _response_content_length(response)
     return _iter_remote_response(response, session), filename, media_type, size_bytes
 
@@ -1268,8 +1270,18 @@ async def require_authentication(request: Request, call_next):
     if request_path in {"/auth/session", "/auth/login", "/health"} or request_path.startswith("/auth/"):
         return await call_next(request)
 
+    if verify_basic_auth(request.headers.get("authorization")):
+        return await call_next(request)
+
     session_state = verify_session_cookie(request.cookies.get(SESSION_COOKIE_NAME))
     if not session_state.authenticated:
+        if request_path.startswith("/opds"):
+            return Response(
+                status_code=401,
+                headers={"WWW-Authenticate": 'Basic realm="Panel Stack"'},
+                media_type="text/plain",
+                content="Authentication required.",
+            )
         return Response(status_code=401, media_type="application/json", content='{"detail":"Authentication required."}')
     return await call_next(request)
 
@@ -2195,6 +2207,196 @@ def cancel_downloads() -> DownloadQueueRead | None:
     QUEUE.cancel()
     snapshot = QUEUE.snapshot()
     return _download_snapshot_response(snapshot) if snapshot else None
+
+
+OPDS_ROOT_ID = "urn:panelstack:opds"
+
+
+def _opds_base(request: Request) -> str:
+    """External prefix for OPDS URLs, honouring the /panels mount.
+
+    The passenger middleware rewrites the path before routing, so the request's
+    own base_url has already lost the mount prefix; it is added back here.
+    """
+    root = str(request.base_url).rstrip("/")
+    mount = os.getenv("PANELSTACK_BASE_PATH", "").rstrip("/")
+    if mount and not root.endswith(mount):
+        root = f"{root}{mount}"
+    return root
+
+
+def _opds_response(body: str, kind: str) -> Response:
+    media_type = opds.NAVIGATION_TYPE if kind == "navigation" else opds.ACQUISITION_TYPE
+    return Response(content=body, media_type=media_type)
+
+
+def _opds_entry_download_href(base: str, reading_path_id: int, entry_id: int) -> str:
+    return f"{base}/api/reading-paths/{reading_path_id}/entries/{entry_id}/download"
+
+
+def _opds_entry_cover_href(base: str, reading_path_id: int, entry_id: int) -> str:
+    return f"{base}/api/reading-paths/{reading_path_id}/entries/{entry_id}/cover-image"
+
+
+def _opds_entry_title(entry: ReadingPathEntry) -> str:
+    if entry.canonical_issue is not None:
+        return entry.canonical_issue.title or f"Issue {entry.canonical_issue.issue_number}"
+    return entry.label or f"Entry {entry.id}"
+
+
+@app.get("/opds")
+def opds_root(request: Request) -> Response:
+    base = _opds_base(request)
+    body = opds.feed(
+        feed_id=OPDS_ROOT_ID,
+        title="Panel Stack",
+        self_href=f"{base}/opds",
+        start_href=f"{base}/opds",
+        entries=[
+            opds.navigation_entry(
+                identifier=f"{OPDS_ROOT_ID}:lists",
+                title="Reading lists",
+                href=f"{base}/opds/lists",
+                summary="Lists you built in Panel Stack.",
+            ),
+            opds.navigation_entry(
+                identifier=f"{OPDS_ROOT_ID}:collections",
+                title="Collections",
+                href=f"{base}/opds/collections",
+                summary="Every curated run and collected edition.",
+            ),
+        ],
+    )
+    return _opds_response(body, "navigation")
+
+
+@app.get("/opds/lists")
+def opds_lists(request: Request, db: Session = Depends(get_db)) -> Response:
+    base = _opds_base(request)
+    lists = db.scalars(
+        select(ReadingList).options(selectinload(ReadingList.items)).order_by(ReadingList.name.asc())
+    ).all()
+    body = opds.feed(
+        feed_id=f"{OPDS_ROOT_ID}:lists",
+        title="Reading lists",
+        self_href=f"{base}/opds/lists",
+        start_href=f"{base}/opds",
+        up_href=f"{base}/opds",
+        entries=[
+            opds.navigation_entry(
+                identifier=f"{OPDS_ROOT_ID}:list:{reading_list.id}",
+                title=reading_list.name,
+                href=f"{base}/opds/lists/{reading_list.id}",
+                summary=f"{len(reading_list.items)} issues",
+                kind="acquisition",
+            )
+            for reading_list in lists
+        ],
+    )
+    return _opds_response(body, "navigation")
+
+
+@app.get("/opds/lists/{reading_list_id}")
+def opds_list(reading_list_id: int, request: Request, db: Session = Depends(get_db)) -> Response:
+    base = _opds_base(request)
+    reading_list = _reading_list(db, reading_list_id)
+    entries = []
+    for item in reading_list.items:
+        entries.append(
+            opds.acquisition_entry(
+                identifier=f"{OPDS_ROOT_ID}:item:{item.id}",
+                title=item.title,
+                download_href=_opds_entry_download_href(base, item.reading_path_id, item.reading_path_entry_id),
+                media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
+                cover_href=_opds_entry_cover_href(base, item.reading_path_id, item.reading_path_entry_id),
+            )
+        )
+    body = opds.feed(
+        feed_id=f"{OPDS_ROOT_ID}:list:{reading_list.id}",
+        title=reading_list.name,
+        self_href=f"{base}/opds/lists/{reading_list.id}",
+        start_href=f"{base}/opds",
+        up_href=f"{base}/opds/lists",
+        entries=entries,
+        kind="acquisition",
+    )
+    return _opds_response(body, "acquisition")
+
+
+@app.get("/opds/collections")
+def opds_collections(
+    request: Request,
+    db: Session = Depends(get_db),
+    publisher: list[str] | None = Query(None),
+    character: str | None = Query(None),
+    limit: int = Query(120, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+) -> Response:
+    base = _opds_base(request)
+    collections, _ = catalog_collections(
+        db,
+        publisher=publisher,
+        character=character,
+        limit=limit,
+        offset=offset,
+    )
+    body = opds.feed(
+        feed_id=f"{OPDS_ROOT_ID}:collections",
+        title="Collections",
+        self_href=f"{base}/opds/collections",
+        start_href=f"{base}/opds",
+        up_href=f"{base}/opds",
+        entries=[
+            opds.navigation_entry(
+                identifier=f"{OPDS_ROOT_ID}:collection:{collection.id}",
+                title=collection.title,
+                href=f"{base}/opds/collections/{collection.reading_path_id}",
+                summary=f"{len(collection.items)} issues",
+                kind="acquisition",
+            )
+            for collection in collections
+            if collection.reading_path_id
+        ],
+    )
+    return _opds_response(body, "navigation")
+
+
+@app.get("/opds/collections/{reading_path_id}")
+def opds_collection(reading_path_id: int, request: Request, db: Session = Depends(get_db)) -> Response:
+    base = _opds_base(request)
+    reading_path = db.scalars(
+        select(ReadingPath)
+        .options(selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue))
+        .where(ReadingPath.id == reading_path_id)
+    ).first()
+    if reading_path is None:
+        raise HTTPException(status_code=404, detail=f"Reading path {reading_path_id} not found")
+
+    entries = [
+        opds.acquisition_entry(
+            identifier=f"{OPDS_ROOT_ID}:entry:{entry.id}",
+            title=_opds_entry_title(entry),
+            download_href=_opds_entry_download_href(base, reading_path.id, entry.id),
+            media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
+            cover_href=_opds_entry_cover_href(base, reading_path.id, entry.id),
+            updated=(
+                entry.canonical_issue.published_on.strftime("%Y-%m-%dT00:00:00Z")
+                if entry.canonical_issue is not None and entry.canonical_issue.published_on
+                else None
+            ),
+        )
+        for entry in _collection_download_entries(reading_path)
+    ]
+    body = opds.feed(
+        feed_id=f"{OPDS_ROOT_ID}:collection:{reading_path.id}",
+        title=reading_path.title,
+        self_href=f"{base}/opds/collections/{reading_path.id}",
+        start_href=f"{base}/opds",
+        up_href=f"{base}/opds/collections",
+        entries=entries,
+        kind="acquisition",
+    )
+    return _opds_response(body, "acquisition")
 
 
 @app.get("/publishers", response_model=PublisherListResponse)

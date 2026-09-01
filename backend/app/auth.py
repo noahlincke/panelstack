@@ -51,6 +51,24 @@ def verify_password(password: str) -> bool:
     return hmac.compare_digest(candidate, expected)
 
 
+def verify_basic_auth(header_value: str | None) -> bool:
+    """Check an HTTP Basic credential against the app password.
+
+    OPDS readers authenticate with Basic rather than a session cookie, so the
+    catalog routes accept it. The username is ignored; only the password matters.
+    """
+    if not auth_enabled():
+        return True
+    if not header_value or not header_value.lower().startswith("basic "):
+        return False
+    try:
+        decoded = base64.b64decode(header_value.split(" ", 1)[1]).decode("utf-8")
+    except (ValueError, UnicodeDecodeError):
+        return False
+    _, separator, password = decoded.partition(":")
+    return bool(separator) and verify_password(password)
+
+
 def hash_password(password: str, *, iterations: int = 390000) -> str:
     salt = os.urandom(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations)
