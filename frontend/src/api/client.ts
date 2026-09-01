@@ -807,6 +807,7 @@ export const apiClient = {
         volume_number: number | null;
         issue_count: number;
         owned_count: number;
+        tags: string[];
         first_published_on: string | null;
         latest_published_on: string | null;
         reading_path_id: number | null;
@@ -826,6 +827,7 @@ export const apiClient = {
         volumeNumber: item.volume_number ?? undefined,
         issueCount: item.issue_count,
         ownedCount: item.owned_count,
+        tags: item.tags ?? [],
         firstPublishedOn: item.first_published_on ?? undefined,
         latestPublishedOn: item.latest_published_on ?? undefined,
         readingPathId: item.reading_path_id ? String(item.reading_path_id) : undefined,

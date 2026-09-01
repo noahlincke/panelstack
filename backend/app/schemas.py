@@ -416,6 +416,7 @@ class CatalogCollectionSummary(APIBaseModel):
     volume_number: int | None = None
     issue_count: int
     owned_count: int = 0
+    tags: list[str] = []
     first_published_on: date | None = None
     latest_published_on: date | None = None
     reading_path_id: int | None = None

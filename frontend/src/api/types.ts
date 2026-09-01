@@ -225,6 +225,7 @@ export type CatalogCollection = {
   volumeNumber?: number;
   issueCount: number;
   ownedCount: number;
+  tags: string[];
   firstPublishedOn?: string;
   latestPublishedOn?: string;
   readingPathId?: string;

@@ -1735,7 +1735,7 @@ def list_catalog_collections(
     end: date | None = Query(None),
     search: str | None = Query(None),
     owned: bool | None = Query(None),
-    limit: int = Query(60, ge=1, le=200),
+    limit: int = Query(60, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ) -> CatalogCollectionListResponse:
     collections, total = catalog_collections(
@@ -1763,6 +1763,7 @@ def list_catalog_collections(
                 volume_number=collection.volume_number,
                 issue_count=len(collection.items),
                 owned_count=owned_by_collection.get(collection.id, 0),
+                tags=[tag.tag for tag in collection.tags],
                 first_published_on=collection.first_published_on,
                 latest_published_on=collection.latest_published_on,
                 reading_path_id=collection.reading_path_id,
