@@ -2072,12 +2072,6 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
     justify-content: flex-start;
   }
 
-  .poster-grid,
-  .reading-paths,
-  .event-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .catalog-toolbar {
     align-items: start;
   }
@@ -2130,10 +2124,6 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
     height: calc(100vh - 28px);
   }
 
-  .poster-grid,
-  .poster-grid--issues,
-  .reading-paths,
-  .event-grid,
   .issue-row {
     grid-template-columns: 1fr;
   }
