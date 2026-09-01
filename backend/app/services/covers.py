@@ -15,6 +15,7 @@ import requests
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from .cover_cache import has_room_for_covers, prune_cover_cache
 from ..models import ReadingPathCoverAsset
 
 
@@ -322,6 +323,10 @@ def ensure_reading_path_cover_asset(
         db.flush()
         return asset
 
+    # Never spend the last of the host's disk on a cover.
+    if not has_room_for_covers():
+        return None, None, cover
+
     COVER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     try:
         content, content_type = _download_binary(cover.image_url)
@@ -335,6 +340,7 @@ def ensure_reading_path_cover_asset(
     digest = hashlib.sha1(cover.image_url.encode("utf-8")).hexdigest()[:12]
     destination = COVER_CACHE_DIR / f"reading-path-{reading_path_id}-{digest}{extension}"
     destination.write_bytes(content)
+    prune_cover_cache()
 
     asset.cached_path = str(destination)
     asset.content_type = _normalize_image_content_type(cover.image_url, content_type)
@@ -378,6 +384,10 @@ def ensure_query_cover_image(
         content_type = mimetypes.guess_type(destination.name)[0]
         return destination, content_type, cover
 
+    # Never spend the last of the host's disk on a cover.
+    if not has_room_for_covers():
+        return None, None, cover
+
     try:
         content, content_type = _download_binary(cover.image_url)
     except (HTTPError, URLError, TimeoutError, requests.RequestException):
@@ -388,6 +398,7 @@ def ensure_query_cover_image(
             sibling.unlink(missing_ok=True)
 
     destination.write_bytes(content)
+    prune_cover_cache()
     normalized_content_type = _normalize_image_content_type(cover.image_url, content_type)
     return destination, normalized_content_type, cover
 
@@ -413,6 +424,10 @@ def ensure_remote_cover_image(
         existing_path = destination
         return existing_path, _content_type_for_extension(existing_path.suffix.lower())
 
+    # Never spend the last of the host's disk on a cover.
+    if not has_room_for_covers():
+        return None, None
+
     try:
         content, content_type = _download_binary_with_headers(image_url, referer_url=referer_url)
     except (HTTPError, URLError, TimeoutError, requests.RequestException):
@@ -425,5 +440,6 @@ def ensure_remote_cover_image(
             sibling.unlink(missing_ok=True)
 
     destination.write_bytes(content)
+    prune_cover_cache()
     normalized_content_type = _normalize_image_content_type(image_url, content_type)
     return destination, normalized_content_type
