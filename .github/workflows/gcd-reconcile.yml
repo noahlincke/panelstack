@@ -1,0 +1,46 @@
+name: GCD weekly reconciliation
+
+# Re-scans the last few on-sale weeks so late Grand Comics Database edits land in
+# the catalogue. GCD throttles anonymous clients to roughly one hourly window, so
+# this stays deliberately small: a few dozen requests, once a week.
+on:
+  schedule:
+    # Tuesday 09:00 UTC, after the US Wednesday on-sale data has settled.
+    - cron: '0 9 * * 2'
+  workflow_dispatch:
+
+# One run at a time; a queued duplicate would just burn the same quota.
+concurrency:
+  group: gcd-reconcile
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          # No dependency cache: the restore/save cycle costs more Actions cache
+          # storage than it saves on a handful of wheels.
+          cache: ''
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check -r backend/requirements.txt
+
+      - name: Reconcile recent on-sale weeks
+        env:
+          DATABASE_URL: sqlite:///${{ runner.temp }}/gcd-reconcile.db
+        run: python scripts/gcd_import.py reconcile --weeks-back 2
+
+      # No artifacts are uploaded. The run exists to prove the importer still
+      # matches the live API shape; the real database is the local one that gets
+      # copied to lincke.org.
