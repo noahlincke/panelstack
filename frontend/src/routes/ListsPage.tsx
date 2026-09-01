@@ -148,7 +148,7 @@ export function ListsPage() {
       <header className="view__header">
         <h1>Lists</h1>
         <p className="view__lede">
-          Build a list from anywhere in the catalogue, then download all of it or just the parts you want.
+          Build a list from anywhere in the catalog, then download all of it or just the parts you want.
         </p>
       </header>
 

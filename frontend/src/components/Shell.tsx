@@ -29,12 +29,12 @@ export function useShellSettingsAction(action: ShellSettingsAction | null) {
 }
 
 const navItems = [
-  { to: '/catalogue', label: 'Catalogue', icon: 'catalogue' as const },
+  { to: '/catalog', label: 'Catalog', icon: 'catalog' as const },
   { to: '/chronology', label: 'Chronology', icon: 'chronology' as const },
   { to: '/lists', label: 'Lists', icon: 'lists' as const },
 ];
 
-function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalogue' | 'chronology' | 'lists' }) {
+function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalog' | 'chronology' | 'lists' }) {
   if (kind === 'lists') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
@@ -51,7 +51,7 @@ function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalogue' 
     );
   }
 
-  if (kind === 'catalogue') {
+  if (kind === 'catalog') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
         <rect x="4" y="4.5" width="6.6" height="6.6" rx="1.4" fill="currentColor" />

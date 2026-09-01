@@ -2,7 +2,7 @@
 
 Local comic downloader, catalog, and reader for a personal library.
 
-Panel Stack is intentionally undeployed for now. It runs as a local Vite + FastAPI app, stores catalog data in SQLite, and keeps downloaded archives in `~/Documents/panelstack-downloads` by default.
+Panel Stack is intentionally undeployed for now. It runs as a local Vite + FastAPI app, stores catalog data in SQLite, and keeps downloaded archives in `~/Documents/COMICS` by default.
 
 ## Quick Start
 

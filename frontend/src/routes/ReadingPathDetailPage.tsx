@@ -186,7 +186,6 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
     <section className="view">
       <div className="catalog-detail-head">
         <div className="catalog-detail-head__copy">
-          <p className="eyebrow">Available series</p>
           <h1>{path.title}</h1>
           {path.description ? <p className="catalog-detail-head__description">{path.description}</p> : null}
           <p className="catalog-detail-head__meta">
@@ -229,8 +228,8 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
               <span>Remove All</span>
             </button>
           ) : null}
-          <Link to="/catalogue" className="button">
-            Back to catalogue
+          <Link to="/catalog" className="button">
+            Back to catalog
           </Link>
         </div>
       </div>

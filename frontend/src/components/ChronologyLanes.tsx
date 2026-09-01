@@ -40,31 +40,50 @@ type ChronologyLanesProps = {
   lanes: Lane[];
 };
 
+type Placed = {
+  collection: CatalogCollection;
+  /** True in the year the run began, false in the years it merely continues into. */
+  starts: boolean;
+};
+
+function yearSpan(collection: CatalogCollection): number[] {
+  const first = Number(collection.firstPublishedOn?.slice(0, 4));
+  if (!first) return [];
+  const last = Number(collection.latestPublishedOn?.slice(0, 4)) || first;
+  const years = [];
+  for (let year = first; year <= Math.max(first, last); year += 1) {
+    years.push(year);
+  }
+  return years;
+}
+
 /**
- * A year-by-lane board. Reading down a column is one character's run history;
- * reading across a row is everything that launched that year.
+ * A year-by-lane board. A run appears in every year it was publishing, marked in
+ * the year it began, so a column reads as both "what started when" and "what was
+ * running then" — a run that launched in 2024 and is still going shows up in
+ * 2026 rather than vanishing from it.
  */
 export function ChronologyLanes({ collections, lanes }: ChronologyLanesProps) {
   const years = useMemo(() => {
     const seen = new Set<number>();
-    collections.forEach((collection) => {
-      const year = Number(collection.firstPublishedOn?.slice(0, 4));
-      if (year) seen.add(year);
-    });
+    collections.forEach((collection) => yearSpan(collection).forEach((year) => seen.add(year)));
     return [...seen].sort((a, b) => b - a);
   }, [collections]);
 
   const cells = useMemo(() => {
-    const byCell = new Map<string, CatalogCollection[]>();
+    const byCell = new Map<string, Placed[]>();
     collections.forEach((collection) => {
-      const year = Number(collection.firstPublishedOn?.slice(0, 4));
-      if (!year) return;
+      const span = yearSpan(collection);
       lanes.forEach((lane) => {
         if (!inLane(collection, lane.id)) return;
-        const key = `${year}:${lane.id}`;
-        byCell.set(key, [...(byCell.get(key) ?? []), collection]);
+        span.forEach((year, index) => {
+          const key = `${year}:${lane.id}`;
+          byCell.set(key, [...(byCell.get(key) ?? []), { collection, starts: index === 0 }]);
+        });
       });
     });
+    // Runs that begin in a year lead that year's cell.
+    byCell.forEach((placed) => placed.sort((a, b) => Number(b.starts) - Number(a.starts)));
     return byCell;
   }, [collections, lanes]);
 
@@ -91,11 +110,17 @@ export function ChronologyLanes({ collections, lanes }: ChronologyLanesProps) {
             const entries = cells.get(`${year}:${lane.id}`) ?? [];
             return (
               <div className="lanes__cell" key={lane.id}>
-                {entries.map((collection) => (
+                {entries.map(({ collection, starts }) => (
                   <Link
-                    className={`lane-card ${collection.ownedCount > 0 ? 'lane-card--owned' : ''}`}
-                    to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalogue'}
-                    key={collection.id}
+                    className={[
+                      'lane-card',
+                      starts ? 'lane-card--starts' : 'lane-card--continues',
+                      collection.ownedCount > 0 ? 'lane-card--owned' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalog'}
+                    key={`${collection.id}-${starts ? 'start' : 'cont'}`}
                   >
                     <span className="lane-card__cover">
                       <CoverImage
@@ -108,7 +133,7 @@ export function ChronologyLanes({ collections, lanes }: ChronologyLanesProps) {
                     <span className="lane-card__body">
                       <span className="lane-card__title">{collection.title}</span>
                       <span className="lane-card__meta">
-                        {collection.issueCount} issues
+                        {starts ? `${collection.issueCount} issues` : 'continues'}
                         {collection.ownedCount > 0 ? ` · ${collection.ownedCount} owned` : ''}
                       </span>
                     </span>

@@ -161,7 +161,7 @@ def _remote_cover_fetch_enabled() -> bool:
 
 
 def _default_download_root() -> Path:
-    return (Path.home() / "Documents" / "panelstack-downloads").expanduser().resolve()
+    return (Path.home() / "Documents" / "COMICS").expanduser().resolve()
 
 
 def _normalize_download_root(value: str) -> Path:
@@ -417,6 +417,13 @@ def _reading_path_latest_issue_entry(reading_path: ReadingPath) -> ReadingPathEn
     return max(issue_entries, key=lambda entry: (entry.sort_order, entry.id))
 
 
+def _reading_path_first_issue_entry(reading_path: ReadingPath) -> ReadingPathEntry | None:
+    issue_entries = [entry for entry in reading_path.entries if entry.entry_type == "issue"]
+    if not issue_entries:
+        return None
+    return min(issue_entries, key=lambda entry: (entry.sort_order, entry.id))
+
+
 def _reading_path_collected_edition_entry(reading_path: ReadingPath) -> ReadingPathEntry | None:
     collection_entries = [entry for entry in reading_path.entries if entry.entry_type == "collection"]
     if not collection_entries:
@@ -443,8 +450,10 @@ def _reading_path_cover_query(reading_path: ReadingPath) -> str:
     collection_label = _reading_path_issue_label(collection_entry)
     if collection_label:
         return collection_label
-    latest_issue_label = _reading_path_issue_label(_reading_path_latest_issue_entry(reading_path))
-    return latest_issue_label or reading_path.title
+    # The first issue of a run always exists once it has launched; the last
+    # curated issue may still be months from publication.
+    first_issue_label = _reading_path_issue_label(_reading_path_first_issue_entry(reading_path))
+    return first_issue_label or reading_path.title
 
 
 def _expected_getcomics_title(issue: CanonicalIssue | Issue) -> str:
@@ -454,7 +463,7 @@ def _expected_getcomics_title(issue: CanonicalIssue | Issue) -> str:
 
 
 def _reading_path_cover_context(reading_path: ReadingPath) -> tuple[str | None, str | None, int | None]:
-    entry = _reading_path_collected_edition_entry(reading_path) or _reading_path_latest_issue_entry(reading_path)
+    entry = _reading_path_collected_edition_entry(reading_path) or _reading_path_first_issue_entry(reading_path)
     if entry is None:
         return None, None, None
     if entry.canonical_issue is not None:
@@ -886,6 +895,8 @@ def _download_post_to_library(
         post_url,
         "--output-dir",
         str(downloads_root),
+        # Keep the archive as one file; the viewer reads inside it.
+        "--no-extract",
     ]
     completed = subprocess.run(
         command,
@@ -1829,6 +1840,35 @@ def get_catalog_chronology(
         ],
         total=total,
     )
+
+
+def _collection_download_entries(reading_path: ReadingPath) -> list[ReadingPathEntry]:
+    """Prefer trades, then fill in issues the trades do not cover.
+
+    A collected edition is one download instead of six, so when a run has one it
+    stands in for the issues it collects. Issues published since the last trade
+    still come through individually.
+    """
+    collected = [entry for entry in reading_path.entries if entry.entry_type == "collection"]
+    issues = [entry for entry in reading_path.entries if entry.entry_type == "issue"]
+    if not collected:
+        return issues
+
+    covered: set[str] = set()
+    for entry in collected:
+        issue = entry.canonical_issue
+        if issue is None or "-" not in issue.issue_number:
+            continue
+        first, _, last = issue.issue_number.partition("-")
+        if first.strip().isdigit() and last.strip().isdigit():
+            covered.update(str(number) for number in range(int(first), int(last) + 1))
+
+    uncollected = [
+        entry
+        for entry in issues
+        if entry.canonical_issue is None or entry.canonical_issue.issue_number not in covered
+    ]
+    return collected + uncollected
 
 
 def _reading_list(db: Session, reading_list_id: int) -> ReadingList:

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AuthGate } from './components/AuthGate';
 import { Shell } from './components/Shell';
-import { CataloguePage } from './routes/CataloguePage';
+import { CatalogPage } from './routes/CatalogPage';
 import { ChronologyPage } from './routes/ChronologyPage';
 import { ListsPage } from './routes/ListsPage';
 import { ReadingPathDetailPage } from './routes/ReadingPathDetailPage';
@@ -27,10 +27,10 @@ export default function App() {
     <AuthGate>
       <Shell searchQuery={searchQuery} onSearchChange={setSearchQuery}>
         <Routes>
-          <Route path="/" element={<Navigate to="/catalogue" replace />} />
+          <Route path="/" element={<Navigate to="/catalog" replace />} />
           <Route
-            path="/catalogue"
-            element={<CataloguePage searchQuery={searchQuery} refreshToken={libraryRefreshToken} />}
+            path="/catalog"
+            element={<CatalogPage searchQuery={searchQuery} refreshToken={libraryRefreshToken} />}
           />
           <Route path="/chronology" element={<ChronologyPage searchQuery={searchQuery} />} />
           <Route path="/lists" element={<ListsPage />} />
@@ -43,13 +43,13 @@ export default function App() {
           <Route path="/viewer/canonical/:canonicalIssueId" element={<ViewerPage />} />
           <Route path="/viewer/reading-path/:readingPathId/entries/:entryId" element={<ViewerPage />} />
 
-          <Route path="/library" element={<Navigate to="/catalogue" replace />} />
-          <Route path="/all" element={<Navigate to="/catalogue" replace />} />
+          <Route path="/library" element={<Navigate to="/catalog" replace />} />
+          <Route path="/all" element={<Navigate to="/catalog" replace />} />
           <Route path="/all/:readingPathId" element={<LegacyCollectionRedirect />} />
-          <Route path="/reading-paths" element={<Navigate to="/catalogue" replace />} />
+          <Route path="/reading-paths" element={<Navigate to="/catalog" replace />} />
           <Route path="/reading-paths/:readingPathId" element={<LegacyCollectionRedirect />} />
           <Route path="/flight-prep" element={<Navigate to="/lists" replace />} />
-          <Route path="*" element={<Navigate to="/catalogue" replace />} />
+          <Route path="*" element={<Navigate to="/catalog" replace />} />
         </Routes>
       </Shell>
     </AuthGate>

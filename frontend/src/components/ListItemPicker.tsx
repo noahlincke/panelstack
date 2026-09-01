@@ -12,7 +12,7 @@ type ListItemPickerProps = {
   existingEntryIds: Set<string>;
 };
 
-/** Search the catalogue and add issues without leaving the list. */
+/** Search the catalog and add issues without leaving the list. */
 export function ListItemPicker({ onAdd, existingEntryIds }: ListItemPickerProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<CatalogCollection[]>([]);
@@ -66,7 +66,7 @@ export function ListItemPicker({ onAdd, existingEntryIds }: ListItemPickerProps)
         <input
           type="search"
           value={query}
-          placeholder="Search the catalogue to add issues"
+          placeholder="Search the catalog to add issues"
           spellCheck={false}
           onChange={(event) => setQuery(event.target.value)}
         />
