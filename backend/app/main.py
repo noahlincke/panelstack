@@ -630,17 +630,35 @@ def _entry_has_streamable_local_match(entry: ReadingPathEntry) -> bool:
     return _entry_streamable_local_issue(entry) is not None
 
 
-def _entry_resolved_getcomics_post_url(entry: ReadingPathEntry) -> str:
+def _entry_getcomics_post_url(entry: ReadingPathEntry) -> str | None:
+    """Resolve a source post, loosening the query for collected editions.
+
+    A trade's subtitle is the least reliable part of its name, so an exact miss
+    retries without it rather than failing the download.
+    """
     query, expected_series_title, expected_issue_number, expected_year = _reading_path_entry_download_context(entry)
-    cover = fetch_getcomics_cover(
-        query,
-        expected_series_title=expected_series_title,
-        expected_issue_number=expected_issue_number,
-        expected_year=expected_year,
+    candidates = (
+        opds.collected_edition_queries(query)
+        if entry.entry_type == "collection"
+        else [query]
     )
-    if not cover.post_url:
+    for candidate in candidates:
+        cover = fetch_getcomics_cover(
+            candidate,
+            expected_series_title=expected_series_title,
+            expected_issue_number=expected_issue_number,
+            expected_year=expected_year,
+        )
+        if cover.post_url:
+            return cover.post_url
+    return None
+
+
+def _entry_resolved_getcomics_post_url(entry: ReadingPathEntry) -> str:
+    post_url = _entry_getcomics_post_url(entry)
+    if not post_url:
         raise HTTPException(status_code=502, detail="No downloadable GetComics post was resolved for this issue.")
-    return cover.post_url
+    return post_url
 
 
 def _issue_downloadable_archive(issue: Issue) -> Archive | None:
@@ -2059,14 +2077,7 @@ def _download_entry(db: Session, reading_path_id: int, entry_id: int) -> Reading
 
 
 def _download_post_url(entry: ReadingPathEntry) -> str | None:
-    query, expected_series_title, expected_issue_number, expected_year = _reading_path_entry_download_context(entry)
-    cover = fetch_getcomics_cover(
-        query,
-        expected_series_title=expected_series_title,
-        expected_issue_number=expected_issue_number,
-        expected_year=expected_year,
-    )
-    return cover.post_url
+    return _entry_getcomics_post_url(entry)
 
 
 def _download_archive_size(post_url: str, session: requests.Session) -> int | None:

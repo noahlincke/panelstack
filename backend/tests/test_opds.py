@@ -8,8 +8,10 @@ from xml.etree import ElementTree
 
 from backend.app.auth import hash_password, verify_basic_auth
 from backend.app.services.opds import (
+    ACQUISITION_LINK_TYPE,
     ACQUISITION_REL,
     ACQUISITION_TYPE,
+    NAVIGATION_LINK_TYPE,
     NAVIGATION_TYPE,
     acquisition_entry,
     archive_media_type,
@@ -74,13 +76,13 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(root.find(f"{ATOM}title").text, "Panel Stack")
         self.assertEqual(len(root.findall(f"{ATOM}entry")), 1)
         self_link = next(l for l in root.findall(f"{ATOM}link") if l.get("rel") == "self")
-        self.assertEqual(self_link.get("type"), NAVIGATION_TYPE)
+        self.assertEqual(self_link.get("type"), NAVIGATION_LINK_TYPE)
 
     def test_a_list_entry_advertises_an_acquisition_feed(self) -> None:
         entry = navigation_entry(
             identifier="urn:test:list:1", title="Absolute Batman", href="https://example.test/opds/lists/1", kind="acquisition"
         )
-        self.assertEqual(entry.links[0].type, ACQUISITION_TYPE)
+        self.assertEqual(entry.links[0].type, ACQUISITION_LINK_TYPE)
 
     def test_an_acquisition_entry_carries_a_download_and_a_cover(self) -> None:
         document = feed(
@@ -118,6 +120,42 @@ class FeedTests(unittest.TestCase):
         )
         root = parse(document)
         self.assertEqual(root.find(f"{ATOM}title").text, "Ampersands & <angles>")
+
+
+
+class CollectedEditionQueryTests(unittest.TestCase):
+    """Trade subtitles are unreliable, so the search loosens before giving up."""
+
+    def test_the_subtitle_is_dropped_after_the_exact_title(self) -> None:
+        from backend.app.services.opds import collected_edition_queries
+
+        queries = collected_edition_queries("Absolute Batman Vol. 2 - The Hunt (TPB)")
+        self.assertEqual(queries[0], "Absolute Batman Vol. 2 - The Hunt (TPB)")
+        self.assertIn("Absolute Batman Vol. 2 (TPB)", queries)
+        self.assertIn("Absolute Batman Vol. 2", queries)
+
+    def test_a_title_without_a_volume_is_not_truncated(self) -> None:
+        from backend.app.services.opds import collected_edition_queries
+
+        queries = collected_edition_queries("Far Sector (TPB)")
+        self.assertEqual(queries, ["Far Sector (TPB)", "Far Sector"])
+
+    def test_queries_are_unique_and_ordered(self) -> None:
+        from backend.app.services.opds import collected_edition_queries
+
+        queries = collected_edition_queries("Immortal X-Men Vol. 1 (TPB)")
+        self.assertEqual(len(queries), len(set(queries)))
+        self.assertEqual(queries[0], "Immortal X-Men Vol. 1 (TPB)")
+
+
+class FeedCharsetTests(unittest.TestCase):
+    def test_feed_content_types_declare_utf8(self) -> None:
+        self.assertIn("charset=utf-8", NAVIGATION_TYPE)
+        self.assertIn("charset=utf-8", ACQUISITION_TYPE)
+
+    def test_link_types_stay_charset_free(self) -> None:
+        self.assertNotIn("charset", NAVIGATION_LINK_TYPE)
+        self.assertNotIn("charset", ACQUISITION_LINK_TYPE)
 
 
 if __name__ == "__main__":
