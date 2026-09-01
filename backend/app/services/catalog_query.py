@@ -62,6 +62,7 @@ def _apply_filters(
     start: date | None,
     end: date | None,
     search: str | None,
+    owned: bool | None = None,
 ) -> Select:
     if publisher:
         stmt = stmt.join(Publisher, Publisher.id == CatalogCollection.publisher_id).where(Publisher.slug.in_(publisher))
@@ -77,6 +78,11 @@ def _apply_filters(
         stmt = stmt.where(CatalogCollection.latest_published_on.is_not(None), CatalogCollection.latest_published_on >= start)
     if end:
         stmt = stmt.where(CatalogCollection.first_published_on.is_not(None), CatalogCollection.first_published_on <= end)
+    if owned is not None:
+        owns = CatalogCollection.id.in_(
+            select(CatalogCollectionItem.collection_id).where(CatalogCollectionItem.issue_id.is_not(None))
+        )
+        stmt = stmt.where(owns if owned else ~owns)
     if search:
         needle = f"%{search.strip().lower()}%"
         stmt = stmt.where(
@@ -129,10 +135,11 @@ def catalog_collections(
     start: date | None = None,
     end: date | None = None,
     search: str | None = None,
+    owned: bool | None = None,
     limit: int = 60,
     offset: int = 0,
 ) -> tuple[list[CatalogCollection], int]:
-    filters = dict(publisher=publisher, line=line, character=character, start=start, end=end, search=search)
+    filters = dict(publisher=publisher, line=line, character=character, start=start, end=end, search=search, owned=owned)
     total = db.scalar(_apply_filters(select(func.count(CatalogCollection.id)), **filters))
     stmt = _apply_filters(select(CatalogCollection), **filters).options(
         selectinload(CatalogCollection.publisher),
@@ -149,6 +156,21 @@ def catalog_collections(
     return list(db.scalars(stmt.offset(offset).limit(limit))), int(total or 0)
 
 
+def owned_counts(db: Session, collection_ids: Sequence[int]) -> dict[int, int]:
+    """How many issues of each collection already exist as local files."""
+    if not collection_ids:
+        return {}
+    rows = db.execute(
+        select(CatalogCollectionItem.collection_id, func.count())
+        .where(
+            CatalogCollectionItem.collection_id.in_(collection_ids),
+            CatalogCollectionItem.issue_id.is_not(None),
+        )
+        .group_by(CatalogCollectionItem.collection_id)
+    ).all()
+    return {collection_id: count for collection_id, count in rows}
+
+
 def catalog_chronology(
     db: Session,
     *,
@@ -158,6 +180,7 @@ def catalog_chronology(
     start: date | None = None,
     end: date | None = None,
     search: str | None = None,
+    owned: bool | None = None,
     limit: int = 200,
     offset: int = 0,
 ) -> tuple[list[ChronologyRow], int]:
@@ -168,7 +191,7 @@ def catalog_chronology(
         .join(CatalogCollection, CatalogCollection.id == CatalogCollectionItem.collection_id)
         .where(CanonicalIssue.published_on.is_not(None))
     )
-    filters = dict(publisher=publisher, line=line, character=character, start=None, end=None, search=search)
+    filters = dict(publisher=publisher, line=line, character=character, start=None, end=None, search=search, owned=owned)
     base = _apply_filters(base, **filters)
     if start:
         base = base.where(CanonicalIssue.published_on >= start)

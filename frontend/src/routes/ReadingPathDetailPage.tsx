@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiClient } from '../api/client';
+import { AddToListButton } from '../components/AddToListButton';
 import type { ReadingPathDetail } from '../api/types';
 
 type ReadingPathDetailPageProps = {
@@ -197,13 +198,13 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
           {path.previousCollectionId || path.nextCollectionId ? (
             <div className="catalog-collection-nav" aria-label="Volume navigation">
               {path.previousCollectionId ? (
-                <Link className="catalog-collection-nav__link" to={`/all/${path.previousCollectionId}`}>
+                <Link className="catalog-collection-nav__link" to={`/collections/${path.previousCollectionId}`}>
                   <span className="catalog-collection-nav__arrow" aria-hidden="true">←</span>
                   <span>Previous volume</span>
                 </Link>
               ) : null}
               {path.nextCollectionId ? (
-                <Link className="catalog-collection-nav__link catalog-collection-nav__link--next" to={`/all/${path.nextCollectionId}`}>
+                <Link className="catalog-collection-nav__link catalog-collection-nav__link--next" to={`/collections/${path.nextCollectionId}`}>
                   <span>Next volume</span>
                   <span className="catalog-collection-nav__arrow" aria-hidden="true">→</span>
                 </Link>
@@ -212,14 +213,24 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
           ) : null}
         </div>
         <div className="catalog-detail-head__actions">
+          <AddToListButton
+            targets={path.entries
+              .filter((entry) => !entry.matchedIssue)
+              .map((entry) => ({
+                readingPathId: path.id,
+                entryId: entry.id,
+                title: entry.canonicalIssue?.title ?? entry.label ?? `Entry ${entry.id}`,
+              }))}
+            label="Add missing to list"
+          />
           {localSeriesId ? (
             <button type="button" className="button button--stacked" onClick={() => void handleDeleteSeries()}>
               <TrashIcon />
               <span>Remove All</span>
             </button>
           ) : null}
-          <Link to="/all" className="button">
-            Back to All
+          <Link to="/catalogue" className="button">
+            Back to catalogue
           </Link>
         </div>
       </div>
@@ -233,7 +244,7 @@ export function ReadingPathDetailPage({ onLibraryMutated }: ReadingPathDetailPag
         </span>
       </div>
 
-      <div className="poster-grid poster-grid--issues" style={{ '--poster-min-width': '150px' } as CSSProperties}>
+      <div className="poster-grid poster-grid--issues">
         {path.entries.map((entry) => {
           const matchedIssue = entry.matchedIssue;
           const isRead = Boolean(entry.isRead);

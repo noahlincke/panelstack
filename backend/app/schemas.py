@@ -415,6 +415,7 @@ class CatalogCollectionSummary(APIBaseModel):
     collection_type: str
     volume_number: int | None = None
     issue_count: int
+    owned_count: int = 0
     first_published_on: date | None = None
     latest_published_on: date | None = None
     reading_path_id: int | None = None
@@ -444,18 +445,18 @@ class ChronologyResponse(APIBaseModel):
     total: int
 
 
-class FlightPrepTargetWrite(APIBaseModel):
+class DownloadTargetWrite(APIBaseModel):
     reading_path_id: int
     entry_id: int
     title: str
 
 
-class FlightPrepEstimateWrite(APIBaseModel):
-    targets: list[FlightPrepTargetWrite]
+class DownloadEstimateWrite(APIBaseModel):
+    targets: list[DownloadTargetWrite]
     destination: str | None = None
 
 
-class FlightPrepTargetRead(APIBaseModel):
+class DownloadTargetRead(APIBaseModel):
     reading_path_id: int
     entry_id: int
     title: str
@@ -471,8 +472,8 @@ class DestinationSpaceRead(APIBaseModel):
     exists: bool
 
 
-class FlightPrepEstimateResponse(APIBaseModel):
-    targets: list[FlightPrepTargetRead]
+class DownloadEstimateResponse(APIBaseModel):
+    targets: list[DownloadTargetRead]
     total_bytes: int
     resolved_count: int
     unavailable_count: int
@@ -480,12 +481,12 @@ class FlightPrepEstimateResponse(APIBaseModel):
     fits: bool
 
 
-class FlightPrepStartWrite(APIBaseModel):
-    targets: list[FlightPrepTargetWrite]
+class DownloadStartWrite(APIBaseModel):
+    targets: list[DownloadTargetWrite]
     destination: str | None = None
 
 
-class FlightPrepQueueItemRead(APIBaseModel):
+class DownloadQueueItemRead(APIBaseModel):
     reading_path_id: int
     entry_id: int
     title: str
@@ -494,12 +495,56 @@ class FlightPrepQueueItemRead(APIBaseModel):
     detail: str | None = None
 
 
-class FlightPrepQueueRead(APIBaseModel):
+class DownloadQueueRead(APIBaseModel):
     id: str
     destination: str
     status: str
-    items: list[FlightPrepQueueItemRead]
+    items: list[DownloadQueueItemRead]
     started_at: str
     finished_at: str | None = None
     completed_count: int
     total_count: int
+
+
+class ReadingListWrite(APIBaseModel):
+    name: str
+    description: str | None = None
+
+
+class ReadingListItemWrite(APIBaseModel):
+    reading_path_id: int
+    entry_id: int
+    title: str
+
+
+class ReadingListItemsWrite(APIBaseModel):
+    items: list[ReadingListItemWrite]
+
+
+class ReadingListItemRead(APIBaseModel):
+    id: int
+    reading_path_id: int
+    entry_id: int
+    title: str
+    sort_order: int
+    owned: bool = False
+    cover_url: str | None = None
+
+
+class ReadingListSummary(APIBaseModel):
+    id: int
+    name: str
+    description: str | None = None
+    item_count: int
+
+
+class ReadingListRead(APIBaseModel):
+    id: int
+    name: str
+    description: str | None = None
+    items: list[ReadingListItemRead]
+
+
+class ReadingListListResponse(APIBaseModel):
+    items: list[ReadingListSummary]
+    total: int

@@ -48,6 +48,8 @@ from .models import (
     IssueMatch,
     Publisher,
     ReadingPath,
+    ReadingList,
+    ReadingListItem,
     ReadingPathEntry,
     Series,
     StoryArc,
@@ -72,12 +74,12 @@ from .schemas import (
     ChronologyEntryRead,
     ChronologyResponse,
     DestinationSpaceRead,
-    FlightPrepEstimateResponse,
-    FlightPrepEstimateWrite,
-    FlightPrepQueueItemRead,
-    FlightPrepQueueRead,
-    FlightPrepStartWrite,
-    FlightPrepTargetRead,
+    DownloadEstimateResponse,
+    DownloadEstimateWrite,
+    DownloadQueueItemRead,
+    DownloadQueueRead,
+    DownloadStartWrite,
+    DownloadTargetRead,
     EventListResponse,
     EventRead,
     EventSummary,
@@ -97,6 +99,12 @@ from .schemas import (
     ReadingPathDownloadResponse,
     ReadingPathListResponse,
     ReadingPathRead,
+    ReadingListItemRead,
+    ReadingListItemsWrite,
+    ReadingListListResponse,
+    ReadingListRead,
+    ReadingListSummary,
+    ReadingListWrite,
     ReadingPathSummary,
     SeriesListResponse,
     SeriesRead,
@@ -123,8 +131,8 @@ from .services import (
     sync_curation_data,
     sync_mangapill_catalog,
 )
-from .services.catalog_query import catalog_chronology, catalog_collections, catalog_facets
-from .services.flight_prep import QUEUE, FlightPrepTarget, QueueItem, destination_space, resolve_targets
+from .services.catalog_query import catalog_chronology, catalog_collections, catalog_facets, owned_counts
+from .services.downloads_queue import QUEUE, DownloadTarget, QueueItem, destination_space, resolve_targets
 from .services.ingest import ComicMetadata, PageRecord, ScanResult
 from .services.stream_buffer import (
     StreamBufferTooLargeError,
@@ -1726,6 +1734,7 @@ def list_catalog_collections(
     start: date | None = Query(None),
     end: date | None = Query(None),
     search: str | None = Query(None),
+    owned: bool | None = Query(None),
     limit: int = Query(60, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ) -> CatalogCollectionListResponse:
@@ -1737,9 +1746,11 @@ def list_catalog_collections(
         start=start,
         end=end,
         search=search,
+        owned=owned,
         limit=limit,
         offset=offset,
     )
+    owned_by_collection = owned_counts(db, [collection.id for collection in collections])
     return CatalogCollectionListResponse(
         items=[
             CatalogCollectionSummary(
@@ -1751,6 +1762,7 @@ def list_catalog_collections(
                 collection_type=collection.collection_type,
                 volume_number=collection.volume_number,
                 issue_count=len(collection.items),
+                owned_count=owned_by_collection.get(collection.id, 0),
                 first_published_on=collection.first_published_on,
                 latest_published_on=collection.latest_published_on,
                 reading_path_id=collection.reading_path_id,
@@ -1771,6 +1783,7 @@ def get_catalog_chronology(
     start: date | None = Query(None),
     end: date | None = Query(None),
     search: str | None = Query(None),
+    owned: bool | None = Query(None),
     limit: int = Query(200, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ) -> ChronologyResponse:
@@ -1782,6 +1795,7 @@ def get_catalog_chronology(
         start=start,
         end=end,
         search=search,
+        owned=owned,
         limit=limit,
         offset=offset,
     )
@@ -1806,19 +1820,168 @@ def get_catalog_chronology(
     )
 
 
+def _reading_list(db: Session, reading_list_id: int) -> ReadingList:
+    reading_list = db.scalars(
+        select(ReadingList).options(selectinload(ReadingList.items)).where(ReadingList.id == reading_list_id)
+    ).first()
+    if reading_list is None:
+        raise HTTPException(status_code=404, detail=f"Reading list {reading_list_id} not found")
+    return reading_list
+
+
+def _reading_list_item_read(item: ReadingListItem, entry: ReadingPathEntry | None) -> ReadingListItemRead:
+    return ReadingListItemRead(
+        id=item.id,
+        reading_path_id=item.reading_path_id,
+        entry_id=item.reading_path_entry_id,
+        title=item.title,
+        sort_order=item.sort_order,
+        owned=_entry_has_local_match(entry) if entry is not None else False,
+        cover_url=(
+            _provider_issue_cover_url(entry.canonical_issue)
+            if entry is not None and entry.canonical_issue is not None
+            else None
+        ),
+    )
+
+
+def _reading_list_read(db: Session, reading_list: ReadingList) -> ReadingListRead:
+    entry_ids = [item.reading_path_entry_id for item in reading_list.items]
+    entries = {
+        entry.id: entry
+        for entry in db.scalars(
+            select(ReadingPathEntry)
+            .options(
+                selectinload(ReadingPathEntry.canonical_issue).selectinload(CanonicalIssue.series),
+                selectinload(ReadingPathEntry.canonical_issue)
+                .selectinload(CanonicalIssue.issue_matches)
+                .selectinload(IssueMatch.local_issue)
+                .selectinload(Issue.archives),
+                selectinload(ReadingPathEntry.issue).selectinload(Issue.archives),
+            )
+            .where(ReadingPathEntry.id.in_(entry_ids))
+        )
+    } if entry_ids else {}
+    return ReadingListRead(
+        id=reading_list.id,
+        name=reading_list.name,
+        description=reading_list.description,
+        items=[_reading_list_item_read(item, entries.get(item.reading_path_entry_id)) for item in reading_list.items],
+    )
+
+
+@app.get("/reading-lists", response_model=ReadingListListResponse)
+def list_reading_lists(db: Session = Depends(get_db)) -> ReadingListListResponse:
+    lists = db.scalars(
+        select(ReadingList).options(selectinload(ReadingList.items)).order_by(ReadingList.name.asc())
+    ).all()
+    return ReadingListListResponse(
+        items=[
+            ReadingListSummary(
+                id=reading_list.id,
+                name=reading_list.name,
+                description=reading_list.description,
+                item_count=len(reading_list.items),
+            )
+            for reading_list in lists
+        ],
+        total=len(lists),
+    )
+
+
+@app.post("/reading-lists", response_model=ReadingListRead, status_code=201)
+def create_reading_list(payload: ReadingListWrite, db: Session = Depends(get_db)) -> ReadingListRead:
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="A list name is required.")
+    if db.scalar(select(ReadingList).where(ReadingList.name == name)) is not None:
+        raise HTTPException(status_code=409, detail=f"A list named '{name}' already exists.")
+    reading_list = ReadingList(name=name, description=payload.description)
+    db.add(reading_list)
+    db.commit()
+    db.refresh(reading_list)
+    return _reading_list_read(db, reading_list)
+
+
+@app.get("/reading-lists/{reading_list_id}", response_model=ReadingListRead)
+def get_reading_list(reading_list_id: int, db: Session = Depends(get_db)) -> ReadingListRead:
+    return _reading_list_read(db, _reading_list(db, reading_list_id))
+
+
+@app.patch("/reading-lists/{reading_list_id}", response_model=ReadingListRead)
+def rename_reading_list(
+    reading_list_id: int, payload: ReadingListWrite, db: Session = Depends(get_db)
+) -> ReadingListRead:
+    reading_list = _reading_list(db, reading_list_id)
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="A list name is required.")
+    reading_list.name = name
+    reading_list.description = payload.description
+    db.commit()
+    return _reading_list_read(db, reading_list)
+
+
+@app.delete("/reading-lists/{reading_list_id}", status_code=204)
+def delete_reading_list(reading_list_id: int, db: Session = Depends(get_db)) -> Response:
+    db.delete(_reading_list(db, reading_list_id))
+    db.commit()
+    return Response(status_code=204)
+
+
+@app.post("/reading-lists/{reading_list_id}/items", response_model=ReadingListRead)
+def add_reading_list_items(
+    reading_list_id: int, payload: ReadingListItemsWrite, db: Session = Depends(get_db)
+) -> ReadingListRead:
+    reading_list = _reading_list(db, reading_list_id)
+    existing = {item.reading_path_entry_id for item in reading_list.items}
+    next_sort = max((item.sort_order for item in reading_list.items), default=-1) + 1
+    for candidate in payload.items:
+        if candidate.entry_id in existing:
+            continue
+        db.add(
+            ReadingListItem(
+                reading_list_id=reading_list.id,
+                reading_path_id=candidate.reading_path_id,
+                reading_path_entry_id=candidate.entry_id,
+                title=candidate.title,
+                sort_order=next_sort,
+            )
+        )
+        existing.add(candidate.entry_id)
+        next_sort += 1
+    db.commit()
+    db.refresh(reading_list)
+    return _reading_list_read(db, reading_list)
+
+
+@app.delete("/reading-lists/{reading_list_id}/items/{item_id}", response_model=ReadingListRead)
+def remove_reading_list_item(
+    reading_list_id: int, item_id: int, db: Session = Depends(get_db)
+) -> ReadingListRead:
+    reading_list = _reading_list(db, reading_list_id)
+    item = next((candidate for candidate in reading_list.items if candidate.id == item_id), None)
+    if item is None:
+        raise HTTPException(status_code=404, detail=f"Reading list item {item_id} not found")
+    db.delete(item)
+    db.commit()
+    db.refresh(reading_list)
+    return _reading_list_read(db, reading_list)
+
+
 def _require_local_deployment() -> None:
     if _hosted_deployment():
         raise HTTPException(
             status_code=410,
-            detail="Flight prep downloads run on your own machine. The hosted library is browse and preview only.",
+            detail="Downloads run on your own machine. The hosted library is browse and preview only.",
         )
 
 
-def _flight_prep_destination(destination: str | None) -> Path:
+def _download_destination(destination: str | None) -> Path:
     return _normalize_download_root(destination) if destination else _downloads_root()
 
 
-def _flight_prep_entry(db: Session, reading_path_id: int, entry_id: int) -> ReadingPathEntry:
+def _download_entry(db: Session, reading_path_id: int, entry_id: int) -> ReadingPathEntry:
     entry = db.scalars(
         select(ReadingPathEntry)
         .options(
@@ -1832,7 +1995,7 @@ def _flight_prep_entry(db: Session, reading_path_id: int, entry_id: int) -> Read
     return entry
 
 
-def _flight_prep_post_url(entry: ReadingPathEntry) -> str | None:
+def _download_post_url(entry: ReadingPathEntry) -> str | None:
     query, expected_series_title, expected_issue_number, expected_year = _reading_path_entry_download_context(entry)
     cover = fetch_getcomics_cover(
         query,
@@ -1843,7 +2006,7 @@ def _flight_prep_post_url(entry: ReadingPathEntry) -> str | None:
     return cover.post_url
 
 
-def _flight_prep_archive_size(post_url: str) -> int | None:
+def _download_archive_size(post_url: str) -> int | None:
     """Ask the mirror for the real archive size without downloading it."""
     session = comics.build_session()
     try:
@@ -1858,32 +2021,32 @@ def _flight_prep_archive_size(post_url: str) -> int | None:
         session.close()
 
 
-@app.post("/flight-prep/estimate", response_model=FlightPrepEstimateResponse)
-def estimate_flight_prep(payload: FlightPrepEstimateWrite) -> FlightPrepEstimateResponse:
+@app.post("/downloads/estimate", response_model=DownloadEstimateResponse)
+def estimate_downloads(payload: DownloadEstimateWrite) -> DownloadEstimateResponse:
     _require_local_deployment()
-    destination = _flight_prep_destination(payload.destination)
+    destination = _download_destination(payload.destination)
 
-    def resolve(target: FlightPrepTarget) -> tuple[int | None, str | None]:
+    def resolve(target: DownloadTarget) -> tuple[int | None, str | None]:
         # Sizes resolve on a worker pool, and a Session is not thread safe.
         with SessionLocal() as session:
-            entry = _flight_prep_entry(session, target.reading_path_id, target.entry_id)
-            post_url = _flight_prep_post_url(entry)
+            entry = _download_entry(session, target.reading_path_id, target.entry_id)
+            post_url = _download_post_url(entry)
         if not post_url:
             return None, None
-        return _flight_prep_archive_size(post_url), post_url
+        return _download_archive_size(post_url), post_url
 
     resolved = resolve_targets(
         [
-            FlightPrepTarget(reading_path_id=t.reading_path_id, entry_id=t.entry_id, title=t.title)
+            DownloadTarget(reading_path_id=t.reading_path_id, entry_id=t.entry_id, title=t.title)
             for t in payload.targets
         ],
         resolve,
     )
     total_bytes = sum(item.size_bytes or 0 for item in resolved)
     space = destination_space(destination)
-    return FlightPrepEstimateResponse(
+    return DownloadEstimateResponse(
         targets=[
-            FlightPrepTargetRead(
+            DownloadTargetRead(
                 reading_path_id=item.reading_path_id,
                 entry_id=item.entry_id,
                 title=item.title,
@@ -1906,13 +2069,13 @@ def estimate_flight_prep(payload: FlightPrepEstimateWrite) -> FlightPrepEstimate
     )
 
 
-def _flight_prep_snapshot_response(snapshot) -> FlightPrepQueueRead:
-    return FlightPrepQueueRead(
+def _download_snapshot_response(snapshot) -> DownloadQueueRead:
+    return DownloadQueueRead(
         id=snapshot.id,
         destination=snapshot.destination,
         status=snapshot.status,
         items=[
-            FlightPrepQueueItemRead(
+            DownloadQueueItemRead(
                 reading_path_id=item.reading_path_id,
                 entry_id=item.entry_id,
                 title=item.title,
@@ -1929,20 +2092,20 @@ def _flight_prep_snapshot_response(snapshot) -> FlightPrepQueueRead:
     )
 
 
-@app.post("/flight-prep/queue", response_model=FlightPrepQueueRead)
-def start_flight_prep(payload: FlightPrepStartWrite) -> FlightPrepQueueRead:
+@app.post("/downloads/queue", response_model=DownloadQueueRead)
+def start_downloads(payload: DownloadStartWrite) -> DownloadQueueRead:
     _require_local_deployment()
     if not payload.targets:
         raise HTTPException(status_code=422, detail="Select at least one issue to download.")
-    destination = _flight_prep_destination(payload.destination)
+    destination = _download_destination(payload.destination)
     destination.mkdir(parents=True, exist_ok=True)
 
     def run(item: QueueItem) -> str | None:
         with SessionLocal() as session:
-            entry = _flight_prep_entry(session, item.reading_path_id, item.entry_id)
+            entry = _download_entry(session, item.reading_path_id, item.entry_id)
             if _entry_has_local_match(entry):
                 return "Already in the library."
-            post_url = _flight_prep_post_url(entry)
+            post_url = _download_post_url(entry)
             if not post_url:
                 raise RuntimeError("No downloadable source was found.")
             imported_paths, _ = _download_post_to_library(session, post_url, destination=destination)
@@ -1965,22 +2128,22 @@ def start_flight_prep(payload: FlightPrepStartWrite) -> FlightPrepQueueRead:
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
-    return _flight_prep_snapshot_response(snapshot)
+    return _download_snapshot_response(snapshot)
 
 
-@app.get("/flight-prep/queue", response_model=FlightPrepQueueRead | None)
-def get_flight_prep_queue() -> FlightPrepQueueRead | None:
+@app.get("/downloads/queue", response_model=DownloadQueueRead | None)
+def get_download_queue() -> DownloadQueueRead | None:
     _require_local_deployment()
     snapshot = QUEUE.snapshot()
-    return _flight_prep_snapshot_response(snapshot) if snapshot else None
+    return _download_snapshot_response(snapshot) if snapshot else None
 
 
-@app.post("/flight-prep/queue/cancel", response_model=FlightPrepQueueRead | None)
-def cancel_flight_prep() -> FlightPrepQueueRead | None:
+@app.post("/downloads/queue/cancel", response_model=DownloadQueueRead | None)
+def cancel_downloads() -> DownloadQueueRead | None:
     _require_local_deployment()
     QUEUE.cancel()
     snapshot = QUEUE.snapshot()
-    return _flight_prep_snapshot_response(snapshot) if snapshot else None
+    return _download_snapshot_response(snapshot) if snapshot else None
 
 
 @app.get("/publishers", response_model=PublisherListResponse)

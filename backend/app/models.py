@@ -611,6 +611,46 @@ class CanonicalSeriesAlias(Base, TimestampMixin):
     canonical_series: Mapped["CanonicalSeries"] = relationship(back_populates="aliases")
 
 
+class ReadingList(Base, TimestampMixin):
+    """A user-made list of issues to read or download. Curation, not continuity."""
+
+    __tablename__ = "reading_lists"
+    __table_args__ = (UniqueConstraint("name", name="uq_reading_list_name"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    items: Mapped[list["ReadingListItem"]] = relationship(
+        back_populates="reading_list",
+        cascade="all, delete-orphan",
+        order_by="ReadingListItem.sort_order",
+    )
+
+
+class ReadingListItem(Base, TimestampMixin):
+    __tablename__ = "reading_list_items"
+    __table_args__ = (
+        UniqueConstraint("reading_list_id", "reading_path_entry_id", name="uq_reading_list_item_entry"),
+        Index("ix_reading_list_items_list_sort", "reading_list_id", "sort_order"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    reading_list_id: Mapped[int] = mapped_column(
+        ForeignKey("reading_lists.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    reading_path_id: Mapped[int] = mapped_column(
+        ForeignKey("reading_paths.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    reading_path_entry_id: Mapped[int] = mapped_column(
+        ForeignKey("reading_path_entries.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    title: Mapped[str] = mapped_column(String(512), nullable=False)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    reading_list: Mapped["ReadingList"] = relationship(back_populates="items")
+
+
 class UserIssueState(Base, TimestampMixin):
     __tablename__ = "user_issue_states"
     __table_args__ = (

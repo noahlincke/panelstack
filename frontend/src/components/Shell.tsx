@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { NavLink, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { SettingsIcon } from './SettingsIcon';
+import { TopbarSearch } from './TopbarSearch';
 
 type ShellProps = {
   children: ReactNode;
@@ -28,20 +29,23 @@ export function useShellSettingsAction(action: ShellSettingsAction | null) {
 }
 
 const navItems = [
-  { to: '/library', label: 'My Library', icon: 'books' as const },
-  { to: '/all', label: 'All', icon: 'cart' as const },
   { to: '/catalogue', label: 'Catalogue', icon: 'catalogue' as const },
   { to: '/chronology', label: 'Chronology', icon: 'chronology' as const },
-  { to: '/flight-prep', label: 'Flight prep', icon: 'flight' as const },
+  { to: '/lists', label: 'Lists', icon: 'lists' as const },
 ];
 
-function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalogue' | 'chronology' | 'flight' }) {
-  if (kind === 'flight') {
+function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalogue' | 'chronology' | 'lists' }) {
+  if (kind === 'lists') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
+        <rect x="3.6" y="5" width="3.4" height="3.4" rx="1" fill="currentColor" />
+        <rect x="3.6" y="10.3" width="3.4" height="3.4" rx="1" fill="currentColor" opacity="0.72" />
+        <rect x="3.6" y="15.6" width="3.4" height="3.4" rx="1" fill="currentColor" opacity="0.72" />
         <path
-          d="M11.2 3.4a1.3 1.3 0 0 1 2.5 0l.6 5.4 5.5 2.9a1 1 0 0 1 .5.9v1a.5.5 0 0 1-.65.48L13.9 12.4l-.5 4.2 1.9 1.5a.7.7 0 0 1 .26.55v.7a.4.4 0 0 1-.52.38l-2.6-.76-2.6.76a.4.4 0 0 1-.52-.38v-.7a.7.7 0 0 1 .26-.55l1.9-1.5-.5-4.2-5.75 1.68A.5.5 0 0 1 4.6 13.6v-1a1 1 0 0 1 .5-.9l5.5-2.9z"
-          fill="currentColor"
+          d="M9.8 6.7h10.6M9.8 12h10.6M9.8 17.3h7.4"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
         />
       </svg>
     );
@@ -119,7 +123,6 @@ export function Shell({ children, searchQuery, onSearchChange }: ShellProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [settingsAction, setSettingsAction] = useState<ShellSettingsAction | null>(null);
   const hideTimerRef = useRef<number | null>(null);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const registerSettingsAction = useCallback((action: ShellSettingsAction | null) => {
     setSettingsAction(action);
   }, []);
@@ -148,32 +151,6 @@ export function Shell({ children, searchQuery, onSearchChange }: ShellProps) {
     setIsTopbarVisible(true);
     scheduleTopbarHide();
   }
-
-  useEffect(() => {
-    if (!isSearchOpen) {
-      return;
-    }
-    searchInputRef.current?.focus();
-  }, [isSearchOpen]);
-
-  useEffect(() => {
-    if (!isSearchOpen) {
-      return;
-    }
-
-    function handlePointerDown(event: PointerEvent) {
-      const target = event.target as Node | null;
-      const searchContainer = searchInputRef.current?.closest('.topbar-search');
-      if (searchContainer && target && !searchContainer.contains(target)) {
-        setIsSearchOpen(false);
-      }
-    }
-
-    window.addEventListener('pointerdown', handlePointerDown);
-    return () => {
-      window.removeEventListener('pointerdown', handlePointerDown);
-    };
-  }, [isSearchOpen]);
 
   useEffect(() => {
     if (!isViewerRoute) {
@@ -235,7 +212,10 @@ export function Shell({ children, searchQuery, onSearchChange }: ShellProps) {
             }
           }}
         >
-          <nav className="topbar__nav topbar__nav--minimal" aria-label="Primary">
+          <nav
+            className={`topbar__nav topbar__nav--minimal ${isSearchOpen ? 'topbar__nav--searching' : ''}`}
+            aria-label="Primary"
+          >
             <div className="topbar__spacer" aria-hidden="true" />
             <div className="topbar__center">
               {navItems.map((item) => (
@@ -248,33 +228,13 @@ export function Shell({ children, searchQuery, onSearchChange }: ShellProps) {
                   <span className="sr-only">{item.label}</span>
                 </NavLink>
               ))}
-              <div className={`topbar-search ${isSearchOpen ? 'topbar-search--open' : ''}`}>
-                <button
-                  type="button"
-                  className={`topbar-search__trigger nav-link nav-link--icon ${isSearchOpen || searchQuery ? 'nav-link--active' : ''}`}
-                  aria-label="Search collections"
-                  aria-expanded={isSearchOpen}
-                  onClick={() => setIsSearchOpen((value) => !value)}
-                >
-                  <TopbarIcon kind="search" />
-                  <span className="sr-only">Search</span>
-                </button>
-                <div className="topbar-search__panel" aria-hidden={!isSearchOpen}>
-                  <span className="topbar-search__panel-icon" aria-hidden="true">
-                    <TopbarIcon kind="search" />
-                  </span>
-                  <input
-                    ref={searchInputRef}
-                    type="search"
-                    value={searchQuery}
-                    onChange={(event) => onSearchChange(event.target.value)}
-                    placeholder="Search collections"
-                    aria-label="Search collections"
-                    spellCheck={false}
-                    tabIndex={isSearchOpen ? 0 : -1}
-                  />
-                </div>
-              </div>
+              <TopbarSearch
+                query={searchQuery}
+                onQueryChange={onSearchChange}
+                isOpen={isSearchOpen}
+                onOpenChange={setIsSearchOpen}
+                icon={<TopbarIcon kind="search" />}
+              />
             </div>
             <div className="topbar__actions">
               {settingsAction ? (

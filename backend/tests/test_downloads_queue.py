@@ -6,9 +6,9 @@ import time
 import unittest
 from pathlib import Path
 
-from backend.app.services.flight_prep import (
-    FlightPrepQueue,
-    FlightPrepTarget,
+from backend.app.services.downloads_queue import (
+    DownloadQueue,
+    DownloadTarget,
     QueueItem,
     destination_space,
     resolve_targets,
@@ -42,8 +42,8 @@ class DestinationSpaceTests(unittest.TestCase):
 
 
 class ResolveTargetsTests(unittest.TestCase):
-    def _target(self, entry_id: int) -> FlightPrepTarget:
-        return FlightPrepTarget(reading_path_id=1, entry_id=entry_id, title=f"Issue {entry_id}")
+    def _target(self, entry_id: int) -> DownloadTarget:
+        return DownloadTarget(reading_path_id=1, entry_id=entry_id, title=f"Issue {entry_id}")
 
     def test_keeps_caller_order_and_records_sizes(self) -> None:
         targets = [self._target(index) for index in range(6)]
@@ -53,7 +53,7 @@ class ResolveTargetsTests(unittest.TestCase):
         self.assertTrue(all(item.status == "ready" for item in resolved))
 
     def test_a_failing_source_does_not_fail_the_batch(self) -> None:
-        def resolver(target: FlightPrepTarget) -> tuple[int | None, str | None]:
+        def resolver(target: DownloadTarget) -> tuple[int | None, str | None]:
             if target.entry_id == 1:
                 raise RuntimeError("mirror refused")
             return 10, "https://example.test/ok"
@@ -67,7 +67,7 @@ class ResolveTargetsTests(unittest.TestCase):
         self.assertEqual(resolved[0].status, "unavailable")
 
 
-class FlightPrepQueueTests(unittest.TestCase):
+class DownloadQueueTests(unittest.TestCase):
     def _items(self, count: int) -> list[QueueItem]:
         return [
             QueueItem(reading_path_id=1, entry_id=index, title=f"Issue {index}", size_bytes=100)
@@ -75,7 +75,7 @@ class FlightPrepQueueTests(unittest.TestCase):
         ]
 
     def test_downloads_run_one_at_a_time(self) -> None:
-        queue = FlightPrepQueue()
+        queue = DownloadQueue()
         concurrent = []
         active = threading.Semaphore(1)
 
@@ -91,7 +91,7 @@ class FlightPrepQueueTests(unittest.TestCase):
         self.assertEqual([item.status for item in queue.snapshot().items], ["done"] * 4)
 
     def test_a_failed_item_does_not_stop_the_queue(self) -> None:
-        queue = FlightPrepQueue()
+        queue = DownloadQueue()
 
         def runner(item: QueueItem) -> None:
             if item.entry_id == 1:
@@ -106,7 +106,7 @@ class FlightPrepQueueTests(unittest.TestCase):
         self.assertEqual(snapshot.completed_count, 3)
 
     def test_cancel_marks_the_remaining_items_skipped(self) -> None:
-        queue = FlightPrepQueue()
+        queue = DownloadQueue()
         started = threading.Event()
 
         def runner(item: QueueItem) -> None:
@@ -123,7 +123,7 @@ class FlightPrepQueueTests(unittest.TestCase):
         self.assertNotIn("pending", statuses)
 
     def test_a_second_queue_is_refused_while_one_runs(self) -> None:
-        queue = FlightPrepQueue()
+        queue = DownloadQueue()
         release = threading.Event()
         queue.start(destination=Path("/tmp"), items=self._items(1), runner=lambda item: release.wait(timeout=2))
         wait_until(queue.is_running)
@@ -133,7 +133,7 @@ class FlightPrepQueueTests(unittest.TestCase):
         wait_until(lambda: queue.snapshot().status == "complete")
 
     def test_no_queue_reports_no_snapshot(self) -> None:
-        self.assertIsNone(FlightPrepQueue().snapshot())
+        self.assertIsNone(DownloadQueue().snapshot())
 
 
 if __name__ == "__main__":
