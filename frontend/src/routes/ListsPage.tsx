@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiClient } from '../api/client';
 import { CoverImage } from '../components/CoverImage';
+import { ListItemPicker } from '../components/ListItemPicker';
 import { formatBytes } from '../lib/formatBytes';
 import type {
   AppSettings,
@@ -118,6 +119,17 @@ export function ListsPage() {
       .catch((cause: Error) => setError(cause.message));
   };
 
+  const addTargets = (newTargets: DownloadTarget[]) => {
+    if (!openList) return;
+    apiClient
+      .addReadingListItems(openList.id, newTargets)
+      .then((list) => {
+        setOpenList(list);
+        void refreshLists();
+      })
+      .catch((cause: Error) => setError(cause.message));
+  };
+
   const removeItem = (itemId: string) => {
     if (!openList) return;
     apiClient
@@ -230,10 +242,13 @@ export function ListsPage() {
                 ))}
               </ul>
               {openList.items.length === 0 ? (
-                <p className="view__empty">
-                  This list is empty. Open a collection from the catalogue and use “Add to list”.
-                </p>
+                <p className="view__empty">Nothing here yet. Search below to add issues.</p>
               ) : null}
+
+              <ListItemPicker
+                onAdd={addTargets}
+                existingEntryIds={new Set(openList.items.map((item) => item.entryId))}
+              />
             </>
           ) : (
             <p className="view__empty">Pick a list to see what is in it.</p>

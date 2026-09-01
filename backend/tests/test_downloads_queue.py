@@ -47,7 +47,7 @@ class ResolveTargetsTests(unittest.TestCase):
 
     def test_keeps_caller_order_and_records_sizes(self) -> None:
         targets = [self._target(index) for index in range(6)]
-        resolved = resolve_targets(targets, lambda t: (t.entry_id * 1000, f"https://example.test/{t.entry_id}"))
+        resolved = resolve_targets(targets, lambda t: (t.entry_id * 1000, f"https://example.test/{t.entry_id}"), delay_seconds=0)
         self.assertEqual([item.entry_id for item in resolved], list(range(6)))
         self.assertEqual([item.size_bytes for item in resolved], [index * 1000 for index in range(6)])
         self.assertTrue(all(item.status == "ready" for item in resolved))
@@ -58,12 +58,12 @@ class ResolveTargetsTests(unittest.TestCase):
                 raise RuntimeError("mirror refused")
             return 10, "https://example.test/ok"
 
-        resolved = resolve_targets([self._target(0), self._target(1), self._target(2)], resolver)
+        resolved = resolve_targets([self._target(0), self._target(1), self._target(2)], resolver, delay_seconds=0)
         self.assertEqual([item.status for item in resolved], ["ready", "unavailable", "ready"])
         self.assertEqual(resolved[1].detail, "mirror refused")
 
     def test_a_target_without_a_source_is_unavailable(self) -> None:
-        resolved = resolve_targets([self._target(0)], lambda t: (None, None))
+        resolved = resolve_targets([self._target(0)], lambda t: (None, None), delay_seconds=0)
         self.assertEqual(resolved[0].status, "unavailable")
 
 
