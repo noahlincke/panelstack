@@ -77,7 +77,9 @@ def main() -> int:
                     expected_year=year,
                 )
             except Exception as exc:  # noqa: BLE001 - one bad cover must not stop the run
-                print(f"  {reading_path.slug}: {exc}")
+                # Without this the failed statement poisons every later commit.
+                db.rollback()
+                print(f"  {reading_path.slug}: {str(exc).splitlines()[0]}")
             else:
                 db.commit()
                 if _reading_path_ready_cover_url(reading_path):

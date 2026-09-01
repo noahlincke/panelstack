@@ -370,3 +370,29 @@ class CoverAssetTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CoverAssetCreationTests(unittest.TestCase):
+    """A brand new collection has no asset row yet, and query is NOT NULL."""
+
+    def test_a_new_asset_carries_its_query_before_it_is_flushed(self) -> None:
+        from sqlalchemy import create_engine, select
+        from sqlalchemy.orm import sessionmaker
+
+        from backend.app.services.covers import GetComicsCoverResult, ensure_reading_path_cover_asset
+
+        engine = create_engine("sqlite://", future=True)
+        Base.metadata.create_all(engine)
+        db = sessionmaker(bind=engine, future=True)()
+        reading_path = ReadingPath(slug="new-run-vol-1", title="New Run", status="published")
+        db.add(reading_path)
+        db.commit()
+
+        with patch("backend.app.services.covers.fetch_getcomics_cover") as fetch:
+            fetch.return_value = GetComicsCoverResult(query="New Run #1", image_url=None, post_url=None, post_title=None)
+            ensure_reading_path_cover_asset(db, reading_path_id=reading_path.id, query="New Run #1")
+
+        asset = db.scalar(select(ReadingPathCoverAsset).where(ReadingPathCoverAsset.reading_path_id == reading_path.id))
+        self.assertIsNotNone(asset)
+        self.assertEqual(asset.query, "New Run #1")
+        db.close()
