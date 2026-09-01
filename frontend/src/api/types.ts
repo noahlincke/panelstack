@@ -190,3 +190,54 @@ export type AppSettings = {
 export type OpenFolderResult = {
   path: string;
 };
+
+export type CatalogFacet = {
+  value: string;
+  label: string;
+  count: number;
+};
+
+export type CatalogFacets = {
+  publishers: CatalogFacet[];
+  lines: CatalogFacet[];
+  characters: CatalogFacet[];
+  minYear?: number;
+  maxYear?: number;
+};
+
+export type CatalogFilterState = {
+  publisher?: string[];
+  line?: string;
+  character?: string;
+  start?: string;
+  end?: string;
+  search?: string;
+};
+
+export type CatalogCollection = {
+  id: string;
+  slug: string;
+  title: string;
+  publisher?: string;
+  line: string;
+  collectionType: string;
+  volumeNumber?: number;
+  issueCount: number;
+  firstPublishedOn?: string;
+  latestPublishedOn?: string;
+  readingPathId?: string;
+  coverUrl?: string;
+};
+
+export type ChronologyEntry = {
+  canonicalIssueId: string;
+  title: string;
+  issueNumber: string;
+  publishedOn: string;
+  publisher?: string;
+  line: string;
+  collectionId: string;
+  collectionTitle: string;
+  readingPathId?: string;
+  coverUrl?: string;
+};

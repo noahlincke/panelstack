@@ -390,3 +390,55 @@ class IngestImportResponse(APIBaseModel):
     issues_updated: int
     archives_created: int
     archives_updated: int
+
+
+class CatalogFacetRead(APIBaseModel):
+    value: str
+    label: str
+    count: int
+
+
+class CatalogFacetsResponse(APIBaseModel):
+    publishers: list[CatalogFacetRead]
+    lines: list[CatalogFacetRead]
+    characters: list[CatalogFacetRead]
+    min_year: int | None = None
+    max_year: int | None = None
+
+
+class CatalogCollectionSummary(APIBaseModel):
+    id: int
+    slug: str
+    title: str
+    publisher: str | None = None
+    line: str
+    collection_type: str
+    volume_number: int | None = None
+    issue_count: int
+    first_published_on: date | None = None
+    latest_published_on: date | None = None
+    reading_path_id: int | None = None
+    cover_url: str | None = None
+
+
+class CatalogCollectionListResponse(APIBaseModel):
+    items: list[CatalogCollectionSummary]
+    total: int
+
+
+class ChronologyEntryRead(APIBaseModel):
+    canonical_issue_id: int
+    title: str
+    issue_number: str
+    published_on: date
+    publisher: str | None = None
+    line: str
+    collection_id: int
+    collection_title: str
+    reading_path_id: int | None = None
+    cover_url: str | None = None
+
+
+class ChronologyResponse(APIBaseModel):
+    items: list[ChronologyEntryRead]
+    total: int

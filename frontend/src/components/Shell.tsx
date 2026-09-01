@@ -30,9 +30,33 @@ export function useShellSettingsAction(action: ShellSettingsAction | null) {
 const navItems = [
   { to: '/library', label: 'My Library', icon: 'books' as const },
   { to: '/all', label: 'All', icon: 'cart' as const },
+  { to: '/catalogue', label: 'Catalogue', icon: 'catalogue' as const },
+  { to: '/chronology', label: 'Chronology', icon: 'chronology' as const },
 ];
 
-function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' }) {
+function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalogue' | 'chronology' }) {
+  if (kind === 'catalogue') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
+        <rect x="4" y="4.5" width="6.6" height="6.6" rx="1.4" fill="currentColor" />
+        <rect x="13.4" y="4.5" width="6.6" height="6.6" rx="1.4" fill="currentColor" opacity="0.72" />
+        <rect x="4" y="12.9" width="6.6" height="6.6" rx="1.4" fill="currentColor" opacity="0.72" />
+        <rect x="13.4" y="12.9" width="6.6" height="6.6" rx="1.4" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (kind === 'chronology') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
+        <path d="M6 4.5v15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="6" cy="8" r="2.1" fill="currentColor" />
+        <circle cx="6" cy="15.4" r="2.1" fill="currentColor" opacity="0.72" />
+        <path d="M10.6 8h8.2M10.6 15.4h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
   if (kind === 'books') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
