@@ -207,6 +207,7 @@ export type CatalogFacets = {
 
 export type CatalogFilterState = {
   publisher?: string[];
+  owned?: boolean;
   line?: string;
   character?: string;
   start?: string;
@@ -223,6 +224,7 @@ export type CatalogCollection = {
   collectionType: string;
   volumeNumber?: number;
   issueCount: number;
+  ownedCount: number;
   firstPublishedOn?: string;
   latestPublishedOn?: string;
   readingPathId?: string;
@@ -242,13 +244,13 @@ export type ChronologyEntry = {
   coverUrl?: string;
 };
 
-export type FlightPrepTarget = {
+export type DownloadTarget = {
   readingPathId: string;
   entryId: string;
   title: string;
 };
 
-export type FlightPrepEstimateItem = FlightPrepTarget & {
+export type DownloadEstimateItem = DownloadTarget & {
   sizeBytes?: number;
   status: string;
   detail?: string;
@@ -261,8 +263,8 @@ export type DestinationSpace = {
   exists: boolean;
 };
 
-export type FlightPrepEstimate = {
-  targets: FlightPrepEstimateItem[];
+export type DownloadEstimate = {
+  targets: DownloadEstimateItem[];
   totalBytes: number;
   resolvedCount: number;
   unavailableCount: number;
@@ -270,19 +272,43 @@ export type FlightPrepEstimate = {
   fits: boolean;
 };
 
-export type FlightPrepQueueItem = FlightPrepTarget & {
+export type DownloadQueueItem = DownloadTarget & {
   sizeBytes?: number;
   status: string;
   detail?: string;
 };
 
-export type FlightPrepQueue = {
+export type DownloadQueue = {
   id: string;
   destination: string;
   status: string;
-  items: FlightPrepQueueItem[];
+  items: DownloadQueueItem[];
   startedAt: string;
   finishedAt?: string;
   completedCount: number;
   totalCount: number;
+};
+
+export type ReadingListSummary = {
+  id: string;
+  name: string;
+  description?: string;
+  itemCount: number;
+};
+
+export type ReadingListItem = {
+  id: string;
+  readingPathId: string;
+  entryId: string;
+  title: string;
+  sortOrder: number;
+  owned: boolean;
+  coverUrl?: string;
+};
+
+export type ReadingList = {
+  id: string;
+  name: string;
+  description?: string;
+  items: ReadingListItem[];
 };

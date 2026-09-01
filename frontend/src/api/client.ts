@@ -14,9 +14,11 @@ import type {
   CatalogFilterState,
   ChronologyEntry,
   DestinationSpace,
-  FlightPrepEstimate,
-  FlightPrepQueue,
-  FlightPrepTarget,
+  DownloadEstimate,
+  DownloadQueue,
+  DownloadTarget,
+  ReadingList,
+  ReadingListSummary,
   EventDetail,
   EventSummary,
   ImportResult,
@@ -570,6 +572,8 @@ function catalogQuery(filters: CatalogFilterState, extra: Record<string, string>
   Object.entries({ ...filters, ...extra }).forEach(([key, value]) => {
     if (Array.isArray(value)) {
       value.forEach((item) => params.append(key, item));
+    } else if (typeof value === 'boolean') {
+      params.set(key, String(value));
     } else if (value) {
       params.set(key, value);
     }
@@ -579,7 +583,7 @@ function catalogQuery(filters: CatalogFilterState, extra: Record<string, string>
 }
 
 
-type BackendFlightPrepItem = {
+type BackendDownloadItem = {
   reading_path_id: number;
   entry_id: number;
   title: string;
@@ -588,18 +592,18 @@ type BackendFlightPrepItem = {
   detail: string | null;
 };
 
-type BackendFlightPrepQueue = {
+type BackendDownloadQueue = {
   id: string;
   destination: string;
   status: string;
-  items: BackendFlightPrepItem[];
+  items: BackendDownloadItem[];
   started_at: string;
   finished_at: string | null;
   completed_count: number;
   total_count: number;
 };
 
-function flightPrepItem(item: BackendFlightPrepItem) {
+function downloadItem(item: BackendDownloadItem) {
   return {
     readingPathId: String(item.reading_path_id),
     entryId: String(item.entry_id),
@@ -610,12 +614,12 @@ function flightPrepItem(item: BackendFlightPrepItem) {
   };
 }
 
-function flightPrepQueue(payload: BackendFlightPrepQueue): FlightPrepQueue {
+function downloadQueue(payload: BackendDownloadQueue): DownloadQueue {
   return {
     id: payload.id,
     destination: payload.destination,
     status: payload.status,
-    items: payload.items.map(flightPrepItem),
+    items: payload.items.map(downloadItem),
     startedAt: payload.started_at,
     finishedAt: payload.finished_at ?? undefined,
     completedCount: payload.completed_count,
@@ -623,7 +627,7 @@ function flightPrepQueue(payload: BackendFlightPrepQueue): FlightPrepQueue {
   };
 }
 
-function flightPrepBody(targets: FlightPrepTarget[], destination?: string) {
+function downloadBody(targets: DownloadTarget[], destination?: string) {
   return JSON.stringify({
     destination: destination || null,
     targets: targets.map((target) => ({
@@ -634,19 +638,105 @@ function flightPrepBody(targets: FlightPrepTarget[], destination?: string) {
   });
 }
 
+
+type BackendReadingList = {
+  id: number;
+  name: string;
+  description: string | null;
+  items: {
+    id: number;
+    reading_path_id: number;
+    entry_id: number;
+    title: string;
+    sort_order: number;
+    owned: boolean;
+    cover_url: string | null;
+  }[];
+};
+
+function readingList(payload: BackendReadingList): ReadingList {
+  return {
+    id: String(payload.id),
+    name: payload.name,
+    description: payload.description ?? undefined,
+    items: payload.items.map((item) => ({
+      id: String(item.id),
+      readingPathId: String(item.reading_path_id),
+      entryId: String(item.entry_id),
+      title: item.title,
+      sortOrder: item.sort_order,
+      owned: item.owned,
+      coverUrl: item.cover_url ? resolveApiUrl(item.cover_url) : undefined,
+    })),
+  };
+}
+
 export const apiClient = {
-  async estimateFlightPrep(targets: FlightPrepTarget[], destination?: string): Promise<FlightPrepEstimate> {
+  async listReadingLists(): Promise<ReadingListSummary[]> {
     const payload = await fetchJson<{
-      targets: BackendFlightPrepItem[];
+      items: { id: number; name: string; description: string | null; item_count: number }[];
+    }>('/reading-lists');
+    return payload.items.map((item) => ({
+      id: String(item.id),
+      name: item.name,
+      description: item.description ?? undefined,
+      itemCount: item.item_count,
+    }));
+  },
+
+  async createReadingList(name: string): Promise<ReadingList> {
+    return readingList(
+      await fetchJson<BackendReadingList>('/reading-lists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      }),
+    );
+  },
+
+  async getReadingList(id: string): Promise<ReadingList> {
+    return readingList(await fetchJson<BackendReadingList>(`/reading-lists/${id}`));
+  },
+
+  async deleteReadingList(id: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/reading-lists/${id}`, { method: 'DELETE', credentials: 'include' });
+  },
+
+  async addReadingListItems(id: string, items: DownloadTarget[]): Promise<ReadingList> {
+    return readingList(
+      await fetchJson<BackendReadingList>(`/reading-lists/${id}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            reading_path_id: Number(item.readingPathId),
+            entry_id: Number(item.entryId),
+            title: item.title,
+          })),
+        }),
+      }),
+    );
+  },
+
+  async removeReadingListItem(id: string, itemId: string): Promise<ReadingList> {
+    return readingList(
+      await fetchJson<BackendReadingList>(`/reading-lists/${id}/items/${itemId}`, { method: 'DELETE' }),
+    );
+  },
+
+
+  async estimateDownloads(targets: DownloadTarget[], destination?: string): Promise<DownloadEstimate> {
+    const payload = await fetchJson<{
+      targets: BackendDownloadItem[];
       total_bytes: number;
       resolved_count: number;
       unavailable_count: number;
       destination: { path: string; total_bytes: number; free_bytes: number; exists: boolean };
       fits: boolean;
-    }>('/flight-prep/estimate', {
+    }>('/downloads/estimate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: flightPrepBody(targets, destination),
+      body: downloadBody(targets, destination),
     });
     const space: DestinationSpace = {
       path: payload.destination.path,
@@ -655,7 +745,7 @@ export const apiClient = {
       exists: payload.destination.exists,
     };
     return {
-      targets: payload.targets.map(flightPrepItem),
+      targets: payload.targets.map(downloadItem),
       totalBytes: payload.total_bytes,
       resolvedCount: payload.resolved_count,
       unavailableCount: payload.unavailable_count,
@@ -664,24 +754,24 @@ export const apiClient = {
     };
   },
 
-  async startFlightPrep(targets: FlightPrepTarget[], destination?: string): Promise<FlightPrepQueue> {
-    return flightPrepQueue(
-      await fetchJson<BackendFlightPrepQueue>('/flight-prep/queue', {
+  async startDownloads(targets: DownloadTarget[], destination?: string): Promise<DownloadQueue> {
+    return downloadQueue(
+      await fetchJson<BackendDownloadQueue>('/downloads/queue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: flightPrepBody(targets, destination),
+        body: downloadBody(targets, destination),
       }),
     );
   },
 
-  async getFlightPrepQueue(): Promise<FlightPrepQueue | undefined> {
-    const payload = await fetchJson<BackendFlightPrepQueue | null>('/flight-prep/queue');
-    return payload ? flightPrepQueue(payload) : undefined;
+  async getDownloadQueue(): Promise<DownloadQueue | undefined> {
+    const payload = await fetchJson<BackendDownloadQueue | null>('/downloads/queue');
+    return payload ? downloadQueue(payload) : undefined;
   },
 
-  async cancelFlightPrep(): Promise<FlightPrepQueue | undefined> {
-    const payload = await fetchJson<BackendFlightPrepQueue | null>('/flight-prep/queue/cancel', { method: 'POST' });
-    return payload ? flightPrepQueue(payload) : undefined;
+  async cancelDownloads(): Promise<DownloadQueue | undefined> {
+    const payload = await fetchJson<BackendDownloadQueue | null>('/downloads/queue/cancel', { method: 'POST' });
+    return payload ? downloadQueue(payload) : undefined;
   },
 
   async getCatalogFacets(): Promise<CatalogFacets> {
@@ -716,6 +806,7 @@ export const apiClient = {
         collection_type: string;
         volume_number: number | null;
         issue_count: number;
+        owned_count: number;
         first_published_on: string | null;
         latest_published_on: string | null;
         reading_path_id: number | null;
@@ -734,6 +825,7 @@ export const apiClient = {
         collectionType: item.collection_type,
         volumeNumber: item.volume_number ?? undefined,
         issueCount: item.issue_count,
+        ownedCount: item.owned_count,
         firstPublishedOn: item.first_published_on ?? undefined,
         latestPublishedOn: item.latest_published_on ?? undefined,
         readingPathId: item.reading_path_id ? String(item.reading_path_id) : undefined,

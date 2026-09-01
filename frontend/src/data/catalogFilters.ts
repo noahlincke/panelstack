@@ -443,3 +443,20 @@ export function matchesCatalogFilters(path: ReadingPath, activeFilterIds: string
 export function matchesAnyCatalogFilter(path: ReadingPath): boolean {
   return matchesCatalogFilters(path, Array.from(FILTERS_BY_ID.keys()));
 }
+
+/**
+ * The catalogue tags characters as "<name>-family". Most FILTER_GROUPS ids already
+ * use that form; Batman is the one that does not, so it is mapped explicitly.
+ */
+const ICON_BY_TAG_OVERRIDE: Record<string, string> = {
+  'bat-family': batmanIcon,
+};
+
+export function characterIcon(tag: string): string | undefined {
+  return ICON_BY_TAG_OVERRIDE[tag] ?? FILTERS_BY_ID.get(tag)?.imageSrc;
+}
+
+export const PUBLISHER_ICONS: Record<string, string> = {
+  dc: justiceLeagueIcon,
+  marvel: avengersIcon,
+};

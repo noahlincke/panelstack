@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../api/client';
 import { CatalogFilterBar } from '../components/CatalogFilterBar';
@@ -11,9 +10,10 @@ const PAGE_SIZE = 60;
 
 type CataloguePageProps = {
   searchQuery: string;
+  refreshToken: number;
 };
 
-export function CataloguePage({ searchQuery }: CataloguePageProps) {
+export function CataloguePage({ searchQuery, refreshToken }: CataloguePageProps) {
   const [facets, setFacets] = useState<CatalogFacets | undefined>();
   const [filters, setFilters] = useState<CatalogFilterState>({ ...CATALOG_WINDOW, publisher: [...DEFAULT_PUBLISHERS] });
   const [collections, setCollections] = useState<CatalogCollection[]>([]);
@@ -46,7 +46,7 @@ export function CataloguePage({ searchQuery }: CataloguePageProps) {
     return () => {
       cancelled = true;
     };
-  }, [filters, searchQuery]);
+  }, [filters, refreshToken, searchQuery]);
 
   const loadMore = useCallback(() => {
     apiClient
@@ -78,11 +78,11 @@ export function CataloguePage({ searchQuery }: CataloguePageProps) {
         <p className="view__empty">No collections match these filters.</p>
       ) : null}
 
-      <div className="poster-grid" style={{ '--poster-min-width': '132px' } as CSSProperties}>
+      <div className="poster-grid">
         {collections.map((collection) => (
           <article className="poster-tile" key={collection.id}>
             <Link
-              to={collection.readingPathId ? `/all/${collection.readingPathId}` : '/all'}
+              to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalogue'}
               className="poster-tile__media"
             >
               <CoverImage
@@ -92,7 +92,7 @@ export function CataloguePage({ searchQuery }: CataloguePageProps) {
               />
             </Link>
             <h2 className="poster-tile__title">
-              <Link to={collection.readingPathId ? `/all/${collection.readingPathId}` : '/all'}>
+              <Link to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalogue'}>
                 {collection.title}
               </Link>
             </h2>

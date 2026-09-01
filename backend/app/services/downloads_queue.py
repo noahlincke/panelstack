@@ -1,7 +1,7 @@
-"""Bulk 'get this on my laptop before a flight' downloads.
+"""Bulk downloads for a selection of issues.
 
 This is a local-only workflow: it writes archives to a chosen folder on the
-machine running the app. The hosted deployment refuses every flight-prep route,
+machine running the app. The hosted deployment refuses every downloads route,
 so nothing here ever runs against lincke.org.
 """
 from __future__ import annotations
@@ -19,7 +19,7 @@ SIZE_RESOLUTION_WORKERS = 4
 
 
 @dataclass(frozen=True)
-class FlightPrepTarget:
+class DownloadTarget:
     """One selected issue or collected edition."""
 
     reading_path_id: int
@@ -93,13 +93,13 @@ def destination_space(path: Path) -> DestinationSpace:
 
 
 def resolve_targets(
-    targets: Sequence[FlightPrepTarget],
-    resolver: Callable[[FlightPrepTarget], tuple[int | None, str | None]],
+    targets: Sequence[DownloadTarget],
+    resolver: Callable[[DownloadTarget], tuple[int | None, str | None]],
 ) -> list[ResolvedTarget]:
     """Resolve each target's real archive size, keeping the caller's order."""
     from concurrent.futures import ThreadPoolExecutor
 
-    def resolve_one(target: FlightPrepTarget) -> ResolvedTarget:
+    def resolve_one(target: DownloadTarget) -> ResolvedTarget:
         try:
             size_bytes, post_url = resolver(target)
         except Exception as exc:  # noqa: BLE001 - one bad source must not fail the batch
@@ -126,7 +126,7 @@ def resolve_targets(
         return list(pool.map(resolve_one, targets))
 
 
-class FlightPrepQueue:
+class DownloadQueue:
     """A single sequential download queue for the local app."""
 
     def __init__(self) -> None:
@@ -205,4 +205,4 @@ class FlightPrepQueue:
             state.snapshot.finished_at = datetime.now(timezone.utc).isoformat()
 
 
-QUEUE = FlightPrepQueue()
+QUEUE = DownloadQueue()

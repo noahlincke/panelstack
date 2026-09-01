@@ -116,7 +116,7 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
                   <div className="chronology-row__body">
                     <span className="chronology-row__title">
                       {entry.readingPathId ? (
-                        <Link to={`/all/${entry.readingPathId}`}>{entry.title}</Link>
+                        <Link to={`/collections/${entry.readingPathId}`}>{entry.title}</Link>
                       ) : (
                         entry.title
                       )}

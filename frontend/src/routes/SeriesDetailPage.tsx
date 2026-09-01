@@ -53,7 +53,7 @@ export function SeriesDetailPage() {
   }
 
   if (series.readingPathId) {
-    return <Navigate to={`/all/${series.readingPathId}`} replace />;
+    return <Navigate to={`/collections/${series.readingPathId}`} replace />;
   }
 
   const firstIssue = issues[0];

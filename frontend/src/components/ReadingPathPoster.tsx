@@ -20,9 +20,9 @@ export function ReadingPathPoster({
   return (
     <article className={`poster-tile poster-tile--path ${isComplete ? 'poster-tile--complete' : ''}`}>
       <h2 className="poster-tile__title">
-        <Link to={`/all/${path.id}`}>{path.title}</Link>
+        <Link to={`/collections/${path.id}`}>{path.title}</Link>
       </h2>
-      <Link to={`/all/${path.id}`} className={`poster-tile__media ${isComplete ? 'poster-tile__media--complete' : ''}`}>
+      <Link to={`/collections/${path.id}`} className={`poster-tile__media ${isComplete ? 'poster-tile__media--complete' : ''}`}>
         {cover?.imageUrl ? (
           <img
             src={cover.imageUrl}
