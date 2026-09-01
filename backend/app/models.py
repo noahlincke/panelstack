@@ -611,6 +611,33 @@ class CanonicalSeriesAlias(Base, TimestampMixin):
     canonical_series: Mapped["CanonicalSeries"] = relationship(back_populates="aliases")
 
 
+class GcdSeriesLookup(Base, TimestampMixin):
+    """Provenance cache: which GCD series belongs to which GCD publisher.
+
+    The public GCD API cannot filter, so every weekly page returns all publishers.
+    Caching the series->publisher edge is what keeps the import quota-safe; it is
+    a source record and never a canonical identity.
+    """
+
+    __tablename__ = "gcd_series_lookup"
+
+    gcd_series_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    gcd_publisher_id: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(512), nullable=False)
+    year_began: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+
+class GcdImportState(Base, TimestampMixin):
+    """One row holding the resumable import cursor."""
+
+    __tablename__ = "gcd_import_state"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    last_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_week: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    weeks_completed: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
 class ReadingList(Base, TimestampMixin):
     """A user-made list of issues to read or download. Curation, not continuity."""
 
