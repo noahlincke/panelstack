@@ -138,8 +138,11 @@ def catalog_collections(
         selectinload(CatalogCollection.publisher),
         selectinload(CatalogCollection.reading_path),
     )
+    # NULLS LAST needs SQLite 3.30; the host still ships 3.26, so sort the nulls
+    # explicitly instead.
     stmt = stmt.order_by(
-        CatalogCollection.first_published_on.desc().nullslast(),
+        CatalogCollection.first_published_on.is_(None).asc(),
+        CatalogCollection.first_published_on.desc(),
         CatalogCollection.sort_title.asc(),
         CatalogCollection.id.asc(),
     )

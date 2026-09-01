@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 from datetime import date
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 from backend.app.models import (
@@ -113,6 +113,33 @@ class CatalogQueryTests(unittest.TestCase):
         collections, bat_total = catalog_collections(self.db, character="bat-family")
         self.assertEqual(bat_total, 2)
         self.assertEqual({c.line for c in collections}, {"series", "absolute"})
+
+    def test_collections_sort_undated_runs_last(self) -> None:
+        self.db.add(
+            CatalogCollection(
+                slug="undated",
+                title="Undated Run",
+                sort_title="undated run",
+                line="series",
+                collection_type="run",
+                sequence_number=99,
+            )
+        )
+        self.db.commit()
+        collections, _ = catalog_collections(self.db)
+        self.assertEqual(collections[-1].title, "Undated Run")
+
+    def test_collection_ordering_never_emits_nulls_last(self) -> None:
+        """The host runs SQLite 3.26, which cannot parse NULLS LAST."""
+        statements: list[str] = []
+
+        @event.listens_for(self.db.get_bind(), "before_cursor_execute")
+        def record(conn, cursor, statement, parameters, context, executemany):  # noqa: ANN001
+            statements.append(statement)
+
+        catalog_collections(self.db)
+        self.assertTrue(statements)
+        self.assertNotIn("NULLS", " ".join(statements).upper())
 
     def test_chronology_is_newest_first_and_window_bounded(self) -> None:
         rows, total = catalog_chronology(self.db, publisher=["dc", "marvel"], start=date(2019, 1, 1), end=date(2026, 8, 31))
