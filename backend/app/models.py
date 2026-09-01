@@ -184,6 +184,31 @@ class CanonicalIssue(Base, TimestampMixin):
     reading_path_entries: Mapped[list["ReadingPathEntry"]] = relationship(back_populates="canonical_issue")
     catalog_items: Mapped[list["CatalogCollectionItem"]] = relationship(back_populates="canonical_issue")
     user_states: Mapped[list["UserIssueState"]] = relationship(back_populates="canonical_issue")
+    sources: Mapped[list["CanonicalIssueSource"]] = relationship(
+        back_populates="canonical_issue",
+        cascade="all, delete-orphan",
+    )
+
+
+class CanonicalIssueSource(Base, TimestampMixin):
+    """A source record is provenance, never the canonical comic identity."""
+
+    __tablename__ = "canonical_issue_sources"
+    __table_args__ = (
+        UniqueConstraint("source_name", "source_issue_id", name="uq_canonical_issue_source_identity"),
+        Index("ix_canonical_issue_sources_issue", "canonical_issue_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    canonical_issue_id: Mapped[int] = mapped_column(
+        ForeignKey("canonical_issues.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    source_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_issue_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    source_url: Mapped[str] = mapped_column(Text, nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    canonical_issue: Mapped["CanonicalIssue"] = relationship(back_populates="sources")
 
 
 class Issue(Base, TimestampMixin):

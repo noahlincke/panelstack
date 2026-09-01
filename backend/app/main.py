@@ -487,7 +487,11 @@ def _reading_path_ready_cover_url(reading_path: ReadingPath) -> str | None:
 
 def _should_proxy_provider_cover_url(image_url: str) -> bool:
     lowered = image_url.lower()
-    return "cdn.readdetectiveconan.com/file/mangapill/" in lowered
+    return (
+        "cdn.readdetectiveconan.com/file/mangapill/" in lowered
+        or "i0.wp.com/getcomics.org/" in lowered
+        or "getcomics.org/share/uploads/" in lowered
+    )
 
 
 def _provider_cover_cache_key(image_url: str) -> str:
@@ -625,6 +629,13 @@ def _iter_remote_response(response: requests.Response, session: requests.Session
         session.close()
 
 
+def _response_content_length(response: requests.Response) -> int | None:
+    try:
+        return int(response.headers.get("content-length") or 0) or None
+    except ValueError:
+        return None
+
+
 def _prepare_entry_device_download(entry: ReadingPathEntry) -> tuple[object, str, str, int | None]:
     local_issue = _entry_local_issue(entry)
     if local_issue is not None:
@@ -654,10 +665,7 @@ def _prepare_entry_device_download(entry: ReadingPathEntry) -> tuple[object, str
     media_type = response.headers.get("content-type", "").split(";", 1)[0].strip() or (
         mimetypes.guess_type(filename)[0] or "application/octet-stream"
     )
-    try:
-        size_bytes = int(response.headers.get("content-length") or 0) or None
-    except ValueError:
-        size_bytes = None
+    size_bytes = _response_content_length(response)
     return _iter_remote_response(response, session), filename, media_type, size_bytes
 
 
@@ -673,6 +681,9 @@ def _buffered_entry_archive(entry: ReadingPathEntry) -> Archive:
         plan = comics.resolve_download_plan(source_url, session, preferred_host=None)
         response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
         comics.ensure_success(response, plan.resolved_url)
+        content_length = _response_content_length(response)
+        if content_length is not None and content_length > stream_buffer_max_bytes():
+            raise StreamBufferTooLargeError("Archive exceeds the configured stream buffer size limit.")
         filename = comics.infer_filename(plan.post_title, response, plan.resolved_url)
         archive = store_stream_archive(
             cache_key=cache_key,
@@ -2151,6 +2162,11 @@ def get_reading_path_cover_image(reading_path_id: int, db: Session = Depends(get
 
 @app.post("/reading-paths/{reading_path_id}/download", response_model=ReadingPathDownloadResponse)
 def download_reading_path_issue(reading_path_id: int, db: Session = Depends(get_db)) -> ReadingPathDownloadResponse:
+    if _hosted_deployment():
+        raise HTTPException(
+            status_code=410,
+            detail="Hosted library downloads are disabled. Download the issue directly to your device instead.",
+        )
     reading_path = db.scalars(
         select(ReadingPath)
         .options(
@@ -2224,6 +2240,11 @@ def download_reading_path_issue(reading_path_id: int, db: Session = Depends(get_
 
 @app.post("/reading-paths/{reading_path_id}/entries/{entry_id}/download", response_model=ReadingPathDownloadResponse)
 def download_reading_path_entry(reading_path_id: int, entry_id: int, db: Session = Depends(get_db)) -> ReadingPathDownloadResponse:
+    if _hosted_deployment():
+        raise HTTPException(
+            status_code=410,
+            detail="Hosted library downloads are disabled. Download the issue directly to your device instead.",
+        )
     reading_path = db.scalars(
         select(ReadingPath)
         .options(
@@ -2437,7 +2458,7 @@ def get_reading_path_entry_cover_image(
     if entry is None:
         raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
 
-    if entry.canonical_issue is not None and entry.canonical_issue.provider_name and _canonical_issue_cover_url(entry.canonical_issue):
+    if entry.canonical_issue is not None and _canonical_issue_cover_url(entry.canonical_issue):
         image_url = _provider_issue_cover_url(entry.canonical_issue) or _canonical_issue_cover_url(entry.canonical_issue)
         if not _remote_cover_fetch_enabled() and not _should_proxy_provider_cover_url(image_url):
             raise HTTPException(status_code=404, detail="Cover image proxying is disabled")

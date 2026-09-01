@@ -105,7 +105,7 @@ export function ViewSettingsDrawer({
           <label className="settings-slider">
             <input
               type="range"
-              min="110"
+              min="80"
               max="240"
               step="10"
               value={posterSize}

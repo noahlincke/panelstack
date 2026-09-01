@@ -877,6 +877,24 @@ h2 {
   gap: 16px 14px;
 }
 
+@media (max-width: 700px) {
+  .poster-grid {
+    gap: 12px 9px;
+  }
+
+  .poster-tile {
+    gap: 6px;
+  }
+
+  .poster-tile__title {
+    font-size: 0.8rem;
+  }
+
+  .poster-tile__meta {
+    font-size: 0.72rem;
+  }
+}
+
 .poster-tile {
   display: grid;
   gap: 10px;
