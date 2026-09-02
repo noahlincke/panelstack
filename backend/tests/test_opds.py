@@ -158,5 +158,34 @@ class FeedCharsetTests(unittest.TestCase):
         self.assertNotIn("charset", ACQUISITION_LINK_TYPE)
 
 
+class ChallengeTests(unittest.TestCase):
+    """An OPDS reader can only authenticate if the 401 carries a challenge.
+
+    Acquisition and cover URLs used to live under /api, whose 401 is a plain JSON
+    body, so Panels loaded the catalog and then failed every download.
+    """
+
+    def _routes(self) -> set[str]:
+        import backend.app.main as main
+
+        return {getattr(route, "path", "") for route in main.app.routes}
+
+    def test_downloads_and_covers_are_served_under_opds(self) -> None:
+        routes = self._routes()
+        self.assertIn("/opds/download/{reading_path_id}/{entry_id}", routes)
+        self.assertIn("/opds/cover/{reading_path_id}/{entry_id}", routes)
+
+    def test_feed_links_point_at_the_opds_surface(self) -> None:
+        import backend.app.main as main
+
+        download = main._opds_entry_download_href("https://example.test/panels", 71, 64804)
+        cover = main._opds_entry_cover_href("https://example.test/panels", 71, 64804)
+        self.assertEqual(download, "https://example.test/panels/opds/download/71/64804")
+        self.assertEqual(cover, "https://example.test/panels/opds/cover/71/64804")
+        # /api carries no WWW-Authenticate, so an acquisition link must never use it.
+        self.assertNotIn("/api/", download)
+        self.assertNotIn("/api/", cover)
+
+
 if __name__ == "__main__":
     unittest.main()
