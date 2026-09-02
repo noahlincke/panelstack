@@ -2241,12 +2241,22 @@ def _opds_response(body: str, kind: str) -> Response:
     return Response(content=body, media_type=media_type)
 
 
+@app.get("/opds/download/{reading_path_id}/{entry_id}")
+def opds_download(reading_path_id: int, entry_id: int, db: Session = Depends(get_db)) -> StreamingResponse:
+    return download_reading_path_entry_file(reading_path_id, entry_id, db)
+
+
+@app.get("/opds/cover/{reading_path_id}/{entry_id}")
+def opds_cover(reading_path_id: int, entry_id: int, db: Session = Depends(get_db)) -> FileResponse:
+    return get_reading_path_entry_cover_image(reading_path_id, entry_id, db)
+
+
 def _opds_entry_download_href(base: str, reading_path_id: int, entry_id: int) -> str:
-    return f"{base}/api/reading-paths/{reading_path_id}/entries/{entry_id}/download"
+    return f"{base}/opds/download/{reading_path_id}/{entry_id}"
 
 
 def _opds_entry_cover_href(base: str, reading_path_id: int, entry_id: int) -> str:
-    return f"{base}/api/reading-paths/{reading_path_id}/entries/{entry_id}/cover-image"
+    return f"{base}/opds/cover/{reading_path_id}/{entry_id}"
 
 
 def _opds_entry_title(entry: ReadingPathEntry) -> str:
