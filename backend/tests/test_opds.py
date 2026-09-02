@@ -187,5 +187,62 @@ class ChallengeTests(unittest.TestCase):
         self.assertNotIn("/api/", cover)
 
 
+class DownloadClientContractTests(unittest.TestCase):
+    """What a download manager needs before it will show progress or resume.
+
+    Panels probed with HEAD, got 405 from a GET-only route, and sat at 0%.
+    """
+
+    def _download_routes(self):
+        import backend.app.main as main
+
+        # The same paths also carry a POST route for downloading into the local
+        # library; only the fetching routes are part of this contract.
+        return [
+            route
+            for route in main.app.routes
+            if "GET" in (getattr(route, "methods", None) or set())
+            and (
+                getattr(route, "path", "").endswith("/download/{reading_path_id}/{entry_id}")
+                or getattr(route, "path", "").endswith("/entries/{entry_id}/download")
+            )
+        ]
+
+    def test_download_routes_answer_head(self) -> None:
+        routes = self._download_routes()
+        self.assertTrue(routes)
+        for route in routes:
+            self.assertIn("HEAD", route.methods, f"{route.path} does not answer HEAD")
+
+    def test_head_does_not_pull_the_body_off_the_mirror(self) -> None:
+        import backend.app.main as main
+
+        closed = []
+
+        class Chunks:
+            def close(self) -> None:
+                closed.append(True)
+
+        download = main.EntryDownload(
+            chunks=Chunks(), filename="a.cbz", media_type="application/vnd.comicbook+zip", size_bytes=5
+        )
+        main._close_download(download)
+        self.assertEqual(closed, [True])
+
+    def test_a_ranged_reply_from_the_mirror_is_relayed(self) -> None:
+        import backend.app.main as main
+
+        download = main.EntryDownload(
+            chunks=[b"x"],
+            filename="a.cbz",
+            media_type="application/vnd.comicbook+zip",
+            size_bytes=10,
+            content_range="bytes 0-9/100",
+            status_code=206,
+        )
+        self.assertEqual(download.status_code, 206)
+        self.assertEqual(download.content_range, "bytes 0-9/100")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from datetime import date, datetime, timezone
 import errno
 import fcntl
@@ -698,23 +699,52 @@ def _response_content_length(response: requests.Response) -> int | None:
         return None
 
 
-def _prepare_entry_device_download(entry: ReadingPathEntry) -> tuple[object, str, str, int | None]:
+@dataclass(frozen=True)
+class EntryDownload:
+    """One prepared download, including whatever range the mirror agreed to."""
+
+    chunks: object
+    filename: str
+    media_type: str
+    size_bytes: int | None = None
+    content_range: str | None = None
+    status_code: int = 200
+
+
+def _close_download(download: "EntryDownload") -> None:
+    """Release a prepared stream that will not be read."""
+    closer = getattr(download.chunks, "close", None)
+    if callable(closer):
+        closer()
+
+
+def _prepare_entry_device_download(
+    entry: ReadingPathEntry, *, range_header: str | None = None
+) -> EntryDownload:
     local_issue = _entry_local_issue(entry)
     if local_issue is not None:
         archive = _issue_downloadable_archive(local_issue)
         if archive is not None:
             path = Path(archive.storage_path)
             media_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
-            return _iter_local_file(path), archive.original_filename or path.name, media_type, path.stat().st_size
+            return EntryDownload(
+                chunks=_iter_local_file(path),
+                filename=archive.original_filename or path.name,
+                media_type=media_type,
+                size_bytes=path.stat().st_size,
+            )
 
     if entry.canonical_issue is not None and entry.canonical_issue.provider_name == "MangaPill":
         raise HTTPException(status_code=409, detail="This source supports in-browser streaming only right now.")
 
     source_url = _entry_resolved_getcomics_post_url(entry)
     session = comics.build_session(False)
+    request_headers = {"Range": range_header} if range_header else None
     try:
         plan = comics.resolve_download_plan(source_url, session, preferred_host=None)
-        response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
+        response = session.get(
+            plan.resolved_url, timeout=60, allow_redirects=True, stream=True, headers=request_headers
+        )
         comics.ensure_success(response, plan.resolved_url)
     except comics.ComicDownloadError as exc:
         session.close()
@@ -727,8 +757,14 @@ def _prepare_entry_device_download(entry: ReadingPathEntry) -> tuple[object, str
     # Mirrors serve archives as octet-stream, which tells an OPDS reader nothing.
     # The extension is the reliable signal for what this actually is.
     media_type = opds.archive_media_type(filename)
-    size_bytes = _response_content_length(response)
-    return _iter_remote_response(response, session), filename, media_type, size_bytes
+    return EntryDownload(
+        chunks=_iter_remote_response(response, session),
+        filename=filename,
+        media_type=media_type,
+        size_bytes=_response_content_length(response),
+        content_range=response.headers.get("content-range"),
+        status_code=206 if response.status_code == 206 else 200,
+    )
 
 
 def _buffered_entry_archive(entry: ReadingPathEntry) -> Archive:
@@ -739,9 +775,12 @@ def _buffered_entry_archive(entry: ReadingPathEntry) -> Archive:
 
     source_url = _entry_resolved_getcomics_post_url(entry)
     session = comics.build_session(False)
+    request_headers = {"Range": range_header} if range_header else None
     try:
         plan = comics.resolve_download_plan(source_url, session, preferred_host=None)
-        response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
+        response = session.get(
+            plan.resolved_url, timeout=60, allow_redirects=True, stream=True, headers=request_headers
+        )
         comics.ensure_success(response, plan.resolved_url)
         content_length = _response_content_length(response)
         if content_length is not None and content_length > stream_buffer_max_bytes():
@@ -1600,8 +1639,12 @@ def delete_issue(issue_id: int, db: Session = Depends(get_db)) -> dict[str, int 
     }
 
 
-@app.get("/reading-paths/{reading_path_id}/entries/{entry_id}/download")
-def download_reading_path_entry_file(reading_path_id: int, entry_id: int, db: Session = Depends(get_db)) -> StreamingResponse:
+@app.api_route(
+    "/reading-paths/{reading_path_id}/entries/{entry_id}/download", methods=["GET", "HEAD"]
+)
+def download_reading_path_entry_file(
+    reading_path_id: int, entry_id: int, request: Request, db: Session = Depends(get_db)
+) -> Response:
     entry = db.scalars(
         select(ReadingPathEntry)
         .options(
@@ -1616,11 +1659,26 @@ def download_reading_path_entry_file(reading_path_id: int, entry_id: int, db: Se
     if entry is None or entry.entry_type not in {"issue", "collection"}:
         raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
 
-    chunks, filename, media_type, size_bytes = _prepare_entry_device_download(entry)
-    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
-    if size_bytes is not None:
-        headers["Content-Length"] = str(size_bytes)
-    return StreamingResponse(chunks, media_type=media_type, headers=headers)
+    download = _prepare_entry_device_download(entry, range_header=request.headers.get("range"))
+    headers = {
+        "Content-Disposition": f'attachment; filename="{download.filename}"',
+        # Download managers check this before offering resume.
+        "Accept-Ranges": "bytes",
+    }
+    if download.size_bytes is not None:
+        headers["Content-Length"] = str(download.size_bytes)
+    if download.content_range:
+        headers["Content-Range"] = download.content_range
+
+    if request.method == "HEAD":
+        # A HEAD probe wants the headers only; iterating the body would pull the
+        # whole archive off the mirror for nothing.
+        _close_download(download)
+        return Response(status_code=download.status_code, media_type=download.media_type, headers=headers)
+
+    return StreamingResponse(
+        download.chunks, status_code=download.status_code, media_type=download.media_type, headers=headers
+    )
 
 
 @app.get("/reading-paths/{reading_path_id}/entries/{entry_id}/viewer", response_model=ReaderIssueRead)
@@ -2241,12 +2299,14 @@ def _opds_response(body: str, kind: str) -> Response:
     return Response(content=body, media_type=media_type)
 
 
-@app.get("/opds/download/{reading_path_id}/{entry_id}")
-def opds_download(reading_path_id: int, entry_id: int, db: Session = Depends(get_db)) -> StreamingResponse:
-    return download_reading_path_entry_file(reading_path_id, entry_id, db)
+@app.api_route("/opds/download/{reading_path_id}/{entry_id}", methods=["GET", "HEAD"])
+def opds_download(
+    reading_path_id: int, entry_id: int, request: Request, db: Session = Depends(get_db)
+) -> Response:
+    return download_reading_path_entry_file(reading_path_id, entry_id, request, db)
 
 
-@app.get("/opds/cover/{reading_path_id}/{entry_id}")
+@app.api_route("/opds/cover/{reading_path_id}/{entry_id}", methods=["GET", "HEAD"])
 def opds_cover(reading_path_id: int, entry_id: int, db: Session = Depends(get_db)) -> FileResponse:
     return get_reading_path_entry_cover_image(reading_path_id, entry_id, db)
 

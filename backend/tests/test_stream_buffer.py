@@ -12,11 +12,22 @@ from fastapi import HTTPException
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from backend.app.main import download_reading_path_entry_file, get_reading_path_entry_viewer_issue
+from backend.app.main import EntryDownload, download_reading_path_entry_file, get_reading_path_entry_viewer_issue
 from backend.app.models import Base, CanonicalIssue, CanonicalSeries, Publisher, ReadingPath, ReadingPathEntry
 from backend.app.services.curation import sync_curation_data
 from backend.app.services.reader import list_archive_pages
 from backend.app.services.stream_buffer import StreamBufferTooLargeError, find_stream_archive, prune_stream_buffer, store_stream_archive
+
+
+def _fake_request(method: str, headers: dict[str, str] | None = None):
+    """Minimal stand-in for the parts of Request the download handler reads."""
+
+    class FakeRequest:
+        def __init__(self) -> None:
+            self.method = method
+            self.headers = headers or {}
+
+    return FakeRequest()
 
 
 def sample_curation_payload() -> dict:
@@ -165,10 +176,17 @@ class StreamBufferTests(unittest.TestCase):
 
             with patch(
                 "backend.app.main._prepare_entry_device_download",
-                return_value=([b"cbz-bytes"], "Sample Hero 001.cbz", "application/vnd.comicbook+zip", 9),
+                return_value=EntryDownload(
+                    chunks=[b"cbz-bytes"],
+                    filename="Sample Hero 001.cbz",
+                    media_type="application/vnd.comicbook+zip",
+                    size_bytes=9,
+                ),
                 create=True,
             ):
-                response = download_reading_path_entry_file(reading_path.id, entry.id, db)
+                response = download_reading_path_entry_file(
+                    reading_path.id, entry.id, _fake_request("GET"), db
+                )
 
         self.assertEqual(response.media_type, "application/vnd.comicbook+zip")
         self.assertIn('attachment; filename="Sample Hero 001.cbz"', response.headers["content-disposition"])
@@ -229,7 +247,7 @@ class StreamBufferTests(unittest.TestCase):
             db.refresh(entry)
 
             with self.assertRaises(HTTPException) as raised:
-                download_reading_path_entry_file(reading_path.id, entry.id, db)
+                download_reading_path_entry_file(reading_path.id, entry.id, _fake_request("GET"), db)
 
         self.assertEqual(raised.exception.status_code, 409)
         self.assertIn("stream", str(raised.exception.detail).lower())
