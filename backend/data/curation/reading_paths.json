@@ -1909,6 +1909,559 @@
       "phase": "series",
       "status": "published",
       "description": "Tom King's suburban tragedy."
+    },
+    {
+      "slug": "absolute-batman-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Scott Snyder and Nick Dragotta's new Absolute Universe Batman."
+    },
+    {
+      "slug": "absolute-batman-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Scott Snyder and Nick Dragotta's new Absolute Universe Batman."
+    },
+    {
+      "slug": "absolute-flash-2025-vol-2",
+      "title": "Volume 2",
+      "phase": "series",
+      "status": "published",
+      "description": "Jeff Lemire and Nick Robles bring Wally West into the Absolute Universe."
+    },
+    {
+      "slug": "absolute-flash-2025-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Jeff Lemire and Nick Robles bring Wally West into the Absolute Universe."
+    },
+    {
+      "slug": "absolute-flash-2025-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Jeff Lemire and Nick Robles bring Wally West into the Absolute Universe."
+    },
+    {
+      "slug": "absolute-green-lantern-2025-vol-2",
+      "title": "Volume 2",
+      "phase": "series",
+      "status": "published",
+      "description": "Al Ewing and Jahnoy Lindsay's cosmic-horror take on Green Lantern."
+    },
+    {
+      "slug": "absolute-green-lantern-2025-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Al Ewing and Jahnoy Lindsay's cosmic-horror take on Green Lantern."
+    },
+    {
+      "slug": "absolute-martian-manhunter-2025-vol-2",
+      "title": "Volume 2",
+      "phase": "series",
+      "status": "published",
+      "description": "Deniz Camp and Javier Rodriguez's psychedelic Absolute Martian Manhunter."
+    },
+    {
+      "slug": "absolute-martian-manhunter-2025-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Deniz Camp and Javier Rodriguez's psychedelic Absolute Martian Manhunter."
+    },
+    {
+      "slug": "absolute-martian-manhunter-2025-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Deniz Camp and Javier Rodriguez's psychedelic Absolute Martian Manhunter."
+    },
+    {
+      "slug": "absolute-superman-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Jason Aaron and Rafa Sandoval's reinvention of Superman in the Absolute Universe."
+    },
+    {
+      "slug": "absolute-superman-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Jason Aaron and Rafa Sandoval's reinvention of Superman in the Absolute Universe."
+    },
+    {
+      "slug": "absolute-wonder-woman-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Kelly Thompson and Hayden Sherman's Absolute Universe Wonder Woman."
+    },
+    {
+      "slug": "absolute-wonder-woman-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Kelly Thompson and Hayden Sherman's Absolute Universe Wonder Woman."
+    },
+    {
+      "slug": "action-comics-2016-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Superman's companion flagship, seeded with the 2024-2025 run."
+    },
+    {
+      "slug": "action-comics-2016-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Superman's companion flagship, seeded with the 2024-2025 run."
+    },
+    {
+      "slug": "amazing-spider-man-2025-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Marvel's flagship Spider-Man ongoing for the 2025 era."
+    },
+    {
+      "slug": "avengers-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Jed MacKay's current Avengers ongoing."
+    },
+    {
+      "slug": "batman-2016-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "DC's flagship Batman ongoing, seeded here with the major 2025-2026 collections."
+    },
+    {
+      "slug": "batman-2016-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "DC's flagship Batman ongoing, seeded here with the major 2025-2026 collections."
+    },
+    {
+      "slug": "batman-and-robin-2023-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Bruce and Damian's current father-son team book."
+    },
+    {
+      "slug": "batman-and-robin-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Bruce and Damian's current father-son team book."
+    },
+    {
+      "slug": "captain-america-2025-vol-2",
+      "title": "Volume 2",
+      "phase": "series",
+      "status": "published",
+      "description": "Steve Rogers returns to a new flagship Cap ongoing."
+    },
+    {
+      "slug": "captain-america-2025-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Steve Rogers returns to a new flagship Cap ongoing."
+    },
+    {
+      "slug": "daredevil-2023-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Saladin Ahmed's Daredevil ongoing."
+    },
+    {
+      "slug": "daredevil-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Saladin Ahmed's Daredevil ongoing."
+    },
+    {
+      "slug": "daredevil-2023-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Saladin Ahmed's Daredevil ongoing."
+    },
+    {
+      "slug": "deadpool-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Wade Wilson's current ongoing series."
+    },
+    {
+      "slug": "deadpool-2024-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Wade Wilson's current ongoing series."
+    },
+    {
+      "slug": "deadpool-2024-vol-6",
+      "title": "Volume 6",
+      "phase": "series",
+      "status": "published",
+      "description": "Wade Wilson's current ongoing series."
+    },
+    {
+      "slug": "detective-comics-1937-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Batman's detective-focused flagship title, seeded with the current Tom Taylor era."
+    },
+    {
+      "slug": "doctor-strange-of-asgard-2025-vol-2",
+      "title": "Volume 2",
+      "phase": "series",
+      "status": "published",
+      "description": "Stephen Strange heads to Asgard in this current Marvel ongoing."
+    },
+    {
+      "slug": "doctor-strange-of-asgard-2025-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Stephen Strange heads to Asgard in this current Marvel ongoing."
+    },
+    {
+      "slug": "doctor-strange-of-asgard-2025-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Stephen Strange heads to Asgard in this current Marvel ongoing."
+    },
+    {
+      "slug": "exceptional-x-men-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Kitty Pryde leads a fresh mutant-focused relaunch."
+    },
+    {
+      "slug": "exceptional-x-men-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Kitty Pryde leads a fresh mutant-focused relaunch."
+    },
+    {
+      "slug": "exceptional-x-men-2024-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Kitty Pryde leads a fresh mutant-focused relaunch."
+    },
+    {
+      "slug": "fantastic-four-2022-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Ryan North's Fantastic Four run."
+    },
+    {
+      "slug": "fantastic-four-2022-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Ryan North's Fantastic Four run."
+    },
+    {
+      "slug": "green-arrow-2023-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Oliver Queen's current solo series."
+    },
+    {
+      "slug": "green-arrow-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Oliver Queen's current solo series."
+    },
+    {
+      "slug": "green-arrow-2023-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Oliver Queen's current solo series."
+    },
+    {
+      "slug": "green-lantern-2023-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Jeremy Adams' core Green Lantern run."
+    },
+    {
+      "slug": "green-lantern-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Jeremy Adams' core Green Lantern run."
+    },
+    {
+      "slug": "immortal-thor-2023-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Al Ewing's mythic Thor ongoing."
+    },
+    {
+      "slug": "immortal-thor-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Al Ewing's mythic Thor ongoing."
+    },
+    {
+      "slug": "incredible-hulk-2023-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Phillip Kennedy Johnson's current Hulk run."
+    },
+    {
+      "slug": "incredible-hulk-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Phillip Kennedy Johnson's current Hulk run."
+    },
+    {
+      "slug": "incredible-hulk-2023-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Phillip Kennedy Johnson's current Hulk run."
+    },
+    {
+      "slug": "iron-man-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Spencer Ackerman's current Iron Man run."
+    },
+    {
+      "slug": "iron-man-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Spencer Ackerman's current Iron Man run."
+    },
+    {
+      "slug": "iron-man-2024-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Spencer Ackerman's current Iron Man run."
+    },
+    {
+      "slug": "justice-league-unlimited-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "DC's new Justice League flagship in the All In era."
+    },
+    {
+      "slug": "justice-league-unlimited-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "DC's new Justice League flagship in the All In era."
+    },
+    {
+      "slug": "nightwing-2016-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Dick Grayson's ongoing solo title."
+    },
+    {
+      "slug": "nightwing-2016-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Dick Grayson's ongoing solo title."
+    },
+    {
+      "slug": "phoenix-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Jean Grey goes cosmic in the current Phoenix ongoing."
+    },
+    {
+      "slug": "phoenix-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Jean Grey goes cosmic in the current Phoenix ongoing."
+    },
+    {
+      "slug": "phoenix-2024-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Jean Grey goes cosmic in the current Phoenix ongoing."
+    },
+    {
+      "slug": "storm-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Storm's current solo title."
+    },
+    {
+      "slug": "storm-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Storm's current solo title."
+    },
+    {
+      "slug": "superman-2023-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Joshua Williamson's core Superman ongoing."
+    },
+    {
+      "slug": "superman-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Joshua Williamson's core Superman ongoing."
+    },
+    {
+      "slug": "superman-unlimited-2025-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Dan Slott and Rafael Albuquerque launch a new core Superman ongoing."
+    },
+    {
+      "slug": "the-flash-2023-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Wally West's current ongoing series."
+    },
+    {
+      "slug": "the-flash-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Wally West's current ongoing series."
+    },
+    {
+      "slug": "the-flash-2023-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Wally West's current ongoing series."
+    },
+    {
+      "slug": "uncanny-x-men-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Gail Simone's Uncanny X-Men relaunch."
+    },
+    {
+      "slug": "uncanny-x-men-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Gail Simone's Uncanny X-Men relaunch."
+    },
+    {
+      "slug": "uncanny-x-men-2024-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Gail Simone's Uncanny X-Men relaunch."
+    },
+    {
+      "slug": "wolverine-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "Logan's current flagship solo title."
+    },
+    {
+      "slug": "wolverine-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Logan's current flagship solo title."
+    },
+    {
+      "slug": "wolverine-2024-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "Logan's current flagship solo title."
+    },
+    {
+      "slug": "wonder-woman-2023-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "Tom King and Daniel Sampere's Wonder Woman run."
+    },
+    {
+      "slug": "x-men-2024-vol-3",
+      "title": "Volume 3",
+      "phase": "series",
+      "status": "published",
+      "description": "The core X-Men launch of Marvel's post-Krakoa line."
+    },
+    {
+      "slug": "x-men-2024-vol-4",
+      "title": "Volume 4",
+      "phase": "series",
+      "status": "published",
+      "description": "The core X-Men launch of Marvel's post-Krakoa line."
+    },
+    {
+      "slug": "x-men-2024-vol-5",
+      "title": "Volume 5",
+      "phase": "series",
+      "status": "published",
+      "description": "The core X-Men launch of Marvel's post-Krakoa line."
+    },
+    {
+      "slug": "absolute-green-arrow-2026-vol-2",
+      "title": "Volume 2",
+      "phase": "series",
+      "status": "published",
+      "description": "The Absolute line's take on Oliver Queen."
+    },
+    {
+      "slug": "absolute-catwoman-2026-vol-2",
+      "title": "Volume 2",
+      "phase": "series",
+      "status": "published",
+      "description": "The Absolute line's take on Selina Kyle."
     }
   ],
   "series": [
@@ -2005,8 +2558,59 @@
           "published_on": "2026-01-01",
           "sort_order": 14500,
           "summary": "Collects Absolute Batman #7-12."
+        },
+        {
+          "issue_number": "15",
+          "title": "Absolute Batman #15",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Absolute Batman #16",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Absolute Batman #17",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Absolute Batman #18",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Absolute Batman #19",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Absolute Batman #20",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Absolute Batman #21",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Absolute Batman #22",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Absolute Batman #23",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Absolute Batman #24",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "absolute-flash-2025",
@@ -2045,8 +2649,74 @@
           "issue_number": "6",
           "title": "Absolute Flash #6",
           "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Absolute Flash #7",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Absolute Flash #8",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Absolute Flash #9",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Absolute Flash #10",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Absolute Flash #11",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Absolute Flash #12",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Absolute Flash #13",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Absolute Flash #14",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Absolute Flash #15",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Absolute Flash #16",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Absolute Flash #17",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Absolute Flash #18",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Absolute Flash #19",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "absolute-green-lantern-2025",
@@ -2085,8 +2755,69 @@
           "issue_number": "6",
           "title": "Absolute Green Lantern #6",
           "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Absolute Green Lantern #7",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Absolute Green Lantern #8",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Absolute Green Lantern #9",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Absolute Green Lantern #10",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Absolute Green Lantern #11",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Absolute Green Lantern #12",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Absolute Green Lantern #13",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Absolute Green Lantern #14",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Absolute Green Lantern #15",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Absolute Green Lantern #16",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Absolute Green Lantern #17",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Absolute Green Lantern #18",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "absolute-martian-manhunter-2025",
@@ -2125,8 +2856,74 @@
           "issue_number": "6",
           "title": "Absolute Martian Manhunter #6",
           "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Absolute Martian Manhunter #7",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Absolute Martian Manhunter #8",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Absolute Martian Manhunter #9",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Absolute Martian Manhunter #10",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Absolute Martian Manhunter #11",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Absolute Martian Manhunter #12",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Absolute Martian Manhunter #13",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Absolute Martian Manhunter #14",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Absolute Martian Manhunter #15",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Absolute Martian Manhunter #16",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Absolute Martian Manhunter #17",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Absolute Martian Manhunter #18",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Absolute Martian Manhunter #19",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "absolute-superman-2024",
@@ -2203,8 +3000,64 @@
           "published_on": "2025-08-01",
           "sort_order": 12500,
           "summary": "Collects Absolute Superman #1-6."
+        },
+        {
+          "issue_number": "13",
+          "title": "Absolute Superman #13",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Absolute Superman #14",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Absolute Superman #15",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Absolute Superman #16",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Absolute Superman #17",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Absolute Superman #18",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Absolute Superman #19",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Absolute Superman #20",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Absolute Superman #21",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Absolute Superman #22",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Absolute Superman #23",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "absolute-wonder-woman-2024",
@@ -2291,8 +3144,59 @@
           "published_on": "2025-07-01",
           "sort_order": 14500,
           "summary": "Collects Absolute Wonder Woman #1-6."
+        },
+        {
+          "issue_number": "15",
+          "title": "Absolute Wonder Woman #15",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Absolute Wonder Woman #16",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Absolute Wonder Woman #17",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Absolute Wonder Woman #18",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Absolute Wonder Woman #19",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Absolute Wonder Woman #20",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Absolute Wonder Woman #21",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Absolute Wonder Woman #22",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Absolute Wonder Woman #23",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Absolute Wonder Woman #24",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "action-comics-2016",
@@ -2361,8 +3265,69 @@
           "issue_number": "1087",
           "title": "Action Comics #1087",
           "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "1088",
+          "title": "Action Comics #1088",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "1089",
+          "title": "Action Comics #1089",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "1090",
+          "title": "Action Comics #1090",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "1091",
+          "title": "Action Comics #1091",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "1092",
+          "title": "Action Comics #1092",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "1093",
+          "title": "Action Comics #1093",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "1094",
+          "title": "Action Comics #1094",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "1095",
+          "title": "Action Comics #1095",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "1096",
+          "title": "Action Comics #1096",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "1097",
+          "title": "Action Comics #1097",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "1098",
+          "title": "Action Comics #1098",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "1099",
+          "title": "Action Comics #1099",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "amazing-spider-man-1999",
@@ -2504,8 +3469,39 @@
           "issue_number": "12",
           "title": "The Amazing Spider-Man #12",
           "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "The Amazing Spider-Man #13",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "The Amazing Spider-Man #14",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "The Amazing Spider-Man #15",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "The Amazing Spider-Man #16",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "The Amazing Spider-Man #17",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "The Amazing Spider-Man #18",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "avengers-2023",
@@ -2604,8 +3600,39 @@
           "issue_number": "36",
           "title": "Avengers #36",
           "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Avengers #37",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "Avengers #38",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "39",
+          "title": "Avengers #39",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "40",
+          "title": "Avengers #40",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "41",
+          "title": "Avengers #41",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "42",
+          "title": "Avengers #42",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "batman-2016",
@@ -2674,8 +3701,44 @@
           "issue_number": "169",
           "title": "Batman #169",
           "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "170",
+          "title": "Batman #170",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "171",
+          "title": "Batman #171",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "172",
+          "title": "Batman #172",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "173",
+          "title": "Batman #173",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "174",
+          "title": "Batman #174",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "175",
+          "title": "Batman #175",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "176",
+          "title": "Batman #176",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "batman-and-robin-2023",
@@ -2744,8 +3807,59 @@
           "issue_number": "27",
           "title": "Batman and Robin #27",
           "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "28",
+          "title": "Batman and Robin #28",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "29",
+          "title": "Batman and Robin #29",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "30",
+          "title": "Batman and Robin #30",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "31",
+          "title": "Batman and Robin #31",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "32",
+          "title": "Batman and Robin #32",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "Batman and Robin #33",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "Batman and Robin #34",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "Batman and Robin #35",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "Batman and Robin #36",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Batman and Robin #37",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "captain-america-2025",
@@ -2784,8 +3898,54 @@
           "issue_number": "6",
           "title": "Captain America #6",
           "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Captain America #7",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Captain America #8",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Captain America #9",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Captain America #10",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Captain America #11",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Captain America #12",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Captain America #13",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Captain America #14",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Captain America #15",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "civil-war-2006",
@@ -3010,8 +4170,74 @@
           "issue_number": "25",
           "title": "Daredevil #25",
           "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "26",
+          "title": "Daredevil #26",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "27",
+          "title": "Daredevil #27",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "28",
+          "title": "Daredevil #28",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "29",
+          "title": "Daredevil #29",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "30",
+          "title": "Daredevil #30",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "31",
+          "title": "Daredevil #31",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "32",
+          "title": "Daredevil #32",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "Daredevil #33",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "Daredevil #34",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "Daredevil #35",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "Daredevil #36",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Daredevil #37",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "Daredevil #38",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "day-of-vengeance-2005",
@@ -3186,8 +4412,84 @@
           "issue_number": "15",
           "title": "Deadpool #15",
           "published_on": "2025-06-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Deadpool #16",
+          "published_on": "2025-07-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Deadpool #17",
+          "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Deadpool #18",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Deadpool #19",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Deadpool #20",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Deadpool #21",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Deadpool #22",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Deadpool #23",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Deadpool #24",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "25",
+          "title": "Deadpool #25",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "26",
+          "title": "Deadpool #26",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "27",
+          "title": "Deadpool #27",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "28",
+          "title": "Deadpool #28",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "29",
+          "title": "Deadpool #29",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "30",
+          "title": "Deadpool #30",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "decimation-house-of-m-the-day-after-2005",
@@ -3322,8 +4624,39 @@
           "issue_number": "1107",
           "title": "Detective Comics #1107",
           "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "1108",
+          "title": "Detective Comics #1108",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "1109",
+          "title": "Detective Comics #1109",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "1110",
+          "title": "Detective Comics #1110",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "1111",
+          "title": "Detective Comics #1111",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "1112",
+          "title": "Detective Comics #1112",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "1113",
+          "title": "Detective Comics #1113",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "doctor-strange-of-asgard-2025",
@@ -3357,8 +4690,79 @@
           "issue_number": "5",
           "title": "Doctor Strange of Asgard #5",
           "published_on": "2025-07-01"
+        },
+        {
+          "issue_number": "6",
+          "title": "Doctor Strange of Asgard #6",
+          "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Doctor Strange of Asgard #7",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Doctor Strange of Asgard #8",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Doctor Strange of Asgard #9",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Doctor Strange of Asgard #10",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Doctor Strange of Asgard #11",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Doctor Strange of Asgard #12",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Doctor Strange of Asgard #13",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Doctor Strange of Asgard #14",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Doctor Strange of Asgard #15",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Doctor Strange of Asgard #16",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Doctor Strange of Asgard #17",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Doctor Strange of Asgard #18",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Doctor Strange of Asgard #19",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "exceptional-x-men-2024",
@@ -3427,8 +4831,74 @@
           "issue_number": "12",
           "title": "Exceptional X-Men #12",
           "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Exceptional X-Men #13",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Exceptional X-Men #14",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Exceptional X-Men #15",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Exceptional X-Men #16",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Exceptional X-Men #17",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Exceptional X-Men #18",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Exceptional X-Men #19",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Exceptional X-Men #20",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Exceptional X-Men #21",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Exceptional X-Men #22",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Exceptional X-Men #23",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Exceptional X-Men #24",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "25",
+          "title": "Exceptional X-Men #25",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "fantastic-four-2022",
@@ -3497,8 +4967,69 @@
           "issue_number": "36",
           "title": "Fantastic Four #36",
           "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Fantastic Four #37",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "Fantastic Four #38",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "39",
+          "title": "Fantastic Four #39",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "40",
+          "title": "Fantastic Four #40",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "41",
+          "title": "Fantastic Four #41",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "42",
+          "title": "Fantastic Four #42",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "43",
+          "title": "Fantastic Four #43",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "44",
+          "title": "Fantastic Four #44",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "45",
+          "title": "Fantastic Four #45",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "46",
+          "title": "Fantastic Four #46",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "47",
+          "title": "Fantastic Four #47",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "48",
+          "title": "Fantastic Four #48",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "green-arrow-2023",
@@ -3567,8 +5098,74 @@
           "issue_number": "27",
           "title": "Green Arrow #27",
           "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "28",
+          "title": "Green Arrow #28",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "29",
+          "title": "Green Arrow #29",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "30",
+          "title": "Green Arrow #30",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "31",
+          "title": "Green Arrow #31",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "32",
+          "title": "Green Arrow #32",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "Green Arrow #33",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "Green Arrow #34",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "Green Arrow #35",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "Green Arrow #36",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Green Arrow #37",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "Green Arrow #38",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "39",
+          "title": "Green Arrow #39",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "40",
+          "title": "Green Arrow #40",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "green-lantern-2023",
@@ -3645,8 +5242,69 @@
           "published_on": "2024-02-01",
           "sort_order": 27500,
           "summary": "Collects Green Lantern #1-6."
+        },
+        {
+          "issue_number": "28",
+          "title": "Green Lantern #28",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "29",
+          "title": "Green Lantern #29",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "30",
+          "title": "Green Lantern #30",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "31",
+          "title": "Green Lantern #31",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "32",
+          "title": "Green Lantern #32",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "Green Lantern #33",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "Green Lantern #34",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "Green Lantern #35",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "Green Lantern #36",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Green Lantern #37",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "Green Lantern #38",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "39",
+          "title": "Green Lantern #39",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "house-of-m-2005",
@@ -3773,8 +5431,69 @@
           "issue_number": "26",
           "title": "Immortal Thor #26",
           "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "27",
+          "title": "Immortal Thor #27",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "28",
+          "title": "Immortal Thor #28",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "29",
+          "title": "Immortal Thor #29",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "30",
+          "title": "Immortal Thor #30",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "31",
+          "title": "Immortal Thor #31",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "32",
+          "title": "Immortal Thor #32",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "Immortal Thor #33",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "Immortal Thor #34",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "Immortal Thor #35",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "Immortal Thor #36",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Immortal Thor #37",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "Immortal Thor #38",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "incredible-hulk-2023",
@@ -3843,8 +5562,74 @@
           "issue_number": "30",
           "title": "Incredible Hulk #30",
           "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "31",
+          "title": "Incredible Hulk #31",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "32",
+          "title": "Incredible Hulk #32",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "Incredible Hulk #33",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "Incredible Hulk #34",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "Incredible Hulk #35",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "Incredible Hulk #36",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Incredible Hulk #37",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "Incredible Hulk #38",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "39",
+          "title": "Incredible Hulk #39",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "40",
+          "title": "Incredible Hulk #40",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "41",
+          "title": "Incredible Hulk #41",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "42",
+          "title": "Incredible Hulk #42",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "43",
+          "title": "Incredible Hulk #43",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "infinite-crisis-2005",
@@ -3977,8 +5762,79 @@
           "issue_number": "10",
           "title": "Iron Man #10",
           "published_on": "2025-07-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Iron Man #11",
+          "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Iron Man #12",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Iron Man #13",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Iron Man #14",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Iron Man #15",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Iron Man #16",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Iron Man #17",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Iron Man #18",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Iron Man #19",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Iron Man #20",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Iron Man #21",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Iron Man #22",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Iron Man #23",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Iron Man #24",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "justice-league-unlimited-2024",
@@ -4047,8 +5903,64 @@
           "issue_number": "12",
           "title": "Justice League Unlimited #12",
           "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Justice League Unlimited #13",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Justice League Unlimited #14",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Justice League Unlimited #15",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Justice League Unlimited #16",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Justice League Unlimited #17",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Justice League Unlimited #18",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Justice League Unlimited #19",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Justice League Unlimited #20",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Justice League Unlimited #21",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Justice League Unlimited #22",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Justice League Unlimited #23",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "new-avengers-illuminati-2006",
@@ -4137,8 +6049,59 @@
           "issue_number": "132",
           "title": "Nightwing #132",
           "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "133",
+          "title": "Nightwing #133",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "134",
+          "title": "Nightwing #134",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "135",
+          "title": "Nightwing #135",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "136",
+          "title": "Nightwing #136",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "137",
+          "title": "Nightwing #137",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "138",
+          "title": "Nightwing #138",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "139",
+          "title": "Nightwing #139",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "140",
+          "title": "Nightwing #140",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "141",
+          "title": "Nightwing #141",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "142",
+          "title": "Nightwing #142",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "nyx-2024",
@@ -4339,8 +6302,84 @@
           "issue_number": "12",
           "title": "Phoenix #12",
           "published_on": "2025-06-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Phoenix #13",
+          "published_on": "2025-07-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Phoenix #14",
+          "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Phoenix #15",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Phoenix #16",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Phoenix #17",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Phoenix #18",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Phoenix #19",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Phoenix #20",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Phoenix #21",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Phoenix #22",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Phoenix #23",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Phoenix #24",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "25",
+          "title": "Phoenix #25",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "26",
+          "title": "Phoenix #26",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "27",
+          "title": "Phoenix #27",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "rann-thanagar-war-2005",
@@ -4521,8 +6560,69 @@
           "issue_number": "12",
           "title": "Storm #12",
           "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Storm #13",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Storm #14",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Storm #15",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Storm #16",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Storm #17",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Storm #18",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Storm #19",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Storm #20",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Storm #21",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Storm #22",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Storm #23",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Storm #24",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "superman-2023",
@@ -4591,8 +6691,59 @@
           "issue_number": "32",
           "title": "Superman #32",
           "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "Superman #33",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "Superman #34",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "Superman #35",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "Superman #36",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Superman #37",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "Superman #38",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "39",
+          "title": "Superman #39",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "40",
+          "title": "Superman #40",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "41",
+          "title": "Superman #41",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "42",
+          "title": "Superman #42",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "superman-unlimited-2025",
@@ -4661,8 +6812,34 @@
           "issue_number": "12",
           "title": "Superman Unlimited #12",
           "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Superman Unlimited #13",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Superman Unlimited #14",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Superman Unlimited #15",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Superman Unlimited #16",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Superman Unlimited #17",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "swamp-thing-1982",
@@ -4762,8 +6939,74 @@
           "issue_number": "26",
           "title": "The Flash #26",
           "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "27",
+          "title": "The Flash #27",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "28",
+          "title": "The Flash #28",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "29",
+          "title": "The Flash #29",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "30",
+          "title": "The Flash #30",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "31",
+          "title": "The Flash #31",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "32",
+          "title": "The Flash #32",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "The Flash #33",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "The Flash #34",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "The Flash #35",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "The Flash #36",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "The Flash #37",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "38",
+          "title": "The Flash #38",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "39",
+          "title": "The Flash #39",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "ultimate-black-panther-2024",
@@ -5176,8 +7419,79 @@
           "issue_number": "12",
           "title": "Uncanny X-Men #12",
           "published_on": "2025-07-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Uncanny X-Men #13",
+          "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Uncanny X-Men #14",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Uncanny X-Men #15",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Uncanny X-Men #16",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Uncanny X-Men #17",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Uncanny X-Men #18",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Uncanny X-Men #19",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Uncanny X-Men #20",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Uncanny X-Men #21",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Uncanny X-Men #22",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Uncanny X-Men #23",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Uncanny X-Men #24",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "25",
+          "title": "Uncanny X-Men #25",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "26",
+          "title": "Uncanny X-Men #26",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "villains-united-2005",
@@ -5362,8 +7676,84 @@
           "issue_number": "10",
           "title": "Wolverine #10",
           "published_on": "2025-06-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Wolverine #11",
+          "published_on": "2025-07-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Wolverine #12",
+          "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Wolverine #13",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Wolverine #14",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Wolverine #15",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Wolverine #16",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Wolverine #17",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Wolverine #18",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "Wolverine #19",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "Wolverine #20",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "Wolverine #21",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "Wolverine #22",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "Wolverine #23",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "Wolverine #24",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "25",
+          "title": "Wolverine #25",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "wonder-woman-2023",
@@ -5462,8 +7852,39 @@
           "issue_number": "31",
           "title": "Wonder Woman #31",
           "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "32",
+          "title": "Wonder Woman #32",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "33",
+          "title": "Wonder Woman #33",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "34",
+          "title": "Wonder Woman #34",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "35",
+          "title": "Wonder Woman #35",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "36",
+          "title": "Wonder Woman #36",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "37",
+          "title": "Wonder Woman #37",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "x-men-2024",
@@ -5532,8 +7953,84 @@
           "issue_number": "12",
           "title": "X-Men #12",
           "published_on": "2025-06-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "X-Men #13",
+          "published_on": "2025-07-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "X-Men #14",
+          "published_on": "2025-08-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "X-Men #15",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "X-Men #16",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "X-Men #17",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "X-Men #18",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "19",
+          "title": "X-Men #19",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "20",
+          "title": "X-Men #20",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "21",
+          "title": "X-Men #21",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "22",
+          "title": "X-Men #22",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "23",
+          "title": "X-Men #23",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "24",
+          "title": "X-Men #24",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "25",
+          "title": "X-Men #25",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "26",
+          "title": "X-Men #26",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "27",
+          "title": "X-Men #27",
+          "published_on": "2026-09-01"
         }
-      ]
+      ],
+      "end_year": 2026
     },
     {
       "slug": "far-sector-2019",
@@ -6697,6 +9194,21 @@
           "issue_number": "6",
           "title": "Absolute Green Arrow #6",
           "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Absolute Green Arrow #7",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Absolute Green Arrow #8",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Absolute Green Arrow #9",
+          "published_on": "2026-09-01"
         }
       ]
     },
@@ -6738,6 +9250,16 @@
           "issue_number": "6",
           "title": "Absolute Catwoman #6",
           "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Absolute Catwoman #7",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Absolute Catwoman #8",
+          "published_on": "2026-09-01"
         }
       ]
     },
@@ -26277,6 +28799,3347 @@
           "sort_order": 120,
           "canonical_issue_key": "vision-2015#12",
           "story_arc_slug": "vision-2015-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-batman-2024-vol-3",
+      "title": "Absolute Batman: Vol. 3",
+      "description": "Scott Snyder and Nick Dragotta's new Absolute Universe Batman.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-batman-2024#15",
+          "story_arc_slug": "absolute-batman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-batman-2024#16",
+          "story_arc_slug": "absolute-batman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-batman-2024#17",
+          "story_arc_slug": "absolute-batman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-batman-2024#18",
+          "story_arc_slug": "absolute-batman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-batman-2024#19",
+          "story_arc_slug": "absolute-batman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-batman-2024#20",
+          "story_arc_slug": "absolute-batman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-batman-2024-vol-4",
+      "title": "Absolute Batman: Vol. 4",
+      "description": "Scott Snyder and Nick Dragotta's new Absolute Universe Batman.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-batman-2024#21",
+          "story_arc_slug": "absolute-batman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-batman-2024#22",
+          "story_arc_slug": "absolute-batman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-batman-2024#23",
+          "story_arc_slug": "absolute-batman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-batman-2024#24",
+          "story_arc_slug": "absolute-batman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-flash-2025-vol-2",
+      "title": "Absolute Flash: Vol. 2",
+      "description": "Jeff Lemire and Nick Robles bring Wally West into the Absolute Universe.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-flash-2025#7",
+          "story_arc_slug": "absolute-flash-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-flash-2025#8",
+          "story_arc_slug": "absolute-flash-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-flash-2025#9",
+          "story_arc_slug": "absolute-flash-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-flash-2025#10",
+          "story_arc_slug": "absolute-flash-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-flash-2025#11",
+          "story_arc_slug": "absolute-flash-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-flash-2025#12",
+          "story_arc_slug": "absolute-flash-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-flash-2025-vol-3",
+      "title": "Absolute Flash: Vol. 3",
+      "description": "Jeff Lemire and Nick Robles bring Wally West into the Absolute Universe.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-flash-2025#13",
+          "story_arc_slug": "absolute-flash-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-flash-2025#14",
+          "story_arc_slug": "absolute-flash-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-flash-2025#15",
+          "story_arc_slug": "absolute-flash-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-flash-2025#16",
+          "story_arc_slug": "absolute-flash-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-flash-2025#17",
+          "story_arc_slug": "absolute-flash-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-flash-2025#18",
+          "story_arc_slug": "absolute-flash-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-flash-2025-vol-4",
+      "title": "Absolute Flash: Vol. 4",
+      "description": "Jeff Lemire and Nick Robles bring Wally West into the Absolute Universe.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-flash-2025#19",
+          "story_arc_slug": "absolute-flash-2025-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-green-lantern-2025-vol-2",
+      "title": "Absolute Green Lantern: Vol. 2",
+      "description": "Al Ewing and Jahnoy Lindsay's cosmic-horror take on Green Lantern.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-green-lantern-2025#7",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-green-lantern-2025#8",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-green-lantern-2025#9",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-green-lantern-2025#10",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-green-lantern-2025#11",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-green-lantern-2025#12",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-green-lantern-2025-vol-3",
+      "title": "Absolute Green Lantern: Vol. 3",
+      "description": "Al Ewing and Jahnoy Lindsay's cosmic-horror take on Green Lantern.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-green-lantern-2025#13",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-green-lantern-2025#14",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-green-lantern-2025#15",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-green-lantern-2025#16",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-green-lantern-2025#17",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-green-lantern-2025#18",
+          "story_arc_slug": "absolute-green-lantern-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-martian-manhunter-2025-vol-2",
+      "title": "Absolute Martian Manhunter: Vol. 2",
+      "description": "Deniz Camp and Javier Rodriguez's psychedelic Absolute Martian Manhunter.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#7",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#8",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#9",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#10",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#11",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#12",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-martian-manhunter-2025-vol-3",
+      "title": "Absolute Martian Manhunter: Vol. 3",
+      "description": "Deniz Camp and Javier Rodriguez's psychedelic Absolute Martian Manhunter.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#13",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#14",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#15",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#16",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#17",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#18",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-martian-manhunter-2025-vol-4",
+      "title": "Absolute Martian Manhunter: Vol. 4",
+      "description": "Deniz Camp and Javier Rodriguez's psychedelic Absolute Martian Manhunter.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-martian-manhunter-2025#19",
+          "story_arc_slug": "absolute-martian-manhunter-2025-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-superman-2024-vol-3",
+      "title": "Absolute Superman: Vol. 3",
+      "description": "Jason Aaron and Rafa Sandoval's reinvention of Superman in the Absolute Universe.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-superman-2024#13",
+          "story_arc_slug": "absolute-superman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-superman-2024#14",
+          "story_arc_slug": "absolute-superman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-superman-2024#15",
+          "story_arc_slug": "absolute-superman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-superman-2024#16",
+          "story_arc_slug": "absolute-superman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-superman-2024#17",
+          "story_arc_slug": "absolute-superman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-superman-2024#18",
+          "story_arc_slug": "absolute-superman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-superman-2024-vol-4",
+      "title": "Absolute Superman: Vol. 4",
+      "description": "Jason Aaron and Rafa Sandoval's reinvention of Superman in the Absolute Universe.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-superman-2024#19",
+          "story_arc_slug": "absolute-superman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-superman-2024#20",
+          "story_arc_slug": "absolute-superman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-superman-2024#21",
+          "story_arc_slug": "absolute-superman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-superman-2024#22",
+          "story_arc_slug": "absolute-superman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-superman-2024#23",
+          "story_arc_slug": "absolute-superman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-wonder-woman-2024-vol-3",
+      "title": "Absolute Wonder Woman: Vol. 3",
+      "description": "Kelly Thompson and Hayden Sherman's Absolute Universe Wonder Woman.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-wonder-woman-2024#15",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-wonder-woman-2024#16",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-wonder-woman-2024#17",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-wonder-woman-2024#18",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "absolute-wonder-woman-2024#19",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "absolute-wonder-woman-2024#20",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-wonder-woman-2024-vol-4",
+      "title": "Absolute Wonder Woman: Vol. 4",
+      "description": "Kelly Thompson and Hayden Sherman's Absolute Universe Wonder Woman.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-wonder-woman-2024#21",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-wonder-woman-2024#22",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-wonder-woman-2024#23",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "absolute-wonder-woman-2024#24",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "action-comics-2016-vol-3",
+      "title": "Action Comics: Vol. 3",
+      "description": "Superman's companion flagship, seeded with the 2024-2025 run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "action-comics-2016#1088",
+          "story_arc_slug": "action-comics-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "action-comics-2016#1089",
+          "story_arc_slug": "action-comics-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "action-comics-2016#1090",
+          "story_arc_slug": "action-comics-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "action-comics-2016#1091",
+          "story_arc_slug": "action-comics-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "action-comics-2016#1092",
+          "story_arc_slug": "action-comics-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "action-comics-2016#1093",
+          "story_arc_slug": "action-comics-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "action-comics-2016-vol-4",
+      "title": "Action Comics: Vol. 4",
+      "description": "Superman's companion flagship, seeded with the 2024-2025 run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "action-comics-2016#1094",
+          "story_arc_slug": "action-comics-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "action-comics-2016#1095",
+          "story_arc_slug": "action-comics-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "action-comics-2016#1096",
+          "story_arc_slug": "action-comics-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "action-comics-2016#1097",
+          "story_arc_slug": "action-comics-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "action-comics-2016#1098",
+          "story_arc_slug": "action-comics-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "action-comics-2016#1099",
+          "story_arc_slug": "action-comics-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "amazing-spider-man-2025-vol-3",
+      "title": "The Amazing Spider-Man: Vol. 3",
+      "description": "Marvel's flagship Spider-Man ongoing for the 2025 era.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "amazing-spider-man-2025#13",
+          "story_arc_slug": "amazing-spider-man-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "amazing-spider-man-2025#14",
+          "story_arc_slug": "amazing-spider-man-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "amazing-spider-man-2025#15",
+          "story_arc_slug": "amazing-spider-man-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "amazing-spider-man-2025#16",
+          "story_arc_slug": "amazing-spider-man-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "amazing-spider-man-2025#17",
+          "story_arc_slug": "amazing-spider-man-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "amazing-spider-man-2025#18",
+          "story_arc_slug": "amazing-spider-man-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "avengers-2023-vol-4",
+      "title": "Avengers: Vol. 4",
+      "description": "Jed MacKay's current Avengers ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "avengers-2023#37",
+          "story_arc_slug": "avengers-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "avengers-2023#38",
+          "story_arc_slug": "avengers-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "avengers-2023#39",
+          "story_arc_slug": "avengers-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "avengers-2023#40",
+          "story_arc_slug": "avengers-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "avengers-2023#41",
+          "story_arc_slug": "avengers-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "avengers-2023#42",
+          "story_arc_slug": "avengers-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "batman-2016-vol-3",
+      "title": "Batman: Vol. 3",
+      "description": "DC's flagship Batman ongoing, seeded here with the major 2025-2026 collections.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "batman-2016#170",
+          "story_arc_slug": "batman-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "batman-2016#171",
+          "story_arc_slug": "batman-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "batman-2016#172",
+          "story_arc_slug": "batman-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "batman-2016#173",
+          "story_arc_slug": "batman-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "batman-2016#174",
+          "story_arc_slug": "batman-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "batman-2016#175",
+          "story_arc_slug": "batman-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "batman-2016-vol-4",
+      "title": "Batman: Vol. 4",
+      "description": "DC's flagship Batman ongoing, seeded here with the major 2025-2026 collections.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "batman-2016#176",
+          "story_arc_slug": "batman-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "batman-and-robin-2023-vol-3",
+      "title": "Batman and Robin: Vol. 3",
+      "description": "Bruce and Damian's current father-son team book.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "batman-and-robin-2023#28",
+          "story_arc_slug": "batman-and-robin-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "batman-and-robin-2023#29",
+          "story_arc_slug": "batman-and-robin-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "batman-and-robin-2023#30",
+          "story_arc_slug": "batman-and-robin-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "batman-and-robin-2023#31",
+          "story_arc_slug": "batman-and-robin-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "batman-and-robin-2023#32",
+          "story_arc_slug": "batman-and-robin-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "batman-and-robin-2023#33",
+          "story_arc_slug": "batman-and-robin-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "batman-and-robin-2023-vol-4",
+      "title": "Batman and Robin: Vol. 4",
+      "description": "Bruce and Damian's current father-son team book.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "batman-and-robin-2023#34",
+          "story_arc_slug": "batman-and-robin-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "batman-and-robin-2023#35",
+          "story_arc_slug": "batman-and-robin-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "batman-and-robin-2023#36",
+          "story_arc_slug": "batman-and-robin-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "batman-and-robin-2023#37",
+          "story_arc_slug": "batman-and-robin-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "captain-america-2025-vol-2",
+      "title": "Captain America: Vol. 2",
+      "description": "Steve Rogers returns to a new flagship Cap ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "captain-america-2025#7",
+          "story_arc_slug": "captain-america-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "captain-america-2025#8",
+          "story_arc_slug": "captain-america-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "captain-america-2025#9",
+          "story_arc_slug": "captain-america-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "captain-america-2025#10",
+          "story_arc_slug": "captain-america-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "captain-america-2025#11",
+          "story_arc_slug": "captain-america-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "captain-america-2025#12",
+          "story_arc_slug": "captain-america-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "captain-america-2025-vol-3",
+      "title": "Captain America: Vol. 3",
+      "description": "Steve Rogers returns to a new flagship Cap ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "captain-america-2025#13",
+          "story_arc_slug": "captain-america-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "captain-america-2025#14",
+          "story_arc_slug": "captain-america-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "captain-america-2025#15",
+          "story_arc_slug": "captain-america-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "daredevil-2023-vol-3",
+      "title": "Daredevil: Vol. 3",
+      "description": "Saladin Ahmed's Daredevil ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "daredevil-2023#26",
+          "story_arc_slug": "daredevil-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "daredevil-2023#27",
+          "story_arc_slug": "daredevil-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "daredevil-2023#28",
+          "story_arc_slug": "daredevil-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "daredevil-2023#29",
+          "story_arc_slug": "daredevil-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "daredevil-2023#30",
+          "story_arc_slug": "daredevil-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "daredevil-2023#31",
+          "story_arc_slug": "daredevil-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "daredevil-2023-vol-4",
+      "title": "Daredevil: Vol. 4",
+      "description": "Saladin Ahmed's Daredevil ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "daredevil-2023#32",
+          "story_arc_slug": "daredevil-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "daredevil-2023#33",
+          "story_arc_slug": "daredevil-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "daredevil-2023#34",
+          "story_arc_slug": "daredevil-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "daredevil-2023#35",
+          "story_arc_slug": "daredevil-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "daredevil-2023#36",
+          "story_arc_slug": "daredevil-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "daredevil-2023#37",
+          "story_arc_slug": "daredevil-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "daredevil-2023-vol-5",
+      "title": "Daredevil: Vol. 5",
+      "description": "Saladin Ahmed's Daredevil ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "daredevil-2023#38",
+          "story_arc_slug": "daredevil-2023-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "deadpool-2024-vol-4",
+      "title": "Deadpool: Vol. 4",
+      "description": "Wade Wilson's current ongoing series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "deadpool-2024#16",
+          "story_arc_slug": "deadpool-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "deadpool-2024#17",
+          "story_arc_slug": "deadpool-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "deadpool-2024#18",
+          "story_arc_slug": "deadpool-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "deadpool-2024#19",
+          "story_arc_slug": "deadpool-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "deadpool-2024#20",
+          "story_arc_slug": "deadpool-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "deadpool-2024#21",
+          "story_arc_slug": "deadpool-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "deadpool-2024-vol-5",
+      "title": "Deadpool: Vol. 5",
+      "description": "Wade Wilson's current ongoing series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "deadpool-2024#22",
+          "story_arc_slug": "deadpool-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "deadpool-2024#23",
+          "story_arc_slug": "deadpool-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "deadpool-2024#24",
+          "story_arc_slug": "deadpool-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "deadpool-2024#25",
+          "story_arc_slug": "deadpool-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "deadpool-2024#26",
+          "story_arc_slug": "deadpool-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "deadpool-2024#27",
+          "story_arc_slug": "deadpool-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "deadpool-2024-vol-6",
+      "title": "Deadpool: Vol. 6",
+      "description": "Wade Wilson's current ongoing series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "deadpool-2024#28",
+          "story_arc_slug": "deadpool-2024-vol-6",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "deadpool-2024#29",
+          "story_arc_slug": "deadpool-2024-vol-6",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "deadpool-2024#30",
+          "story_arc_slug": "deadpool-2024-vol-6",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "detective-comics-1937-vol-4",
+      "title": "Detective Comics: Vol. 4",
+      "description": "Batman's detective-focused flagship title, seeded with the current Tom Taylor era.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "detective-comics-1937#1108",
+          "story_arc_slug": "detective-comics-1937-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "detective-comics-1937#1109",
+          "story_arc_slug": "detective-comics-1937-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "detective-comics-1937#1110",
+          "story_arc_slug": "detective-comics-1937-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "detective-comics-1937#1111",
+          "story_arc_slug": "detective-comics-1937-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "detective-comics-1937#1112",
+          "story_arc_slug": "detective-comics-1937-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "detective-comics-1937#1113",
+          "story_arc_slug": "detective-comics-1937-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "doctor-strange-of-asgard-2025-vol-2",
+      "title": "Doctor Strange of Asgard: Vol. 2",
+      "description": "Stephen Strange heads to Asgard in this current Marvel ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#6",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#7",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#8",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#9",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#10",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#11",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "doctor-strange-of-asgard-2025-vol-3",
+      "title": "Doctor Strange of Asgard: Vol. 3",
+      "description": "Stephen Strange heads to Asgard in this current Marvel ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#12",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#13",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#14",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#15",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#16",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#17",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "doctor-strange-of-asgard-2025-vol-4",
+      "title": "Doctor Strange of Asgard: Vol. 4",
+      "description": "Stephen Strange heads to Asgard in this current Marvel ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#18",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "doctor-strange-of-asgard-2025#19",
+          "story_arc_slug": "doctor-strange-of-asgard-2025-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "exceptional-x-men-2024-vol-3",
+      "title": "Exceptional X-Men: Vol. 3",
+      "description": "Kitty Pryde leads a fresh mutant-focused relaunch.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "exceptional-x-men-2024#13",
+          "story_arc_slug": "exceptional-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "exceptional-x-men-2024#14",
+          "story_arc_slug": "exceptional-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "exceptional-x-men-2024#15",
+          "story_arc_slug": "exceptional-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "exceptional-x-men-2024#16",
+          "story_arc_slug": "exceptional-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "exceptional-x-men-2024#17",
+          "story_arc_slug": "exceptional-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "exceptional-x-men-2024#18",
+          "story_arc_slug": "exceptional-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "exceptional-x-men-2024-vol-4",
+      "title": "Exceptional X-Men: Vol. 4",
+      "description": "Kitty Pryde leads a fresh mutant-focused relaunch.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "exceptional-x-men-2024#19",
+          "story_arc_slug": "exceptional-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "exceptional-x-men-2024#20",
+          "story_arc_slug": "exceptional-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "exceptional-x-men-2024#21",
+          "story_arc_slug": "exceptional-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "exceptional-x-men-2024#22",
+          "story_arc_slug": "exceptional-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "exceptional-x-men-2024#23",
+          "story_arc_slug": "exceptional-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "exceptional-x-men-2024#24",
+          "story_arc_slug": "exceptional-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "exceptional-x-men-2024-vol-5",
+      "title": "Exceptional X-Men: Vol. 5",
+      "description": "Kitty Pryde leads a fresh mutant-focused relaunch.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "exceptional-x-men-2024#25",
+          "story_arc_slug": "exceptional-x-men-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "fantastic-four-2022-vol-3",
+      "title": "Fantastic Four: Vol. 3",
+      "description": "Ryan North's Fantastic Four run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "fantastic-four-2022#37",
+          "story_arc_slug": "fantastic-four-2022-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "fantastic-four-2022#38",
+          "story_arc_slug": "fantastic-four-2022-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "fantastic-four-2022#39",
+          "story_arc_slug": "fantastic-four-2022-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "fantastic-four-2022#40",
+          "story_arc_slug": "fantastic-four-2022-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "fantastic-four-2022#41",
+          "story_arc_slug": "fantastic-four-2022-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "fantastic-four-2022#42",
+          "story_arc_slug": "fantastic-four-2022-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "fantastic-four-2022-vol-4",
+      "title": "Fantastic Four: Vol. 4",
+      "description": "Ryan North's Fantastic Four run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "fantastic-four-2022#43",
+          "story_arc_slug": "fantastic-four-2022-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "fantastic-four-2022#44",
+          "story_arc_slug": "fantastic-four-2022-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "fantastic-four-2022#45",
+          "story_arc_slug": "fantastic-four-2022-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "fantastic-four-2022#46",
+          "story_arc_slug": "fantastic-four-2022-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "fantastic-four-2022#47",
+          "story_arc_slug": "fantastic-four-2022-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "fantastic-four-2022#48",
+          "story_arc_slug": "fantastic-four-2022-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "green-arrow-2023-vol-3",
+      "title": "Green Arrow: Vol. 3",
+      "description": "Oliver Queen's current solo series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "green-arrow-2023#28",
+          "story_arc_slug": "green-arrow-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "green-arrow-2023#29",
+          "story_arc_slug": "green-arrow-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "green-arrow-2023#30",
+          "story_arc_slug": "green-arrow-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "green-arrow-2023#31",
+          "story_arc_slug": "green-arrow-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "green-arrow-2023#32",
+          "story_arc_slug": "green-arrow-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "green-arrow-2023#33",
+          "story_arc_slug": "green-arrow-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "green-arrow-2023-vol-4",
+      "title": "Green Arrow: Vol. 4",
+      "description": "Oliver Queen's current solo series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "green-arrow-2023#34",
+          "story_arc_slug": "green-arrow-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "green-arrow-2023#35",
+          "story_arc_slug": "green-arrow-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "green-arrow-2023#36",
+          "story_arc_slug": "green-arrow-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "green-arrow-2023#37",
+          "story_arc_slug": "green-arrow-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "green-arrow-2023#38",
+          "story_arc_slug": "green-arrow-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "green-arrow-2023#39",
+          "story_arc_slug": "green-arrow-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "green-arrow-2023-vol-5",
+      "title": "Green Arrow: Vol. 5",
+      "description": "Oliver Queen's current solo series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "green-arrow-2023#40",
+          "story_arc_slug": "green-arrow-2023-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "green-lantern-2023-vol-3",
+      "title": "Green Lantern: Vol. 3",
+      "description": "Jeremy Adams' core Green Lantern run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "green-lantern-2023#28",
+          "story_arc_slug": "green-lantern-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "green-lantern-2023#29",
+          "story_arc_slug": "green-lantern-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "green-lantern-2023#30",
+          "story_arc_slug": "green-lantern-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "green-lantern-2023#31",
+          "story_arc_slug": "green-lantern-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "green-lantern-2023#32",
+          "story_arc_slug": "green-lantern-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "green-lantern-2023#33",
+          "story_arc_slug": "green-lantern-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "green-lantern-2023-vol-4",
+      "title": "Green Lantern: Vol. 4",
+      "description": "Jeremy Adams' core Green Lantern run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "green-lantern-2023#34",
+          "story_arc_slug": "green-lantern-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "green-lantern-2023#35",
+          "story_arc_slug": "green-lantern-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "green-lantern-2023#36",
+          "story_arc_slug": "green-lantern-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "green-lantern-2023#37",
+          "story_arc_slug": "green-lantern-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "green-lantern-2023#38",
+          "story_arc_slug": "green-lantern-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "green-lantern-2023#39",
+          "story_arc_slug": "green-lantern-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "immortal-thor-2023-vol-3",
+      "title": "Immortal Thor: Vol. 3",
+      "description": "Al Ewing's mythic Thor ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "immortal-thor-2023#27",
+          "story_arc_slug": "immortal-thor-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "immortal-thor-2023#28",
+          "story_arc_slug": "immortal-thor-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "immortal-thor-2023#29",
+          "story_arc_slug": "immortal-thor-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "immortal-thor-2023#30",
+          "story_arc_slug": "immortal-thor-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "immortal-thor-2023#31",
+          "story_arc_slug": "immortal-thor-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "immortal-thor-2023#32",
+          "story_arc_slug": "immortal-thor-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "immortal-thor-2023-vol-4",
+      "title": "Immortal Thor: Vol. 4",
+      "description": "Al Ewing's mythic Thor ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "immortal-thor-2023#33",
+          "story_arc_slug": "immortal-thor-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "immortal-thor-2023#34",
+          "story_arc_slug": "immortal-thor-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "immortal-thor-2023#35",
+          "story_arc_slug": "immortal-thor-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "immortal-thor-2023#36",
+          "story_arc_slug": "immortal-thor-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "immortal-thor-2023#37",
+          "story_arc_slug": "immortal-thor-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "immortal-thor-2023#38",
+          "story_arc_slug": "immortal-thor-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "incredible-hulk-2023-vol-3",
+      "title": "Incredible Hulk: Vol. 3",
+      "description": "Phillip Kennedy Johnson's current Hulk run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "incredible-hulk-2023#31",
+          "story_arc_slug": "incredible-hulk-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "incredible-hulk-2023#32",
+          "story_arc_slug": "incredible-hulk-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "incredible-hulk-2023#33",
+          "story_arc_slug": "incredible-hulk-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "incredible-hulk-2023#34",
+          "story_arc_slug": "incredible-hulk-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "incredible-hulk-2023#35",
+          "story_arc_slug": "incredible-hulk-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "incredible-hulk-2023#36",
+          "story_arc_slug": "incredible-hulk-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "incredible-hulk-2023-vol-4",
+      "title": "Incredible Hulk: Vol. 4",
+      "description": "Phillip Kennedy Johnson's current Hulk run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "incredible-hulk-2023#37",
+          "story_arc_slug": "incredible-hulk-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "incredible-hulk-2023#38",
+          "story_arc_slug": "incredible-hulk-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "incredible-hulk-2023#39",
+          "story_arc_slug": "incredible-hulk-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "incredible-hulk-2023#40",
+          "story_arc_slug": "incredible-hulk-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "incredible-hulk-2023#41",
+          "story_arc_slug": "incredible-hulk-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "incredible-hulk-2023#42",
+          "story_arc_slug": "incredible-hulk-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "incredible-hulk-2023-vol-5",
+      "title": "Incredible Hulk: Vol. 5",
+      "description": "Phillip Kennedy Johnson's current Hulk run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "incredible-hulk-2023#43",
+          "story_arc_slug": "incredible-hulk-2023-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "iron-man-2024-vol-3",
+      "title": "Iron Man: Vol. 3",
+      "description": "Spencer Ackerman's current Iron Man run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "iron-man-2024#11",
+          "story_arc_slug": "iron-man-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "iron-man-2024#12",
+          "story_arc_slug": "iron-man-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "iron-man-2024#13",
+          "story_arc_slug": "iron-man-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "iron-man-2024#14",
+          "story_arc_slug": "iron-man-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "iron-man-2024#15",
+          "story_arc_slug": "iron-man-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "iron-man-2024#16",
+          "story_arc_slug": "iron-man-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "iron-man-2024-vol-4",
+      "title": "Iron Man: Vol. 4",
+      "description": "Spencer Ackerman's current Iron Man run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "iron-man-2024#17",
+          "story_arc_slug": "iron-man-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "iron-man-2024#18",
+          "story_arc_slug": "iron-man-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "iron-man-2024#19",
+          "story_arc_slug": "iron-man-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "iron-man-2024#20",
+          "story_arc_slug": "iron-man-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "iron-man-2024#21",
+          "story_arc_slug": "iron-man-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "iron-man-2024#22",
+          "story_arc_slug": "iron-man-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "iron-man-2024-vol-5",
+      "title": "Iron Man: Vol. 5",
+      "description": "Spencer Ackerman's current Iron Man run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "iron-man-2024#23",
+          "story_arc_slug": "iron-man-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "iron-man-2024#24",
+          "story_arc_slug": "iron-man-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "justice-league-unlimited-2024-vol-3",
+      "title": "Justice League Unlimited: Vol. 3",
+      "description": "DC's new Justice League flagship in the All In era.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "justice-league-unlimited-2024#13",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "justice-league-unlimited-2024#14",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "justice-league-unlimited-2024#15",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "justice-league-unlimited-2024#16",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "justice-league-unlimited-2024#17",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "justice-league-unlimited-2024#18",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "justice-league-unlimited-2024-vol-4",
+      "title": "Justice League Unlimited: Vol. 4",
+      "description": "DC's new Justice League flagship in the All In era.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "justice-league-unlimited-2024#19",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "justice-league-unlimited-2024#20",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "justice-league-unlimited-2024#21",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "justice-league-unlimited-2024#22",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "justice-league-unlimited-2024#23",
+          "story_arc_slug": "justice-league-unlimited-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "nightwing-2016-vol-3",
+      "title": "Nightwing: Vol. 3",
+      "description": "Dick Grayson's ongoing solo title.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "nightwing-2016#133",
+          "story_arc_slug": "nightwing-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "nightwing-2016#134",
+          "story_arc_slug": "nightwing-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "nightwing-2016#135",
+          "story_arc_slug": "nightwing-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "nightwing-2016#136",
+          "story_arc_slug": "nightwing-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "nightwing-2016#137",
+          "story_arc_slug": "nightwing-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "nightwing-2016#138",
+          "story_arc_slug": "nightwing-2016-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "nightwing-2016-vol-4",
+      "title": "Nightwing: Vol. 4",
+      "description": "Dick Grayson's ongoing solo title.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "nightwing-2016#139",
+          "story_arc_slug": "nightwing-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "nightwing-2016#140",
+          "story_arc_slug": "nightwing-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "nightwing-2016#141",
+          "story_arc_slug": "nightwing-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "nightwing-2016#142",
+          "story_arc_slug": "nightwing-2016-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "phoenix-2024-vol-3",
+      "title": "Phoenix: Vol. 3",
+      "description": "Jean Grey goes cosmic in the current Phoenix ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "phoenix-2024#13",
+          "story_arc_slug": "phoenix-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "phoenix-2024#14",
+          "story_arc_slug": "phoenix-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "phoenix-2024#15",
+          "story_arc_slug": "phoenix-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "phoenix-2024#16",
+          "story_arc_slug": "phoenix-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "phoenix-2024#17",
+          "story_arc_slug": "phoenix-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "phoenix-2024#18",
+          "story_arc_slug": "phoenix-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "phoenix-2024-vol-4",
+      "title": "Phoenix: Vol. 4",
+      "description": "Jean Grey goes cosmic in the current Phoenix ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "phoenix-2024#19",
+          "story_arc_slug": "phoenix-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "phoenix-2024#20",
+          "story_arc_slug": "phoenix-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "phoenix-2024#21",
+          "story_arc_slug": "phoenix-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "phoenix-2024#22",
+          "story_arc_slug": "phoenix-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "phoenix-2024#23",
+          "story_arc_slug": "phoenix-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "phoenix-2024#24",
+          "story_arc_slug": "phoenix-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "phoenix-2024-vol-5",
+      "title": "Phoenix: Vol. 5",
+      "description": "Jean Grey goes cosmic in the current Phoenix ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "phoenix-2024#25",
+          "story_arc_slug": "phoenix-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "phoenix-2024#26",
+          "story_arc_slug": "phoenix-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "phoenix-2024#27",
+          "story_arc_slug": "phoenix-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "storm-2024-vol-3",
+      "title": "Storm: Vol. 3",
+      "description": "Storm's current solo title.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "storm-2024#13",
+          "story_arc_slug": "storm-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "storm-2024#14",
+          "story_arc_slug": "storm-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "storm-2024#15",
+          "story_arc_slug": "storm-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "storm-2024#16",
+          "story_arc_slug": "storm-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "storm-2024#17",
+          "story_arc_slug": "storm-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "storm-2024#18",
+          "story_arc_slug": "storm-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "storm-2024-vol-4",
+      "title": "Storm: Vol. 4",
+      "description": "Storm's current solo title.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "storm-2024#19",
+          "story_arc_slug": "storm-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "storm-2024#20",
+          "story_arc_slug": "storm-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "storm-2024#21",
+          "story_arc_slug": "storm-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "storm-2024#22",
+          "story_arc_slug": "storm-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "storm-2024#23",
+          "story_arc_slug": "storm-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "storm-2024#24",
+          "story_arc_slug": "storm-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "superman-2023-vol-3",
+      "title": "Superman: Vol. 3",
+      "description": "Joshua Williamson's core Superman ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "superman-2023#33",
+          "story_arc_slug": "superman-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "superman-2023#34",
+          "story_arc_slug": "superman-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "superman-2023#35",
+          "story_arc_slug": "superman-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "superman-2023#36",
+          "story_arc_slug": "superman-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "superman-2023#37",
+          "story_arc_slug": "superman-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "superman-2023#38",
+          "story_arc_slug": "superman-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "superman-2023-vol-4",
+      "title": "Superman: Vol. 4",
+      "description": "Joshua Williamson's core Superman ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "superman-2023#39",
+          "story_arc_slug": "superman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "superman-2023#40",
+          "story_arc_slug": "superman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "superman-2023#41",
+          "story_arc_slug": "superman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "superman-2023#42",
+          "story_arc_slug": "superman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "superman-unlimited-2025-vol-3",
+      "title": "Superman Unlimited: Vol. 3",
+      "description": "Dan Slott and Rafael Albuquerque launch a new core Superman ongoing.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "superman-unlimited-2025#13",
+          "story_arc_slug": "superman-unlimited-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "superman-unlimited-2025#14",
+          "story_arc_slug": "superman-unlimited-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "superman-unlimited-2025#15",
+          "story_arc_slug": "superman-unlimited-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "superman-unlimited-2025#16",
+          "story_arc_slug": "superman-unlimited-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "superman-unlimited-2025#17",
+          "story_arc_slug": "superman-unlimited-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "the-flash-2023-vol-3",
+      "title": "The Flash: Vol. 3",
+      "description": "Wally West's current ongoing series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "the-flash-2023#27",
+          "story_arc_slug": "the-flash-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "the-flash-2023#28",
+          "story_arc_slug": "the-flash-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "the-flash-2023#29",
+          "story_arc_slug": "the-flash-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "the-flash-2023#30",
+          "story_arc_slug": "the-flash-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "the-flash-2023#31",
+          "story_arc_slug": "the-flash-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "the-flash-2023#32",
+          "story_arc_slug": "the-flash-2023-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "the-flash-2023-vol-4",
+      "title": "The Flash: Vol. 4",
+      "description": "Wally West's current ongoing series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "the-flash-2023#33",
+          "story_arc_slug": "the-flash-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "the-flash-2023#34",
+          "story_arc_slug": "the-flash-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "the-flash-2023#35",
+          "story_arc_slug": "the-flash-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "the-flash-2023#36",
+          "story_arc_slug": "the-flash-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "the-flash-2023#37",
+          "story_arc_slug": "the-flash-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "the-flash-2023#38",
+          "story_arc_slug": "the-flash-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "the-flash-2023-vol-5",
+      "title": "The Flash: Vol. 5",
+      "description": "Wally West's current ongoing series.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "the-flash-2023#39",
+          "story_arc_slug": "the-flash-2023-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "uncanny-x-men-2024-vol-3",
+      "title": "Uncanny X-Men: Vol. 3",
+      "description": "Gail Simone's Uncanny X-Men relaunch.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "uncanny-x-men-2024#13",
+          "story_arc_slug": "uncanny-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "uncanny-x-men-2024#14",
+          "story_arc_slug": "uncanny-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "uncanny-x-men-2024#15",
+          "story_arc_slug": "uncanny-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "uncanny-x-men-2024#16",
+          "story_arc_slug": "uncanny-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "uncanny-x-men-2024#17",
+          "story_arc_slug": "uncanny-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "uncanny-x-men-2024#18",
+          "story_arc_slug": "uncanny-x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "uncanny-x-men-2024-vol-4",
+      "title": "Uncanny X-Men: Vol. 4",
+      "description": "Gail Simone's Uncanny X-Men relaunch.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "uncanny-x-men-2024#19",
+          "story_arc_slug": "uncanny-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "uncanny-x-men-2024#20",
+          "story_arc_slug": "uncanny-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "uncanny-x-men-2024#21",
+          "story_arc_slug": "uncanny-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "uncanny-x-men-2024#22",
+          "story_arc_slug": "uncanny-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "uncanny-x-men-2024#23",
+          "story_arc_slug": "uncanny-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "uncanny-x-men-2024#24",
+          "story_arc_slug": "uncanny-x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "uncanny-x-men-2024-vol-5",
+      "title": "Uncanny X-Men: Vol. 5",
+      "description": "Gail Simone's Uncanny X-Men relaunch.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "uncanny-x-men-2024#25",
+          "story_arc_slug": "uncanny-x-men-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "uncanny-x-men-2024#26",
+          "story_arc_slug": "uncanny-x-men-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "wolverine-2024-vol-3",
+      "title": "Wolverine: Vol. 3",
+      "description": "Logan's current flagship solo title.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "wolverine-2024#11",
+          "story_arc_slug": "wolverine-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "wolverine-2024#12",
+          "story_arc_slug": "wolverine-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "wolverine-2024#13",
+          "story_arc_slug": "wolverine-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "wolverine-2024#14",
+          "story_arc_slug": "wolverine-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "wolverine-2024#15",
+          "story_arc_slug": "wolverine-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "wolverine-2024#16",
+          "story_arc_slug": "wolverine-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "wolverine-2024-vol-4",
+      "title": "Wolverine: Vol. 4",
+      "description": "Logan's current flagship solo title.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "wolverine-2024#17",
+          "story_arc_slug": "wolverine-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "wolverine-2024#18",
+          "story_arc_slug": "wolverine-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "wolverine-2024#19",
+          "story_arc_slug": "wolverine-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "wolverine-2024#20",
+          "story_arc_slug": "wolverine-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "wolverine-2024#21",
+          "story_arc_slug": "wolverine-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "wolverine-2024#22",
+          "story_arc_slug": "wolverine-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "wolverine-2024-vol-5",
+      "title": "Wolverine: Vol. 5",
+      "description": "Logan's current flagship solo title.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "wolverine-2024#23",
+          "story_arc_slug": "wolverine-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "wolverine-2024#24",
+          "story_arc_slug": "wolverine-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "wolverine-2024#25",
+          "story_arc_slug": "wolverine-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "wonder-woman-2023-vol-4",
+      "title": "Wonder Woman: Vol. 4",
+      "description": "Tom King and Daniel Sampere's Wonder Woman run.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "wonder-woman-2023#32",
+          "story_arc_slug": "wonder-woman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "wonder-woman-2023#33",
+          "story_arc_slug": "wonder-woman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "wonder-woman-2023#34",
+          "story_arc_slug": "wonder-woman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "wonder-woman-2023#35",
+          "story_arc_slug": "wonder-woman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "wonder-woman-2023#36",
+          "story_arc_slug": "wonder-woman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "wonder-woman-2023#37",
+          "story_arc_slug": "wonder-woman-2023-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "x-men-2024-vol-3",
+      "title": "X-Men: Vol. 3",
+      "description": "The core X-Men launch of Marvel's post-Krakoa line.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "x-men-2024#13",
+          "story_arc_slug": "x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "x-men-2024#14",
+          "story_arc_slug": "x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "x-men-2024#15",
+          "story_arc_slug": "x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "x-men-2024#16",
+          "story_arc_slug": "x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "x-men-2024#17",
+          "story_arc_slug": "x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "x-men-2024#18",
+          "story_arc_slug": "x-men-2024-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "x-men-2024-vol-4",
+      "title": "X-Men: Vol. 4",
+      "description": "The core X-Men launch of Marvel's post-Krakoa line.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "x-men-2024#19",
+          "story_arc_slug": "x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "x-men-2024#20",
+          "story_arc_slug": "x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "x-men-2024#21",
+          "story_arc_slug": "x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "x-men-2024#22",
+          "story_arc_slug": "x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "x-men-2024#23",
+          "story_arc_slug": "x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "x-men-2024#24",
+          "story_arc_slug": "x-men-2024-vol-4",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "x-men-2024-vol-5",
+      "title": "X-Men: Vol. 5",
+      "description": "The core X-Men launch of Marvel's post-Krakoa line.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "x-men-2024#25",
+          "story_arc_slug": "x-men-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "x-men-2024#26",
+          "story_arc_slug": "x-men-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "x-men-2024#27",
+          "story_arc_slug": "x-men-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-green-arrow-2026-vol-2",
+      "title": "Absolute Green Arrow: Vol. 2",
+      "description": "The Absolute line's take on Oliver Queen.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-green-arrow-2026#7",
+          "story_arc_slug": "absolute-green-arrow-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-green-arrow-2026#8",
+          "story_arc_slug": "absolute-green-arrow-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "absolute-green-arrow-2026#9",
+          "story_arc_slug": "absolute-green-arrow-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "absolute-catwoman-2026-vol-2",
+      "title": "Absolute Catwoman: Vol. 2",
+      "description": "The Absolute line's take on Selina Kyle.",
+      "status": "published",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "absolute-catwoman-2026#7",
+          "story_arc_slug": "absolute-catwoman-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "absolute-catwoman-2026#8",
+          "story_arc_slug": "absolute-catwoman-2026-vol-2",
           "entry_type": "issue",
           "importance": "main"
         }
