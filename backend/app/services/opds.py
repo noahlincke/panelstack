@@ -14,8 +14,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from xml.sax.saxutils import escape
 
-NAVIGATION_TYPE = "application/atom+xml;profile=opds-catalog;kind=navigation"
-ACQUISITION_TYPE = "application/atom+xml;profile=opds-catalog;kind=acquisition"
+# Starlette only adds a charset for text/*, so it is declared here. Without it a
+# reader may decode the body as Latin-1 and fail on any non-ASCII title.
+NAVIGATION_TYPE = "application/atom+xml;profile=opds-catalog;kind=navigation;charset=utf-8"
+ACQUISITION_TYPE = "application/atom+xml;profile=opds-catalog;kind=acquisition;charset=utf-8"
+# The link "type" attribute names the feed kind and must stay charset-free.
+NAVIGATION_LINK_TYPE = "application/atom+xml;profile=opds-catalog;kind=navigation"
+ACQUISITION_LINK_TYPE = "application/atom+xml;profile=opds-catalog;kind=acquisition"
 ACQUISITION_REL = "http://opds-spec.org/acquisition"
 IMAGE_REL = "http://opds-spec.org/image"
 THUMBNAIL_REL = "http://opds-spec.org/image/thumbnail"
@@ -93,13 +98,13 @@ def feed(
     up_href: str | None = None,
 ) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    feed_type = NAVIGATION_TYPE if kind == "navigation" else ACQUISITION_TYPE
+    feed_type = NAVIGATION_LINK_TYPE if kind == "navigation" else ACQUISITION_LINK_TYPE
     links = [
         Link(href=self_href, rel="self", type=feed_type),
-        Link(href=start_href, rel="start", type=NAVIGATION_TYPE, title="Panel Stack"),
+        Link(href=start_href, rel="start", type=NAVIGATION_LINK_TYPE, title="Panel Stack"),
     ]
     if up_href:
-        links.append(Link(href=up_href, rel="up", type=NAVIGATION_TYPE))
+        links.append(Link(href=up_href, rel="up", type=NAVIGATION_LINK_TYPE))
 
     document = [
         '<?xml version="1.0" encoding="UTF-8"?>\n',
@@ -134,7 +139,7 @@ def navigation_entry(
             Link(
                 href=href,
                 rel="subsection",
-                type=NAVIGATION_TYPE if kind == "navigation" else ACQUISITION_TYPE,
+                type=NAVIGATION_LINK_TYPE if kind == "navigation" else ACQUISITION_LINK_TYPE,
             )
         ],
     )
@@ -155,3 +160,27 @@ def acquisition_entry(
         links.append(Link(href=cover_href, rel=IMAGE_REL, type="image/jpeg"))
         links.append(Link(href=cover_href, rel=THUMBNAIL_REL, type="image/jpeg"))
     return Entry(identifier=identifier, title=title, summary=summary, links=links, updated=updated)
+
+
+def collected_edition_queries(title: str) -> list[str]:
+    """Progressively looser searches for a collected edition.
+
+    Publisher subtitles are the least reliable part of a trade's name — the
+    catalogue may say "Vol. 2 - The Hunt" where the release is "Vol. 2 -
+    Abomination" — so the subtitle is dropped before giving up.
+    """
+    candidates = [title]
+    without_subtitle = title
+    for separator in (" - ", " \u2013 ", " \u2014 ", ": "):
+        head, found, _ = without_subtitle.partition(separator)
+        if found and "vol" in head.lower():
+            without_subtitle = head
+            break
+    if without_subtitle != title:
+        candidates.append(f"{without_subtitle} (TPB)")
+        candidates.append(without_subtitle)
+    stripped = title.replace(" (TPB)", "").strip()
+    if stripped and stripped not in candidates:
+        candidates.append(stripped)
+    seen: set[str] = set()
+    return [c for c in candidates if not (c in seen or seen.add(c))]
