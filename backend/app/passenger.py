@@ -25,6 +25,11 @@ def create_passenger_app() -> FastAPI:
     async def strip_base_path(request, call_next):
         if BASE_PATH and request.scope["path"].startswith(f"{BASE_PATH}/"):
             request.scope["path"] = request.scope["path"][len(BASE_PATH) :] or "/"
+        # OPDS lives on the API app but is served without the /api prefix so the
+        # catalog URL a reader is given stays short.
+        path = request.scope["path"]
+        if path == "/opds" or path.startswith("/opds/"):
+            request.scope["path"] = f"/api{path}"
         return await call_next(request)
 
     app.mount("/api", api_app)

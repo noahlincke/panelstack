@@ -135,6 +135,11 @@ def entry_title(entry: ReadingPathEntry) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Rebuild each seeded list from scratch, dropping items curation no longer produces.",
+    )
     args = parser.parse_args()
 
     Base.metadata.create_all(bind=engine)
@@ -168,6 +173,12 @@ def main() -> int:
                 reading_list = ReadingList(name=name, description="Seeded from the recommendation brief.")
                 db.add(reading_list)
                 db.flush()
+
+            if args.replace:
+                for stale in list(reading_list.items):
+                    db.delete(stale)
+                db.flush()
+                db.refresh(reading_list)
 
             existing = {item.reading_path_entry_id for item in reading_list.items}
             sort_order = max((item.sort_order for item in reading_list.items), default=-1) + 1

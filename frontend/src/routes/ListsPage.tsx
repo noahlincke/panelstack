@@ -26,6 +26,7 @@ export function ListsPage() {
   const [isEstimating, setIsEstimating] = useState(false);
   const [error, setError] = useState('');
   const isHosted = Boolean(settings?.hostedDeployment);
+  const opdsCatalogUrl = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/opds`;
 
   const refreshLists = useCallback(
     () => apiClient.listReadingLists().then(setLists).catch(() => setLists([])),
@@ -262,9 +263,23 @@ export function ListsPage() {
           </h2>
 
           {isHosted ? (
-            <p className="lists__hosted-note">
-              Downloads run on your own machine. The hosted library is browse, preview and device-download only.
-            </p>
+            <div className="lists__hosted-note">
+              <p>
+                Add this catalog once in an OPDS reader such as Panels, then download straight to your
+                phone. Sign in with your Panel Stack password.
+              </p>
+              <code className="lists__opds-url">{opdsCatalogUrl}</code>
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => void navigator.clipboard?.writeText(opdsCatalogUrl)}
+              >
+                Copy catalog URL
+              </button>
+              <p className="lists__hosted-hint">
+                Individual issues can also be downloaded from any collection page.
+              </p>
+            </div>
           ) : (
             <>
               <label className="lists__field">
