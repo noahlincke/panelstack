@@ -185,6 +185,7 @@ export type AppSettings = {
   downloadRoot: string;
   defaultDownloadRoot: string;
   hostedDeployment: boolean;
+  opdsToken?: string;
 };
 
 export type OpenFolderResult = {
