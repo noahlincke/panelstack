@@ -8,12 +8,12 @@ import type { CatalogCollection, CatalogFacets, CatalogFilterState } from '../ap
 
 const PAGE_SIZE = 60;
 
-type CataloguePageProps = {
+type CatalogPageProps = {
   searchQuery: string;
   refreshToken: number;
 };
 
-export function CataloguePage({ searchQuery, refreshToken }: CataloguePageProps) {
+export function CatalogPage({ searchQuery, refreshToken }: CatalogPageProps) {
   const [facets, setFacets] = useState<CatalogFacets | undefined>();
   const [filters, setFilters] = useState<CatalogFilterState>({ ...CATALOG_WINDOW, publisher: [...DEFAULT_PUBLISHERS] });
   const [collections, setCollections] = useState<CatalogCollection[]>([]);
@@ -56,9 +56,9 @@ export function CataloguePage({ searchQuery, refreshToken }: CataloguePageProps)
   }, [collections.length, filters, searchQuery]);
 
   return (
-    <section className="view view--catalogue">
+    <section className="view view--catalog">
       <header className="view__header">
-        <h1>Catalogue</h1>
+        <h1>Catalog</h1>
         <p className="view__lede">
           Curated DC and Marvel runs and collected editions, {CATALOG_WINDOW.start.slice(0, 4)} through{' '}
           {CATALOG_WINDOW.end}.
@@ -73,7 +73,7 @@ export function CataloguePage({ searchQuery, refreshToken }: CataloguePageProps)
       />
 
       {error ? <p className="view__error">{error}</p> : null}
-      {isLoading && collections.length === 0 ? <p className="view__empty">Loading catalogue…</p> : null}
+      {isLoading && collections.length === 0 ? <p className="view__empty">Loading catalog…</p> : null}
       {!isLoading && collections.length === 0 && !error ? (
         <p className="view__empty">No collections match these filters.</p>
       ) : null}
@@ -82,7 +82,7 @@ export function CataloguePage({ searchQuery, refreshToken }: CataloguePageProps)
         {collections.map((collection) => (
           <article className="poster-tile" key={collection.id}>
             <Link
-              to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalogue'}
+              to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalog'}
               className="poster-tile__media"
             >
               <CoverImage
@@ -92,7 +92,7 @@ export function CataloguePage({ searchQuery, refreshToken }: CataloguePageProps)
               />
             </Link>
             <h2 className="poster-tile__title">
-              <Link to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalogue'}>
+              <Link to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalog'}>
                 {collection.title}
               </Link>
             </h2>

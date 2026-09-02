@@ -1989,6 +1989,22 @@
           "issue_number": "14",
           "title": "Absolute Batman #14",
           "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "Absolute Batman Vol. 1 - The Zoo (TPB)",
+          "published_on": "2025-06-01",
+          "sort_order": 14500,
+          "summary": "Collects Absolute Batman #1-6."
+        },
+        {
+          "issue_number": "7-12",
+          "issue_kind": "collection",
+          "title": "Absolute Batman Vol. 2 - The Hunt (TPB)",
+          "published_on": "2026-01-01",
+          "sort_order": 14500,
+          "summary": "Collects Absolute Batman #7-12."
         }
       ]
     },
@@ -2179,6 +2195,14 @@
           "issue_number": "12",
           "title": "Absolute Superman #12",
           "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "Absolute Superman Vol. 1 (TPB)",
+          "published_on": "2025-08-01",
+          "sort_order": 12500,
+          "summary": "Collects Absolute Superman #1-6."
         }
       ]
     },
@@ -2259,6 +2283,14 @@
           "issue_number": "14",
           "title": "Absolute Wonder Woman #14",
           "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "Absolute Wonder Woman Vol. 1 (TPB)",
+          "published_on": "2025-07-01",
+          "sort_order": 14500,
+          "summary": "Collects Absolute Wonder Woman #1-6."
         }
       ]
     },
@@ -3605,6 +3637,14 @@
           "issue_number": "27",
           "title": "Green Lantern #27",
           "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "Green Lantern Vol. 1 - Back in Action (TPB)",
+          "published_on": "2024-02-01",
+          "sort_order": 27500,
+          "summary": "Collects Green Lantern #1-6."
         }
       ]
     },
@@ -5563,6 +5603,14 @@
           "issue_number": "12",
           "title": "Far Sector #12",
           "published_on": "2020-10-01"
+        },
+        {
+          "issue_number": "1-12",
+          "issue_kind": "collection",
+          "title": "Far Sector (TPB)",
+          "published_on": "2021-11-01",
+          "sort_order": 12500,
+          "summary": "Collects Far Sector #1-12."
         }
       ]
     },
@@ -6004,6 +6052,14 @@
           "issue_number": "8",
           "title": "Supergirl: Woman of Tomorrow #8",
           "published_on": "2022-01-01"
+        },
+        {
+          "issue_number": "1-8",
+          "issue_kind": "collection",
+          "title": "Supergirl: Woman of Tomorrow (TPB)",
+          "published_on": "2022-06-01",
+          "sort_order": 8500,
+          "summary": "Collects Supergirl: Woman of Tomorrow #1-8."
         }
       ]
     },
@@ -6075,6 +6131,14 @@
           "issue_number": "12",
           "title": "The Human Target #12",
           "published_on": "2022-11-01"
+        },
+        {
+          "issue_number": "1-12",
+          "issue_kind": "collection",
+          "title": "The Human Target (TPB)",
+          "published_on": "2023-06-01",
+          "sort_order": 12500,
+          "summary": "Collects The Human Target #1-12."
         }
       ]
     },
@@ -6136,6 +6200,14 @@
           "issue_number": "10",
           "title": "Batman: The Knight #10",
           "published_on": "2022-11-01"
+        },
+        {
+          "issue_number": "1-10",
+          "issue_kind": "collection",
+          "title": "Batman: The Knight (TPB)",
+          "published_on": "2023-02-01",
+          "sort_order": 10500,
+          "summary": "Collects Batman: The Knight #1-10."
         }
       ]
     },
@@ -6327,6 +6399,14 @@
           "issue_number": "36",
           "title": "Batman/Superman: World's Finest #36",
           "published_on": "2025-03-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "Batman/Superman: World's Finest Vol. 1 - The Devil Nezha (TPB)",
+          "published_on": "2022-12-01",
+          "sort_order": 36500,
+          "summary": "Collects Batman/Superman: World's Finest #1-6."
         }
       ]
     },
@@ -6729,6 +6809,14 @@
           "issue_number": "12",
           "title": "House of X / Powers of X #12",
           "published_on": "2020-06-01"
+        },
+        {
+          "issue_number": "1-12",
+          "issue_kind": "collection",
+          "title": "House of X / Powers of X (TPB)",
+          "published_on": "2020-01-01",
+          "sort_order": 12500,
+          "summary": "Collects House of X #1-6 and Powers of X #1-6."
         }
       ]
     },
@@ -8155,6 +8243,14 @@
           "issue_number": "18",
           "title": "Immortal X-Men #18",
           "published_on": "2023-08-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "Immortal X-Men Vol. 1 (TPB)",
+          "published_on": "2022-12-01",
+          "sort_order": 18500,
+          "summary": "Collects Immortal X-Men #1-6."
         }
       ]
     },
@@ -8256,6 +8352,14 @@
           "issue_number": "18",
           "title": "X-Men Red #18",
           "published_on": "2023-10-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "X-Men Red Vol. 1 (TPB)",
+          "published_on": "2023-01-01",
+          "sort_order": 18500,
+          "summary": "Collects X-Men Red #1-6."
         }
       ]
     },
@@ -8488,6 +8592,14 @@
           "issue_number": "36",
           "title": "Daredevil #36",
           "published_on": "2022-01-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "Daredevil by Chip Zdarsky Vol. 1 - Know Fear (TPB)",
+          "published_on": "2019-10-01",
+          "sort_order": 36500,
+          "summary": "Collects Daredevil #1-6."
         }
       ]
     },
@@ -8830,6 +8942,14 @@
           "issue_number": "50",
           "title": "Immortal Hulk #50",
           "published_on": "2022-07-01"
+        },
+        {
+          "issue_number": "1-6",
+          "issue_kind": "collection",
+          "title": "Immortal Hulk Vol. 1 - Or Is He Both? (TPB)",
+          "published_on": "2019-01-01",
+          "sort_order": 50500,
+          "summary": "Collects Immortal Hulk #1-6."
         }
       ]
     },
@@ -11761,6 +11881,14 @@
           "story_arc_slug": "absolute-batman-2024-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "absolute-batman-2024#1-6",
+          "story_arc_slug": "absolute-batman-2024-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Absolute Batman #1-6."
         }
       ]
     },
@@ -11827,6 +11955,14 @@
           "story_arc_slug": "absolute-batman-2024-vol-2",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "absolute-batman-2024#7-12",
+          "story_arc_slug": "absolute-batman-2024-vol-2",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Absolute Batman #7-12."
         }
       ]
     },
@@ -12036,6 +12172,14 @@
           "story_arc_slug": "absolute-superman-2024-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "absolute-superman-2024#1-6",
+          "story_arc_slug": "absolute-superman-2024-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Absolute Superman #1-6."
         }
       ]
     },
@@ -12147,6 +12291,14 @@
           "story_arc_slug": "absolute-wonder-woman-2024-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "absolute-wonder-woman-2024#1-6",
+          "story_arc_slug": "absolute-wonder-woman-2024-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Absolute Wonder Woman #1-6."
         }
       ]
     },
@@ -14049,6 +14201,14 @@
           "story_arc_slug": "green-lantern-2023-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "green-lantern-2023#1-6",
+          "story_arc_slug": "green-lantern-2023-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Green Lantern #1-6."
         }
       ],
       "cover_url": "https://static.dc.com/2025-03/GL_Cv21_02111_DIGITAL.jpg"
@@ -16901,6 +17061,14 @@
           "story_arc_slug": "far-sector-2019-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "far-sector-2019#1-12",
+          "story_arc_slug": "far-sector-2019-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Far Sector #1-12."
         }
       ]
     },
@@ -17506,6 +17674,14 @@
           "story_arc_slug": "supergirl-woman-of-tomorrow-2021-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "supergirl-woman-of-tomorrow-2021#1-8",
+          "story_arc_slug": "supergirl-woman-of-tomorrow-2021-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Supergirl: Woman of Tomorrow #1-8."
         }
       ]
     },
@@ -17598,6 +17774,14 @@
           "story_arc_slug": "human-target-2021-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "human-target-2021#1-12",
+          "story_arc_slug": "human-target-2021-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects The Human Target #1-12."
         }
       ]
     },
@@ -17676,6 +17860,14 @@
           "story_arc_slug": "batman-the-knight-2022-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "batman-the-knight-2022#1-10",
+          "story_arc_slug": "batman-the-knight-2022-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Batman: The Knight #1-10."
         }
       ]
     },
@@ -17726,6 +17918,14 @@
           "story_arc_slug": "worlds-finest-2022-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "worlds-finest-2022#1-6",
+          "story_arc_slug": "worlds-finest-2022-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Batman/Superman: World's Finest #1-6."
         }
       ]
     },
@@ -18511,6 +18711,14 @@
           "story_arc_slug": "house-of-x-powers-of-x-2019-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "house-of-x-powers-of-x-2019#1-12",
+          "story_arc_slug": "house-of-x-powers-of-x-2019-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects House of X #1-6 and Powers of X #1-6."
         }
       ]
     },
@@ -20590,6 +20798,14 @@
           "story_arc_slug": "immortal-x-men-2022-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "immortal-x-men-2022#1-6",
+          "story_arc_slug": "immortal-x-men-2022-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Immortal X-Men #1-6."
         }
       ]
     },
@@ -20740,6 +20956,14 @@
           "story_arc_slug": "x-men-red-2022-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "x-men-red-2022#1-6",
+          "story_arc_slug": "x-men-red-2022-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects X-Men Red #1-6."
         }
       ]
     },
@@ -20940,6 +21164,14 @@
           "story_arc_slug": "daredevil-2019-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "daredevil-2019#1-6",
+          "story_arc_slug": "daredevil-2019-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Daredevil #1-6."
         }
       ]
     },
@@ -21354,6 +21586,14 @@
           "story_arc_slug": "immortal-hulk-2018-vol-1",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1000,
+          "canonical_issue_key": "immortal-hulk-2018#1-6",
+          "story_arc_slug": "immortal-hulk-2018-vol-1",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Immortal Hulk #1-6."
         }
       ]
     },

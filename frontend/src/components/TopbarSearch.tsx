@@ -67,7 +67,7 @@ export function TopbarSearch({ query, onQueryChange, isOpen, onOpenChange, icon 
   const openCollection = (collection: CatalogCollection) => {
     onOpenChange(false);
     onQueryChange('');
-    navigate(collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalogue');
+    navigate(collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalog');
   };
 
   return (

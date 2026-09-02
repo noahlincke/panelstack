@@ -2332,7 +2332,7 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
     min-width: 0;
   }
 }
-/* ---- Catalogue and chronology ---------------------------------------- */
+/* ---- Catalog and chronology ---------------------------------------- */
 
 .view__header {
   display: grid;
@@ -3492,7 +3492,7 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
   }
 }
 
-/* ---- Inline catalogue picker inside a list ---------------------------- */
+/* ---- Inline catalog picker inside a list ---------------------------- */
 
 .picker {
   margin-top: var(--space-5);
@@ -3622,4 +3622,84 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 .picker__detail-head h3 {
   margin: 0;
   font-size: 0.94rem;
+}
+
+/* A run that merely continues into a year is dimmed so the launch year leads. */
+.lane-card--continues {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.lane-card--continues:hover {
+  opacity: 1;
+}
+
+.lane-card--starts .lane-card__title {
+  color: var(--text);
+}
+
+/* ---- One header geometry on every page --------------------------------
+
+   Measured before this: the title sat 32px below the bar on Catalog and Lists,
+   38px on Chronology (the view switch made the row taller than the heading) and
+   69px on a collection, which also indented 4px further. Pinning the title row
+   to a fixed line box makes the offsets identical regardless of what sits
+   beside the heading. */
+
+.view__header h1,
+.catalog-detail-head__copy h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 40px;
+  letter-spacing: -0.02em;
+}
+
+.view__header-row {
+  min-height: 40px;
+  align-items: center;
+}
+
+.catalog-detail-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-4);
+  padding: 0;
+  margin-bottom: var(--space-5);
+}
+
+.catalog-detail-head__copy {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 68ch;
+}
+
+.catalog-detail-head__copy .eyebrow {
+  margin: 0 0 var(--space-1);
+}
+
+.catalog-detail-head + .section-head,
+.catalog-detail-status + .section-head {
+  margin-top: 0;
+}
+
+.section-head {
+  margin-bottom: var(--space-4);
+}
+
+@media (max-width: 720px) {
+  .view__header h1,
+  .catalog-detail-head__copy h1 {
+    font-size: 1.45rem;
+    line-height: 34px;
+  }
+
+  .view__header-row {
+    min-height: 34px;
+  }
+
+  .catalog-detail-head {
+    grid-template-columns: 1fr;
+  }
 }

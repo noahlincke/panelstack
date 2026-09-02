@@ -226,10 +226,10 @@ Folder = -
         self.assertEqual(loaded.download_root, str(download_root.resolve()))
         self.assertTrue(download_root.exists())
 
-    def test_default_download_root_uses_documents_panelstack_downloads(self) -> None:
+    def test_default_download_root_uses_documents_comics(self) -> None:
         self.assertEqual(
             _default_download_root(),
-            Path.home().joinpath("Documents", "panelstack-downloads").resolve(),
+            Path.home().joinpath("Documents", "COMICS").resolve(),
         )
 
     def test_parse_download_output_accepts_current_cli_labels(self) -> None:

@@ -445,7 +445,7 @@ export function matchesAnyCatalogFilter(path: ReadingPath): boolean {
 }
 
 /**
- * The catalogue tags characters as "<name>-family". Most FILTER_GROUPS ids already
+ * The catalog tags characters as "<name>-family". Most FILTER_GROUPS ids already
  * use that form; Batman is the one that does not, so it is mapped explicitly.
  */
 const ICON_BY_TAG_OVERRIDE: Record<string, string> = {

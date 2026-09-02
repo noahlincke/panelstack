@@ -21,7 +21,8 @@ from sqlalchemy import select  # noqa: E402
 from sqlalchemy.orm import selectinload  # noqa: E402
 
 from backend.app.db import SessionLocal, engine  # noqa: E402
-from backend.app.models import Base, CanonicalIssue, ReadingList, ReadingListItem, ReadingPath, ReadingPathEntry  # noqa: E402
+from backend.app.main import _collection_download_entries  # noqa: E402
+from backend.app.models import Base, ReadingList, ReadingListItem, ReadingPath, ReadingPathEntry  # noqa: E402
 
 # name -> ordered reading-path slugs.
 LISTS: dict[str, list[str]] = {
@@ -146,7 +147,8 @@ def main() -> int:
                 path = db.scalars(
                     select(ReadingPath)
                     .options(
-                        selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue)
+                        selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue),
+                        selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.issue),
                     )
                     .where(ReadingPath.slug == slug)
                 ).first()
@@ -155,7 +157,8 @@ def main() -> int:
                     continue
                 paths.append(path)
 
-            total_entries = sum(len(path.entries) for path in paths)
+            downloadable = {path.id: _collection_download_entries(path) for path in paths}
+            total_entries = sum(len(entries) for entries in downloadable.values())
             print(f"{name}: {len(paths)}/{len(slugs)} collections, {total_entries} issues")
             if args.dry_run:
                 continue
@@ -169,7 +172,7 @@ def main() -> int:
             existing = {item.reading_path_entry_id for item in reading_list.items}
             sort_order = max((item.sort_order for item in reading_list.items), default=-1) + 1
             for path in paths:
-                for entry in path.entries:
+                for entry in downloadable[path.id]:
                     if entry.id in existing:
                         continue
                     db.add(

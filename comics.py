@@ -65,7 +65,7 @@ DOWNLOAD_TEXT_HINTS = {
     "ufile",
     "zippyshare",
 }
-DEFAULT_OUTPUT_DIR = "~/Documents/panelstack-downloads"
+DEFAULT_OUTPUT_DIR = "~/Documents/COMICS"
 GETCOMICS_SEARCH_URL = "https://getcomics.org/?s={query}"
 
 
