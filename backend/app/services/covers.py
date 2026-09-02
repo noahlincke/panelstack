@@ -290,7 +290,8 @@ def ensure_reading_path_cover_asset(
         select(ReadingPathCoverAsset).where(ReadingPathCoverAsset.reading_path_id == reading_path_id)
     )
     if asset is None:
-        asset = ReadingPathCoverAsset(reading_path_id=reading_path_id)
+        # query is NOT NULL, so it has to be set before the row is flushed.
+        asset = ReadingPathCoverAsset(reading_path_id=reading_path_id, query=query)
         db.add(asset)
         db.flush()
 
