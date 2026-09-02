@@ -22,6 +22,9 @@ class FakeResponse:
         self.text = text
         self.headers = headers or {}
 
+    def close(self) -> None:
+        return None
+
     def raise_for_status(self) -> None:
         if self.status_code >= 400:
             raise requests.HTTPError(f"HTTP {self.status_code}")
@@ -45,7 +48,18 @@ class ComicsDownloaderTests(unittest.TestCase):
 
         session = MagicMock()
 
-        def session_get(url: str, *, timeout: int, allow_redirects: bool, stream: bool = False) -> FakeResponse:
+        def session_get(
+            url: str,
+            *,
+            timeout: int,
+            allow_redirects: bool,
+            stream: bool = False,
+            headers: dict[str, str] | None = None,
+        ) -> FakeResponse:
+            # A ranged probe confirms the mirror actually serves the file.
+            if headers and "Range" in headers:
+                self.assertEqual(url, "https://pixeldrain.com/api/file/ZdxbahwL")
+                return FakeResponse(url=url, status_code=206)
             self.assertEqual(timeout, 60)
             self.assertFalse(stream)
             if url == source_url:
@@ -67,6 +81,32 @@ class ComicsDownloaderTests(unittest.TestCase):
         self.assertEqual(plan.post_title, "Absolute Batman #17 (2026)")
         self.assertEqual(plan.selected_link.url, redirect_url)
         self.assertEqual(plan.resolved_url, "https://pixeldrain.com/api/file/ZdxbahwL")
+
+    def test_a_mirror_that_refuses_the_file_falls_through_to_the_next(self) -> None:
+        candidates = [
+            comics.DownloadCandidate(label="comicfiles", url="https://fs2.comicfiles.ru/a.cbz"),
+            comics.DownloadCandidate(label="pixeldrain", url="https://pixeldrain.com/u/ok"),
+        ]
+        session = MagicMock()
+
+        def session_get(url: str, **kwargs) -> FakeResponse:
+            forbidden = "comicfiles" in url
+            return FakeResponse(url=url, status_code=403 if forbidden else 206)
+
+        session.get.side_effect = session_get
+        selected, resolved = comics.resolve_first_supported(session, candidates)
+
+        self.assertEqual(selected.label, "pixeldrain")
+        self.assertEqual(resolved, "https://pixeldrain.com/api/file/ok")
+
+    def test_all_mirrors_refusing_still_returns_a_resolvable_url(self) -> None:
+        candidates = [comics.DownloadCandidate(label="comicfiles", url="https://fs2.comicfiles.ru/a.cbz")]
+        session = MagicMock()
+        session.get.side_effect = lambda url, **kwargs: FakeResponse(url=url, status_code=403)
+
+        selected, resolved = comics.resolve_first_supported(session, candidates)
+
+        self.assertEqual(resolved, "https://fs2.comicfiles.ru/a.cbz")
 
 
 if __name__ == "__main__":

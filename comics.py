@@ -368,16 +368,48 @@ def sort_candidates(candidates: Iterable[DownloadCandidate], preferred_host: str
     return sorted(candidates, key=score)
 
 
+def mirror_serves_file(session: requests.Session, url: str) -> bool:
+    """Confirm a resolved mirror URL actually hands over bytes.
+
+    A mirror can resolve cleanly and still refuse the file itself: comicfiles.ru
+    returns 403 on the archive even though the redirect chain succeeds. Checking
+    one byte here lets the caller fall through to the next mirror instead of
+    failing the whole download.
+    """
+    try:
+        response = session.get(
+            url, timeout=30, allow_redirects=True, stream=True, headers={"Range": "bytes=0-0"}
+        )
+    except requests.RequestException:
+        return False
+    try:
+        return response.status_code < 400
+    finally:
+        response.close()
+
+
 def resolve_first_supported(
     session: requests.Session,
     candidates: list[DownloadCandidate],
 ) -> tuple[DownloadCandidate, str]:
     last_error: ComicDownloadError | None = None
+    unverified: tuple[DownloadCandidate, str] | None = None
     for candidate in candidates:
         try:
-            return candidate, resolve_candidate_url(session, candidate)
+            resolved_url = resolve_candidate_url(session, candidate)
         except ComicDownloadError as exc:
             last_error = exc
+            continue
+        if mirror_serves_file(session, resolved_url):
+            return candidate, resolved_url
+        if unverified is None:
+            unverified = (candidate, resolved_url)
+        last_error = ComicDownloadError(f"{candidate.host} resolved but refused the file.")
+
+    # Nothing verified; hand back the first resolvable mirror so the caller still
+    # gets a real error from the download attempt rather than a guess.
+    if unverified is not None:
+        return unverified
 
     message = str(last_error) if last_error else "No supported mirrors were usable."
     raise ComicDownloadError(message)

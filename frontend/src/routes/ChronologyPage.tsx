@@ -29,7 +29,7 @@ function groupByMonth(entries: ChronologyEntry[]) {
 }
 
 export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
-  const [view, setView] = useState<ChronologyView>('timeline');
+  const [view, setView] = useState<ChronologyView>('lanes');
   const [facets, setFacets] = useState<CatalogFacets | undefined>();
   const [filters, setFilters] = useState<CatalogFilterState>(defaultCatalogFilters());
   const [entries, setEntries] = useState<ChronologyEntry[]>([]);
@@ -110,11 +110,11 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
         <div className="view__header-row">
           <h1>Chronology</h1>
           <div className="view-switch" role="group" aria-label="Chronology view">
-            <button type="button" aria-pressed={view === 'timeline'} onClick={() => setView('timeline')}>
-              Timeline
-            </button>
             <button type="button" aria-pressed={view === 'lanes'} onClick={() => setView('lanes')}>
               Lanes
+            </button>
+            <button type="button" aria-pressed={view === 'timeline'} onClick={() => setView('timeline')}>
+              Timeline
             </button>
           </div>
         </div>

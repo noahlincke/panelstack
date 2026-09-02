@@ -2017,19 +2017,15 @@ def _download_post_url(entry: ReadingPathEntry) -> str | None:
     return cover.post_url
 
 
-def _download_archive_size(post_url: str) -> int | None:
+def _download_archive_size(post_url: str, session: requests.Session) -> int | None:
     """Ask the mirror for the real archive size without downloading it."""
-    session = comics.build_session()
+    plan = comics.resolve_download_plan(post_url, session, preferred_host=None)
+    response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
     try:
-        plan = comics.resolve_download_plan(post_url, session, preferred_host=None)
-        response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
-        try:
-            comics.ensure_success(response, plan.resolved_url)
-            return _response_content_length(response)
-        finally:
-            response.close()
+        comics.ensure_success(response, plan.resolved_url)
+        return _response_content_length(response)
     finally:
-        session.close()
+        response.close()
 
 
 @app.post("/downloads/estimate", response_model=DownloadEstimateResponse)
@@ -2037,14 +2033,17 @@ def estimate_downloads(payload: DownloadEstimateWrite) -> DownloadEstimateRespon
     _require_local_deployment()
     destination = _download_destination(payload.destination)
 
+    # One HTTP session for the whole estimate so connection reuse and cookies
+    # carry across targets.
+    http = comics.build_session(insecure=False)
+
     def resolve(target: DownloadTarget) -> tuple[int | None, str | None]:
-        # Sizes resolve on a worker pool, and a Session is not thread safe.
         with SessionLocal() as session:
             entry = _download_entry(session, target.reading_path_id, target.entry_id)
             post_url = _download_post_url(entry)
         if not post_url:
             return None, None
-        return _download_archive_size(post_url), post_url
+        return _download_archive_size(post_url, http), post_url
 
     resolved = resolve_targets(
         [
@@ -2053,6 +2052,7 @@ def estimate_downloads(payload: DownloadEstimateWrite) -> DownloadEstimateRespon
         ],
         resolve,
     )
+    http.close()
     total_bytes = sum(item.size_bytes or 0 for item in resolved)
     space = destination_space(destination)
     return DownloadEstimateResponse(

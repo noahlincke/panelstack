@@ -8,14 +8,16 @@ from __future__ import annotations
 
 import shutil
 import threading
+import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Resolving a size costs one post lookup plus one ranged request, so a small pool
-# keeps a 40-issue selection responsive without hammering the source host.
-SIZE_RESOLUTION_WORKERS = 4
+# Size resolution runs serially. Concurrent workers made GetComics return 429 and
+# the mirrors return 403, which surfaced as "no source found" for most of a
+# selection. One request at a time with a pause between is slower and correct.
+SIZE_RESOLUTION_DELAY_SECONDS = 1.2
 
 
 @dataclass(frozen=True)
@@ -95,9 +97,10 @@ def destination_space(path: Path) -> DestinationSpace:
 def resolve_targets(
     targets: Sequence[DownloadTarget],
     resolver: Callable[[DownloadTarget], tuple[int | None, str | None]],
+    *,
+    delay_seconds: float = SIZE_RESOLUTION_DELAY_SECONDS,
 ) -> list[ResolvedTarget]:
-    """Resolve each target's real archive size, keeping the caller's order."""
-    from concurrent.futures import ThreadPoolExecutor
+    """Resolve each target's real archive size, one at a time, in order."""
 
     def resolve_one(target: DownloadTarget) -> ResolvedTarget:
         try:
@@ -120,10 +123,12 @@ def resolve_targets(
             detail=None if post_url else "No downloadable source was found.",
         )
 
-    if not targets:
-        return []
-    with ThreadPoolExecutor(max_workers=min(SIZE_RESOLUTION_WORKERS, len(targets))) as pool:
-        return list(pool.map(resolve_one, targets))
+    resolved: list[ResolvedTarget] = []
+    for index, target in enumerate(targets):
+        if index and delay_seconds:
+            time.sleep(delay_seconds)
+        resolved.append(resolve_one(target))
+    return resolved
 
 
 class DownloadQueue:
@@ -157,7 +162,7 @@ class DownloadQueue:
         """
         with self._lock:
             if self._state is not None and self._state.snapshot.status == "running":
-                raise RuntimeError("A flight prep queue is already running.")
+                raise RuntimeError("A download queue is already running.")
             snapshot = QueueSnapshot(
                 id=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f"),
                 destination=str(destination),
