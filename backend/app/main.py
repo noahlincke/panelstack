@@ -2290,16 +2290,30 @@ def cancel_downloads() -> DownloadQueueRead | None:
 OPDS_ROOT_ID = "urn:panelstack:opds"
 
 
-def _opds_link(href: str, token: str | None) -> str:
-    """Carry the access token onto every link so no request needs a challenge."""
-    if not token:
+def _opds_link(href: str, token: str | None, redirect: bool = False) -> str:
+    """Carry the access token, and the delivery mode, onto every link.
+
+    The token avoids a 401 challenge per request. The delivery mode has to travel
+    too, otherwise choosing it on the catalog URL would not reach the acquisition
+    links the reader actually fetches.
+    """
+    parts = []
+    if token:
+        parts.append(f"{OPDS_TOKEN_PARAM}={token}")
+    if redirect:
+        parts.append("redirect=1")
+    if not parts:
         return href
     separator = "&" if "?" in href else "?"
-    return f"{href}{separator}{OPDS_TOKEN_PARAM}={token}"
+    return f"{href}{separator}{'&'.join(parts)}"
 
 
 def _opds_token(request: Request) -> str | None:
     return request.query_params.get(OPDS_TOKEN_PARAM)
+
+
+def _opds_redirect(request: Request) -> bool:
+    return request.query_params.get("redirect") == "1"
 
 
 def _opds_base(request: Request) -> str:
@@ -2370,6 +2384,19 @@ def opds_download(
     if entry is None or entry.entry_type not in {"issue", "collection"}:
         raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
 
+    # Two ways to hand a file over, switchable per catalog URL.
+    #
+    # Default is to relay: the host streams the bytes. Panels made real progress
+    # this way, and starts nothing at all when handed a 302 — it appears not to
+    # follow redirects on acquisition links. The cost is a connection held open
+    # for the whole transfer.
+    #
+    # redirect=1 hands over the mirror URL instead. The host is free in about a
+    # second and the reader inherits the mirror's own resume support, which is
+    # better for any reader that does follow redirects.
+    if request.query_params.get("redirect") != "1":
+        return download_reading_path_entry_file(reading_path_id, entry_id, request, db)
+
     mirror_url = _entry_mirror_url(entry)
     if mirror_url is None:
         # Local file: there is nothing to redirect to.
@@ -2382,11 +2409,14 @@ def opds_cover(reading_path_id: int, entry_id: int, db: Session = Depends(get_db
     return get_reading_path_entry_cover_image(reading_path_id, entry_id, db)
 
 
-def _opds_entry_download_href(base: str, reading_path_id: int, entry_id: int, token: str | None = None) -> str:
-    return _opds_link(f"{base}/opds/download/{reading_path_id}/{entry_id}", token)
+def _opds_entry_download_href(
+    base: str, reading_path_id: int, entry_id: int, token: str | None = None, redirect: bool = False
+) -> str:
+    return _opds_link(f"{base}/opds/download/{reading_path_id}/{entry_id}", token, redirect)
 
 
 def _opds_entry_cover_href(base: str, reading_path_id: int, entry_id: int, token: str | None = None) -> str:
+    # Covers are small, so they never need the relay flag.
     return _opds_link(f"{base}/opds/cover/{reading_path_id}/{entry_id}", token)
 
 
@@ -2400,22 +2430,23 @@ def _opds_entry_title(entry: ReadingPathEntry) -> str:
 def opds_root(request: Request) -> Response:
     base = _opds_base(request)
     token = _opds_token(request)
+    redirect = _opds_redirect(request)
     body = opds.feed(
         feed_id=OPDS_ROOT_ID,
         title="Panel Stack",
-        self_href=_opds_link(f"{base}/opds", token),
-        start_href=_opds_link(f"{base}/opds", token),
+        self_href=_opds_link(f"{base}/opds", token, redirect),
+        start_href=_opds_link(f"{base}/opds", token, redirect),
         entries=[
             opds.navigation_entry(
                 identifier=f"{OPDS_ROOT_ID}:lists",
                 title="Reading lists",
-                href=_opds_link(f"{base}/opds/lists", token),
+                href=_opds_link(f"{base}/opds/lists", token, redirect),
                 summary="Lists you built in Panel Stack.",
             ),
             opds.navigation_entry(
                 identifier=f"{OPDS_ROOT_ID}:collections",
                 title="Collections",
-                href=_opds_link(f"{base}/opds/collections", token),
+                href=_opds_link(f"{base}/opds/collections", token, redirect),
                 summary="Every curated run and collected edition.",
             ),
         ],
@@ -2427,20 +2458,21 @@ def opds_root(request: Request) -> Response:
 def opds_lists(request: Request, db: Session = Depends(get_db)) -> Response:
     base = _opds_base(request)
     token = _opds_token(request)
+    redirect = _opds_redirect(request)
     lists = db.scalars(
         select(ReadingList).options(selectinload(ReadingList.items)).order_by(ReadingList.name.asc())
     ).all()
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:lists",
         title="Reading lists",
-        self_href=_opds_link(f"{base}/opds/lists", token),
-        start_href=_opds_link(f"{base}/opds", token),
-        up_href=_opds_link(f"{base}/opds", token),
+        self_href=_opds_link(f"{base}/opds/lists", token, redirect),
+        start_href=_opds_link(f"{base}/opds", token, redirect),
+        up_href=_opds_link(f"{base}/opds", token, redirect),
         entries=[
             opds.navigation_entry(
                 identifier=f"{OPDS_ROOT_ID}:list:{reading_list.id}",
                 title=reading_list.name,
-                href=_opds_link(f"{base}/opds/lists/{reading_list.id}", token),
+                href=_opds_link(f"{base}/opds/lists/{reading_list.id}", token, redirect),
                 summary=f"{len(reading_list.items)} issues",
                 kind="acquisition",
             )
@@ -2454,6 +2486,7 @@ def opds_lists(request: Request, db: Session = Depends(get_db)) -> Response:
 def opds_list(reading_list_id: int, request: Request, db: Session = Depends(get_db)) -> Response:
     base = _opds_base(request)
     token = _opds_token(request)
+    redirect = _opds_redirect(request)
     reading_list = _reading_list(db, reading_list_id)
     entries = []
     for item in reading_list.items:
@@ -2461,7 +2494,7 @@ def opds_list(reading_list_id: int, request: Request, db: Session = Depends(get_
             opds.acquisition_entry(
                 identifier=f"{OPDS_ROOT_ID}:item:{item.id}",
                 title=item.title,
-                download_href=_opds_entry_download_href(base, item.reading_path_id, item.reading_path_entry_id, token),
+                download_href=_opds_entry_download_href(base, item.reading_path_id, item.reading_path_entry_id, token, redirect),
                 media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
                 cover_href=_opds_entry_cover_href(base, item.reading_path_id, item.reading_path_entry_id, token),
             )
@@ -2469,9 +2502,9 @@ def opds_list(reading_list_id: int, request: Request, db: Session = Depends(get_
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:list:{reading_list.id}",
         title=reading_list.name,
-        self_href=_opds_link(f"{base}/opds/lists/{reading_list.id}", token),
-        start_href=_opds_link(f"{base}/opds", token),
-        up_href=_opds_link(f"{base}/opds/lists", token),
+        self_href=_opds_link(f"{base}/opds/lists/{reading_list.id}", token, redirect),
+        start_href=_opds_link(f"{base}/opds", token, redirect),
+        up_href=_opds_link(f"{base}/opds/lists", token, redirect),
         entries=entries,
         kind="acquisition",
     )
@@ -2489,6 +2522,7 @@ def opds_collections(
 ) -> Response:
     base = _opds_base(request)
     token = _opds_token(request)
+    redirect = _opds_redirect(request)
     collections, _ = catalog_collections(
         db,
         publisher=publisher,
@@ -2499,14 +2533,14 @@ def opds_collections(
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:collections",
         title="Collections",
-        self_href=_opds_link(f"{base}/opds/collections", token),
-        start_href=_opds_link(f"{base}/opds", token),
-        up_href=_opds_link(f"{base}/opds", token),
+        self_href=_opds_link(f"{base}/opds/collections", token, redirect),
+        start_href=_opds_link(f"{base}/opds", token, redirect),
+        up_href=_opds_link(f"{base}/opds", token, redirect),
         entries=[
             opds.navigation_entry(
                 identifier=f"{OPDS_ROOT_ID}:collection:{collection.id}",
                 title=collection.title,
-                href=_opds_link(f"{base}/opds/collections/{collection.reading_path_id}", token),
+                href=_opds_link(f"{base}/opds/collections/{collection.reading_path_id}", token, redirect),
                 summary=f"{len(collection.items)} issues",
                 kind="acquisition",
             )
@@ -2521,6 +2555,7 @@ def opds_collections(
 def opds_collection(reading_path_id: int, request: Request, db: Session = Depends(get_db)) -> Response:
     base = _opds_base(request)
     token = _opds_token(request)
+    redirect = _opds_redirect(request)
     reading_path = db.scalars(
         select(ReadingPath)
         .options(selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue))
@@ -2533,7 +2568,7 @@ def opds_collection(reading_path_id: int, request: Request, db: Session = Depend
         opds.acquisition_entry(
             identifier=f"{OPDS_ROOT_ID}:entry:{entry.id}",
             title=_opds_entry_title(entry),
-            download_href=_opds_entry_download_href(base, reading_path.id, entry.id, token),
+            download_href=_opds_entry_download_href(base, reading_path.id, entry.id, token, redirect),
             media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
             cover_href=_opds_entry_cover_href(base, reading_path.id, entry.id, token),
             updated=(
@@ -2547,9 +2582,9 @@ def opds_collection(reading_path_id: int, request: Request, db: Session = Depend
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:collection:{reading_path.id}",
         title=reading_path.title,
-        self_href=_opds_link(f"{base}/opds/collections/{reading_path.id}", token),
-        start_href=_opds_link(f"{base}/opds", token),
-        up_href=_opds_link(f"{base}/opds/collections", token),
+        self_href=_opds_link(f"{base}/opds/collections/{reading_path.id}", token, redirect),
+        start_href=_opds_link(f"{base}/opds", token, redirect),
+        up_href=_opds_link(f"{base}/opds/collections", token, redirect),
         entries=entries,
         kind="acquisition",
     )
