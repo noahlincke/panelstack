@@ -326,7 +326,10 @@ def ensure_reading_path_cover_asset(
 
     # Never spend the last of the host's disk on a cover.
     if not has_room_for_covers():
-        return None, None, cover
+        asset.status = "failed"
+        asset.error = "Not enough free disk space to cache a cover."
+        db.flush()
+        return asset
 
     COVER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     try:

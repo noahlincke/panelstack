@@ -75,10 +75,14 @@ class CoverCacheBudgetTests(unittest.TestCase):
             self.assertEqual(cover_cache_max_bytes(), 256 * 1024 * 1024)
 
     def test_caching_stops_when_the_disk_is_nearly_full(self) -> None:
+        # An impossible floor always refuses; a floor of one byte always allows.
+        # Asserting on the machine's real free space would make this test depend
+        # on how full the disk happens to be.
         with patch.dict(os.environ, {MIN_FREE_ENV: str(2**62)}):
             self.assertGreater(cover_cache_min_free_bytes(), 0)
             self.assertFalse(has_room_for_covers(self.dirs))
-        self.assertTrue(has_room_for_covers(self.dirs))
+        with patch.dict(os.environ, {MIN_FREE_ENV: "1"}):
+            self.assertTrue(has_room_for_covers(self.dirs))
 
 
 class CoverProxyHostTests(unittest.TestCase):
