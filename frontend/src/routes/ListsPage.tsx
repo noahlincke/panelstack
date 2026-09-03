@@ -26,7 +26,11 @@ export function ListsPage() {
   const [isEstimating, setIsEstimating] = useState(false);
   const [error, setError] = useState('');
   const isHosted = Boolean(settings?.hostedDeployment);
-  const opdsCatalogUrl = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/opds`;
+  // The token avoids a 401 challenge on every request, which the host firewall
+  // reads as a brute-force attempt and bans the client for.
+  const opdsCatalogUrl = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/opds${
+    settings?.opdsToken ? `?key=${settings.opdsToken}` : ''
+  }`;
 
   const refreshLists = useCallback(
     () => apiClient.listReadingLists().then(setLists).catch(() => setLists([])),
@@ -266,7 +270,7 @@ export function ListsPage() {
             <div className="lists__hosted-note">
               <p>
                 Add this catalog once in an OPDS reader such as Panels, then download straight to your
-                phone. Sign in with your Panel Stack password.
+                phone. The URL carries its own key, so leave username and password blank.
               </p>
               <code className="lists__opds-url">{opdsCatalogUrl}</code>
               <button

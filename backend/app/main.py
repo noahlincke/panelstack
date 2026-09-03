@@ -34,7 +34,10 @@ from .auth import (
     auth_enabled,
     create_session_cookie,
     verify_password,
+    OPDS_TOKEN_PARAM,
+    opds_access_token,
     verify_basic_auth,
+    verify_opds_token,
     verify_session_cookie,
 )
 from .models import (
@@ -1327,6 +1330,11 @@ async def require_authentication(request: Request, call_next):
     if request_path in {"/auth/session", "/auth/login", "/health"} or request_path.startswith("/auth/"):
         return await call_next(request)
 
+    if request_path.startswith("/opds") and verify_opds_token(
+        request.query_params.get(OPDS_TOKEN_PARAM)
+    ):
+        return await call_next(request)
+
     if verify_basic_auth(request.headers.get("authorization")):
         return await call_next(request)
 
@@ -1453,6 +1461,7 @@ def get_app_settings() -> AppSettingsRead:
         download_root=str(_downloads_root()),
         default_download_root=str(_default_download_root()),
         hosted_deployment=_hosted_deployment(),
+        opds_token=opds_access_token() if auth_enabled() else None,
     )
 
 
@@ -2281,6 +2290,18 @@ def cancel_downloads() -> DownloadQueueRead | None:
 OPDS_ROOT_ID = "urn:panelstack:opds"
 
 
+def _opds_link(href: str, token: str | None) -> str:
+    """Carry the access token onto every link so no request needs a challenge."""
+    if not token:
+        return href
+    separator = "&" if "?" in href else "?"
+    return f"{href}{separator}{OPDS_TOKEN_PARAM}={token}"
+
+
+def _opds_token(request: Request) -> str | None:
+    return request.query_params.get(OPDS_TOKEN_PARAM)
+
+
 def _opds_base(request: Request) -> str:
     """External prefix for OPDS URLs, honouring the /panels mount.
 
@@ -2311,12 +2332,12 @@ def opds_cover(reading_path_id: int, entry_id: int, db: Session = Depends(get_db
     return get_reading_path_entry_cover_image(reading_path_id, entry_id, db)
 
 
-def _opds_entry_download_href(base: str, reading_path_id: int, entry_id: int) -> str:
-    return f"{base}/opds/download/{reading_path_id}/{entry_id}"
+def _opds_entry_download_href(base: str, reading_path_id: int, entry_id: int, token: str | None = None) -> str:
+    return _opds_link(f"{base}/opds/download/{reading_path_id}/{entry_id}", token)
 
 
-def _opds_entry_cover_href(base: str, reading_path_id: int, entry_id: int) -> str:
-    return f"{base}/opds/cover/{reading_path_id}/{entry_id}"
+def _opds_entry_cover_href(base: str, reading_path_id: int, entry_id: int, token: str | None = None) -> str:
+    return _opds_link(f"{base}/opds/cover/{reading_path_id}/{entry_id}", token)
 
 
 def _opds_entry_title(entry: ReadingPathEntry) -> str:
@@ -2328,22 +2349,23 @@ def _opds_entry_title(entry: ReadingPathEntry) -> str:
 @app.get("/opds")
 def opds_root(request: Request) -> Response:
     base = _opds_base(request)
+    token = _opds_token(request)
     body = opds.feed(
         feed_id=OPDS_ROOT_ID,
         title="Panel Stack",
-        self_href=f"{base}/opds",
-        start_href=f"{base}/opds",
+        self_href=_opds_link(f"{base}/opds", token),
+        start_href=_opds_link(f"{base}/opds", token),
         entries=[
             opds.navigation_entry(
                 identifier=f"{OPDS_ROOT_ID}:lists",
                 title="Reading lists",
-                href=f"{base}/opds/lists",
+                href=_opds_link(f"{base}/opds/lists", token),
                 summary="Lists you built in Panel Stack.",
             ),
             opds.navigation_entry(
                 identifier=f"{OPDS_ROOT_ID}:collections",
                 title="Collections",
-                href=f"{base}/opds/collections",
+                href=_opds_link(f"{base}/opds/collections", token),
                 summary="Every curated run and collected edition.",
             ),
         ],
@@ -2354,20 +2376,21 @@ def opds_root(request: Request) -> Response:
 @app.get("/opds/lists")
 def opds_lists(request: Request, db: Session = Depends(get_db)) -> Response:
     base = _opds_base(request)
+    token = _opds_token(request)
     lists = db.scalars(
         select(ReadingList).options(selectinload(ReadingList.items)).order_by(ReadingList.name.asc())
     ).all()
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:lists",
         title="Reading lists",
-        self_href=f"{base}/opds/lists",
-        start_href=f"{base}/opds",
-        up_href=f"{base}/opds",
+        self_href=_opds_link(f"{base}/opds/lists", token),
+        start_href=_opds_link(f"{base}/opds", token),
+        up_href=_opds_link(f"{base}/opds", token),
         entries=[
             opds.navigation_entry(
                 identifier=f"{OPDS_ROOT_ID}:list:{reading_list.id}",
                 title=reading_list.name,
-                href=f"{base}/opds/lists/{reading_list.id}",
+                href=_opds_link(f"{base}/opds/lists/{reading_list.id}", token),
                 summary=f"{len(reading_list.items)} issues",
                 kind="acquisition",
             )
@@ -2380,6 +2403,7 @@ def opds_lists(request: Request, db: Session = Depends(get_db)) -> Response:
 @app.get("/opds/lists/{reading_list_id}")
 def opds_list(reading_list_id: int, request: Request, db: Session = Depends(get_db)) -> Response:
     base = _opds_base(request)
+    token = _opds_token(request)
     reading_list = _reading_list(db, reading_list_id)
     entries = []
     for item in reading_list.items:
@@ -2387,17 +2411,17 @@ def opds_list(reading_list_id: int, request: Request, db: Session = Depends(get_
             opds.acquisition_entry(
                 identifier=f"{OPDS_ROOT_ID}:item:{item.id}",
                 title=item.title,
-                download_href=_opds_entry_download_href(base, item.reading_path_id, item.reading_path_entry_id),
+                download_href=_opds_entry_download_href(base, item.reading_path_id, item.reading_path_entry_id, token),
                 media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
-                cover_href=_opds_entry_cover_href(base, item.reading_path_id, item.reading_path_entry_id),
+                cover_href=_opds_entry_cover_href(base, item.reading_path_id, item.reading_path_entry_id, token),
             )
         )
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:list:{reading_list.id}",
         title=reading_list.name,
-        self_href=f"{base}/opds/lists/{reading_list.id}",
-        start_href=f"{base}/opds",
-        up_href=f"{base}/opds/lists",
+        self_href=_opds_link(f"{base}/opds/lists/{reading_list.id}", token),
+        start_href=_opds_link(f"{base}/opds", token),
+        up_href=_opds_link(f"{base}/opds/lists", token),
         entries=entries,
         kind="acquisition",
     )
@@ -2414,6 +2438,7 @@ def opds_collections(
     offset: int = Query(0, ge=0),
 ) -> Response:
     base = _opds_base(request)
+    token = _opds_token(request)
     collections, _ = catalog_collections(
         db,
         publisher=publisher,
@@ -2424,14 +2449,14 @@ def opds_collections(
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:collections",
         title="Collections",
-        self_href=f"{base}/opds/collections",
-        start_href=f"{base}/opds",
-        up_href=f"{base}/opds",
+        self_href=_opds_link(f"{base}/opds/collections", token),
+        start_href=_opds_link(f"{base}/opds", token),
+        up_href=_opds_link(f"{base}/opds", token),
         entries=[
             opds.navigation_entry(
                 identifier=f"{OPDS_ROOT_ID}:collection:{collection.id}",
                 title=collection.title,
-                href=f"{base}/opds/collections/{collection.reading_path_id}",
+                href=_opds_link(f"{base}/opds/collections/{collection.reading_path_id}", token),
                 summary=f"{len(collection.items)} issues",
                 kind="acquisition",
             )
@@ -2445,6 +2470,7 @@ def opds_collections(
 @app.get("/opds/collections/{reading_path_id}")
 def opds_collection(reading_path_id: int, request: Request, db: Session = Depends(get_db)) -> Response:
     base = _opds_base(request)
+    token = _opds_token(request)
     reading_path = db.scalars(
         select(ReadingPath)
         .options(selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue))
@@ -2457,9 +2483,9 @@ def opds_collection(reading_path_id: int, request: Request, db: Session = Depend
         opds.acquisition_entry(
             identifier=f"{OPDS_ROOT_ID}:entry:{entry.id}",
             title=_opds_entry_title(entry),
-            download_href=_opds_entry_download_href(base, reading_path.id, entry.id),
+            download_href=_opds_entry_download_href(base, reading_path.id, entry.id, token),
             media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
-            cover_href=_opds_entry_cover_href(base, reading_path.id, entry.id),
+            cover_href=_opds_entry_cover_href(base, reading_path.id, entry.id, token),
             updated=(
                 entry.canonical_issue.published_on.strftime("%Y-%m-%dT00:00:00Z")
                 if entry.canonical_issue is not None and entry.canonical_issue.published_on
@@ -2471,9 +2497,9 @@ def opds_collection(reading_path_id: int, request: Request, db: Session = Depend
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:collection:{reading_path.id}",
         title=reading_path.title,
-        self_href=f"{base}/opds/collections/{reading_path.id}",
-        start_href=f"{base}/opds",
-        up_href=f"{base}/opds/collections",
+        self_href=_opds_link(f"{base}/opds/collections/{reading_path.id}", token),
+        start_href=_opds_link(f"{base}/opds", token),
+        up_href=_opds_link(f"{base}/opds/collections", token),
         entries=entries,
         kind="acquisition",
     )

@@ -246,3 +246,50 @@ class DownloadClientContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AccessTokenTests(unittest.TestCase):
+    """A token in the URL avoids the 401 round trip that got the client banned.
+
+    Basic auth makes a reader send an unauthenticated request first, so every
+    catalog fetch and every download produced a 401. A burst of those reads as a
+    brute-force attempt to the host firewall.
+    """
+
+    def setUp(self) -> None:
+        self.env = {"APP_PASSWORD_HASH": hash_password("hunter2", iterations=1000), "APP_SESSION_SECRET": "secret-a"}
+
+    def test_the_token_is_stable_for_a_given_session_secret(self) -> None:
+        from backend.app.auth import opds_access_token
+
+        with patch.dict(os.environ, self.env):
+            first = opds_access_token()
+            self.assertEqual(first, opds_access_token())
+
+    def test_rotating_the_session_secret_rotates_the_token(self) -> None:
+        from backend.app.auth import opds_access_token
+
+        with patch.dict(os.environ, self.env):
+            before = opds_access_token()
+        with patch.dict(os.environ, {**self.env, "APP_SESSION_SECRET": "secret-b"}):
+            self.assertNotEqual(before, opds_access_token())
+
+    def test_only_the_real_token_is_accepted(self) -> None:
+        from backend.app.auth import opds_access_token, verify_opds_token
+
+        with patch.dict(os.environ, self.env):
+            self.assertTrue(verify_opds_token(opds_access_token()))
+            self.assertFalse(verify_opds_token("deadbeef"))
+            self.assertFalse(verify_opds_token(None))
+            self.assertFalse(verify_opds_token(""))
+
+    def test_links_carry_the_token_forward(self) -> None:
+        import backend.app.main as main
+
+        plain = main._opds_link("https://example.test/panels/opds/lists", None)
+        tokened = main._opds_link("https://example.test/panels/opds/lists", "abc123")
+        existing_query = main._opds_link("https://example.test/panels/opds/x?a=1", "abc123")
+
+        self.assertEqual(plain, "https://example.test/panels/opds/lists")
+        self.assertEqual(tokened, "https://example.test/panels/opds/lists?key=abc123")
+        self.assertEqual(existing_query, "https://example.test/panels/opds/x?a=1&key=abc123")

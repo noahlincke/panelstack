@@ -18,6 +18,7 @@ class AppSettingsRead(APIBaseModel):
     download_root: str
     default_download_root: str
     hosted_deployment: bool = False
+    opds_token: str | None = None
 
 
 class AppSettingsWrite(APIBaseModel):

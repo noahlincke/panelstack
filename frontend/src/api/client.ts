@@ -948,11 +948,13 @@ export const apiClient = {
       download_root: string;
       default_download_root: string;
       hosted_deployment?: boolean;
+      opds_token?: string | null;
     }>('/settings');
     return {
       downloadRoot: payload.download_root,
       defaultDownloadRoot: payload.default_download_root,
       hostedDeployment: Boolean(payload.hosted_deployment),
+      opdsToken: payload.opds_token ?? undefined,
     };
   },
 
@@ -961,6 +963,7 @@ export const apiClient = {
       download_root: string;
       default_download_root: string;
       hosted_deployment?: boolean;
+      opds_token?: string | null;
     }>('/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -970,6 +973,7 @@ export const apiClient = {
       downloadRoot: payload.download_root,
       defaultDownloadRoot: payload.default_download_root,
       hostedDeployment: Boolean(payload.hosted_deployment),
+      opdsToken: payload.opds_token ?? undefined,
     };
   },
 

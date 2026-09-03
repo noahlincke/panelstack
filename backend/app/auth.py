@@ -51,6 +51,31 @@ def verify_password(password: str) -> bool:
     return hmac.compare_digest(candidate, expected)
 
 
+OPDS_TOKEN_PARAM = "key"
+
+
+def opds_access_token() -> str:
+    """A stable per-install token for catalog URLs.
+
+    HTTP Basic makes a client send an unauthenticated request first and only add
+    credentials after the 401 challenge, so every catalog fetch and every
+    download produces a 401. A burst of those looks like a brute-force attempt
+    and gets the client's IP banned by the host firewall. A token carried in the
+    URL removes the challenge round trip entirely.
+
+    Derived from the session secret so there is no extra secret to manage, and it
+    changes if that secret is rotated.
+    """
+    digest = hashlib.sha256(f"opds-access:{session_secret()}".encode("utf-8")).hexdigest()
+    return digest[:32]
+
+
+def verify_opds_token(token: str | None) -> bool:
+    if not auth_enabled():
+        return True
+    return bool(token) and hmac.compare_digest(token, opds_access_token())
+
+
 def verify_basic_auth(header_value: str | None) -> bool:
     """Check an HTTP Basic credential against the app password.
 
