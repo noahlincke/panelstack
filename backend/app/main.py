@@ -20,7 +20,7 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 import mimetypes
 import requests
 from sqlalchemy import func, or_, select
@@ -2320,61 +2320,11 @@ def _opds_response(body: str, kind: str) -> Response:
     return Response(content=body, media_type=media_type)
 
 
-def _entry_mirror_url(entry: ReadingPathEntry) -> str | None:
-    """Resolve the mirror URL a reader can fetch directly.
-
-    Returns None when the entry is backed by a local file, which has no URL to
-    hand out and must be served from disk.
-    """
-    if _entry_local_issue(entry) is not None and _issue_downloadable_archive(_entry_local_issue(entry)) is not None:
-        return None
-    if entry.canonical_issue is not None and entry.canonical_issue.provider_name == "MangaPill":
-        raise HTTPException(status_code=409, detail="This source supports in-browser streaming only right now.")
-
-    source_url = _entry_resolved_getcomics_post_url(entry)
-    session = comics.build_session(False)
-    try:
-        plan = comics.resolve_download_plan(source_url, session, preferred_host=None)
-    except comics.ComicDownloadError as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
-    except requests.RequestException as exc:
-        raise HTTPException(status_code=502, detail=f"Request failed for {source_url}: {exc}") from exc
-    finally:
-        session.close()
-    return plan.resolved_url
-
-
 @app.api_route("/opds/download/{reading_path_id}/{entry_id}", methods=["GET", "HEAD"])
 def opds_download(
     reading_path_id: int, entry_id: int, request: Request, db: Session = Depends(get_db)
 ) -> Response:
-    """Hand the reader the mirror URL rather than relaying the bytes.
-
-    Proxying a multi-hundred-megabyte archive holds a connection open on the host
-    for minutes per file. Several of those at once looks like a connection flood
-    to the host firewall, which bans the client mid-download. Redirecting costs
-    the host a couple of seconds of resolution and no bandwidth, and the reader
-    gets the mirror's own range support for free.
-    """
-    entry = db.scalars(
-        select(ReadingPathEntry)
-        .options(
-            selectinload(ReadingPathEntry.issue).selectinload(Issue.archives),
-            selectinload(ReadingPathEntry.canonical_issue)
-            .selectinload(CanonicalIssue.issue_matches)
-            .selectinload(IssueMatch.local_issue)
-            .selectinload(Issue.archives),
-        )
-        .where(ReadingPathEntry.reading_path_id == reading_path_id, ReadingPathEntry.id == entry_id)
-    ).first()
-    if entry is None or entry.entry_type not in {"issue", "collection"}:
-        raise HTTPException(status_code=404, detail=f"Reading path entry {entry_id} not found")
-
-    mirror_url = _entry_mirror_url(entry)
-    if mirror_url is None:
-        # Local file: there is nothing to redirect to.
-        return download_reading_path_entry_file(reading_path_id, entry_id, request, db)
-    return RedirectResponse(mirror_url, status_code=302)
+    return download_reading_path_entry_file(reading_path_id, entry_id, request, db)
 
 
 @app.api_route("/opds/cover/{reading_path_id}/{entry_id}", methods=["GET", "HEAD"])

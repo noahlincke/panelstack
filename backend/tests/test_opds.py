@@ -244,47 +244,6 @@ class DownloadClientContractTests(unittest.TestCase):
         self.assertEqual(download.content_range, "bytes 0-9/100")
 
 
-class RedirectInsteadOfProxyTests(unittest.TestCase):
-    """Handing over the mirror URL keeps the host out of the transfer.
-
-    Relaying a several-hundred-megabyte archive held a connection open on the
-    host for minutes per file, and a few of those at once read as a connection
-    flood to the host firewall, which banned the client mid-download.
-    """
-
-    def test_a_remote_entry_redirects_to_the_mirror(self) -> None:
-        import backend.app.main as main
-
-        with patch.object(main, "_entry_local_issue", return_value=None), patch.object(
-            main, "_entry_resolved_getcomics_post_url", return_value="https://getcomics.test/post"
-        ), patch.object(main.comics, "build_session") as build, patch.object(
-            main.comics, "resolve_download_plan"
-        ) as resolve:
-            resolve.return_value = type("Plan", (), {"resolved_url": "https://mirror.test/a.cbz"})()
-            url = main._entry_mirror_url(_stub_entry())
-
-        self.assertEqual(url, "https://mirror.test/a.cbz")
-        build.return_value.close.assert_called_once()
-
-    def test_a_local_entry_has_no_mirror_to_redirect_to(self) -> None:
-        import backend.app.main as main
-
-        archive = object()
-        with patch.object(main, "_entry_local_issue", return_value=object()), patch.object(
-            main, "_issue_downloadable_archive", return_value=archive
-        ):
-            self.assertIsNone(main._entry_mirror_url(_stub_entry()))
-
-
-def _stub_entry():
-    class Entry:
-        entry_type = "issue"
-        canonical_issue = None
-        issue = None
-
-    return Entry()
-
-
 if __name__ == "__main__":
     unittest.main()
 
