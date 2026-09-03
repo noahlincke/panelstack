@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 
 from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..models import (
     CanonicalIssue,
+    CanonicalSeries,
     CatalogCollection,
     CatalogCollectionItem,
     CatalogCollectionTag,
@@ -213,3 +214,97 @@ def catalog_chronology(
         ChronologyRow(canonical_issue=issue, collection=collection, published_on=issue.published_on)
         for issue, collection in rows
     ], int(total or 0)
+
+
+@dataclass(frozen=True)
+class SeriesGroup:
+    """One series, with the volumes that make it up."""
+
+    canonical_series_id: int
+    slug: str
+    title: str
+    publisher_slug: str
+    publisher_name: str
+    start_year: int | None
+    end_year: int | None
+    volume_count: int
+    reading_path_ids: list[int]
+    latest_published_on: date | None
+
+    @property
+    def is_ongoing(self) -> bool:
+        """Still shipping if the newest issue is recent."""
+        if self.latest_published_on is None:
+            return False
+        return self.latest_published_on >= date.today() - timedelta(days=120)
+
+    def display_title(self, *, with_years: bool) -> str:
+        """Marvel and DC series carry their run years; manga lines do not."""
+        if not with_years or not self.start_year:
+            return self.title
+        if self.is_ongoing:
+            return f"{self.title} ({self.start_year}–)"
+        end = self.end_year or (self.latest_published_on.year if self.latest_published_on else None)
+        if end and end != self.start_year:
+            return f"{self.title} ({self.start_year}–{end})"
+        return f"{self.title} ({self.start_year})"
+
+
+def catalog_publishers(db: Session) -> list[Facet]:
+    rows = db.execute(
+        select(Publisher.slug, Publisher.name, func.count(CatalogCollection.id))
+        .join(CatalogCollection, CatalogCollection.publisher_id == Publisher.id)
+        .group_by(Publisher.slug, Publisher.name)
+        .order_by(func.count(CatalogCollection.id).desc(), Publisher.name.asc())
+    ).all()
+    return [Facet(value=slug, label=name, count=count) for slug, name, count in rows]
+
+
+def catalog_series(db: Session, publisher_slug: str) -> list[SeriesGroup]:
+    """Group a publisher's volumes into the series they belong to."""
+    rows = db.execute(
+        select(
+            CanonicalSeries.id,
+            CanonicalSeries.slug,
+            CanonicalSeries.title,
+            Publisher.slug,
+            Publisher.name,
+            CanonicalSeries.start_year,
+            CanonicalSeries.end_year,
+            func.count(CatalogCollection.id),
+            func.max(CatalogCollection.latest_published_on),
+        )
+        .join(CatalogCollection, CatalogCollection.canonical_series_id == CanonicalSeries.id)
+        .join(Publisher, Publisher.id == CatalogCollection.publisher_id)
+        .where(Publisher.slug == publisher_slug)
+        .group_by(CanonicalSeries.id)
+        .order_by(CanonicalSeries.title.asc())
+    ).all()
+
+    groups = []
+    for series_id, slug, title, pub_slug, pub_name, start, end, volumes, latest in rows:
+        paths = list(
+            db.scalars(
+                select(CatalogCollection.reading_path_id)
+                .where(
+                    CatalogCollection.canonical_series_id == series_id,
+                    CatalogCollection.reading_path_id.is_not(None),
+                )
+                .order_by(CatalogCollection.sequence_number.asc(), CatalogCollection.first_published_on.asc())
+            )
+        )
+        groups.append(
+            SeriesGroup(
+                canonical_series_id=series_id,
+                slug=slug,
+                title=title,
+                publisher_slug=pub_slug,
+                publisher_name=pub_name,
+                start_year=start,
+                end_year=end,
+                volume_count=volumes,
+                reading_path_ids=paths,
+                latest_published_on=date.fromisoformat(latest) if isinstance(latest, str) else latest,
+            )
+        )
+    return groups
