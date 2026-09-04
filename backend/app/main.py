@@ -137,7 +137,14 @@ from .services import (
     sync_mangapill_catalog,
 )
 from .services import opds
-from .services.catalog_query import catalog_chronology, catalog_collections, catalog_facets, owned_counts
+from .services.catalog_query import (
+    catalog_chronology,
+    catalog_collections,
+    catalog_facets,
+    catalog_publishers,
+    catalog_series,
+    owned_counts,
+)
 from .services.downloads_queue import QUEUE, DownloadTarget, QueueItem, destination_space, resolve_targets
 from .services.ingest import ComicMetadata, PageRecord, ScanResult
 from .services.stream_buffer import (
@@ -2511,25 +2518,17 @@ def opds_list(reading_list_id: int, request: Request, db: Session = Depends(get_
     return _opds_response(body, "acquisition")
 
 
+# Manga lines are one continuous work, so a run-year suffix is noise there. For
+# Marvel and DC the years are how you tell one Batman run from the next.
+YEARED_PUBLISHERS = {"dc", "marvel"}
+
+
 @app.get("/opds/collections")
-def opds_collections(
-    request: Request,
-    db: Session = Depends(get_db),
-    publisher: list[str] | None = Query(None),
-    character: str | None = Query(None),
-    limit: int = Query(120, ge=1, le=500),
-    offset: int = Query(0, ge=0),
-) -> Response:
+def opds_collections(request: Request, db: Session = Depends(get_db)) -> Response:
+    """Publishers. The tree is publisher -> series -> issues."""
     base = _opds_base(request)
     token = _opds_token(request)
     redirect = _opds_redirect(request)
-    collections, _ = catalog_collections(
-        db,
-        publisher=publisher,
-        character=character,
-        limit=limit,
-        offset=offset,
-    )
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:collections",
         title="Collections",
@@ -2538,53 +2537,97 @@ def opds_collections(
         up_href=_opds_link(f"{base}/opds", token, redirect),
         entries=[
             opds.navigation_entry(
-                identifier=f"{OPDS_ROOT_ID}:collection:{collection.id}",
-                title=collection.title,
-                href=_opds_link(f"{base}/opds/collections/{collection.reading_path_id}", token, redirect),
-                summary=f"{len(collection.items)} issues",
-                kind="acquisition",
+                identifier=f"{OPDS_ROOT_ID}:publisher:{publisher.value}",
+                title=publisher.label,
+                href=_opds_link(f"{base}/opds/collections/{publisher.value}", token, redirect),
+                summary=f"{publisher.count} volumes",
             )
-            for collection in collections
-            if collection.reading_path_id
+            for publisher in catalog_publishers(db)
         ],
     )
     return _opds_response(body, "navigation")
 
 
-@app.get("/opds/collections/{reading_path_id}")
-def opds_collection(reading_path_id: int, request: Request, db: Session = Depends(get_db)) -> Response:
+@app.get("/opds/collections/{publisher_slug}")
+def opds_publisher_series(publisher_slug: str, request: Request, db: Session = Depends(get_db)) -> Response:
+    """A publisher's series, named the way you would look them up."""
     base = _opds_base(request)
     token = _opds_token(request)
     redirect = _opds_redirect(request)
-    reading_path = db.scalars(
-        select(ReadingPath)
-        .options(selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue))
-        .where(ReadingPath.id == reading_path_id)
-    ).first()
-    if reading_path is None:
-        raise HTTPException(status_code=404, detail=f"Reading path {reading_path_id} not found")
+    groups = catalog_series(db, publisher_slug)
+    if not groups:
+        raise HTTPException(status_code=404, detail=f"No collections for publisher {publisher_slug}")
 
-    entries = [
-        opds.acquisition_entry(
-            identifier=f"{OPDS_ROOT_ID}:entry:{entry.id}",
-            title=_opds_entry_title(entry),
-            download_href=_opds_entry_download_href(base, reading_path.id, entry.id, token, redirect),
-            media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
-            cover_href=_opds_entry_cover_href(base, reading_path.id, entry.id, token),
-            updated=(
-                entry.canonical_issue.published_on.strftime("%Y-%m-%dT00:00:00Z")
-                if entry.canonical_issue is not None and entry.canonical_issue.published_on
-                else None
-            ),
-        )
-        for entry in _collection_download_entries(reading_path)
-    ]
+    with_years = publisher_slug in YEARED_PUBLISHERS
     body = opds.feed(
-        feed_id=f"{OPDS_ROOT_ID}:collection:{reading_path.id}",
-        title=reading_path.title,
-        self_href=_opds_link(f"{base}/opds/collections/{reading_path.id}", token, redirect),
+        feed_id=f"{OPDS_ROOT_ID}:publisher:{publisher_slug}",
+        title=groups[0].publisher_name,
+        self_href=_opds_link(f"{base}/opds/collections/{publisher_slug}", token, redirect),
         start_href=_opds_link(f"{base}/opds", token, redirect),
         up_href=_opds_link(f"{base}/opds/collections", token, redirect),
+        entries=[
+            opds.navigation_entry(
+                identifier=f"{OPDS_ROOT_ID}:series:{group.canonical_series_id}",
+                title=group.display_title(with_years=with_years),
+                href=_opds_link(
+                    f"{base}/opds/collections/{publisher_slug}/{group.canonical_series_id}", token, redirect
+                ),
+                summary=f"{group.volume_count} volumes",
+                kind="acquisition",
+            )
+            for group in groups
+        ],
+    )
+    return _opds_response(body, "navigation")
+
+
+@app.get("/opds/collections/{publisher_slug}/{series_id}")
+def opds_series(publisher_slug: str, series_id: int, request: Request, db: Session = Depends(get_db)) -> Response:
+    """Everything readable in one series, trades first.
+
+    A volume is not a folder here. Each volume contributes its collected edition
+    if one exists, or its loose issues if not, so the series reads as one flat
+    shelf rather than a stack of single-entry directories.
+    """
+    base = _opds_base(request)
+    token = _opds_token(request)
+    redirect = _opds_redirect(request)
+    groups = {group.canonical_series_id: group for group in catalog_series(db, publisher_slug)}
+    group = groups.get(series_id)
+    if group is None:
+        raise HTTPException(status_code=404, detail=f"Series {series_id} not found for {publisher_slug}")
+
+    entries = []
+    for reading_path_id in group.reading_path_ids:
+        reading_path = db.scalars(
+            select(ReadingPath)
+            .options(selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue))
+            .where(ReadingPath.id == reading_path_id)
+        ).first()
+        if reading_path is None:
+            continue
+        for entry in _collection_download_entries(reading_path):
+            entries.append(
+                opds.acquisition_entry(
+                    identifier=f"{OPDS_ROOT_ID}:entry:{entry.id}",
+                    title=_opds_entry_title(entry),
+                    download_href=_opds_entry_download_href(base, reading_path.id, entry.id, token, redirect),
+                    media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
+                    cover_href=_opds_entry_cover_href(base, reading_path.id, entry.id, token),
+                    updated=(
+                        entry.canonical_issue.published_on.strftime("%Y-%m-%dT00:00:00Z")
+                        if entry.canonical_issue is not None and entry.canonical_issue.published_on
+                        else None
+                    ),
+                )
+            )
+
+    body = opds.feed(
+        feed_id=f"{OPDS_ROOT_ID}:series:{series_id}",
+        title=group.display_title(with_years=publisher_slug in YEARED_PUBLISHERS),
+        self_href=_opds_link(f"{base}/opds/collections/{publisher_slug}/{series_id}", token, redirect),
+        start_href=_opds_link(f"{base}/opds", token, redirect),
+        up_href=_opds_link(f"{base}/opds/collections/{publisher_slug}", token, redirect),
         entries=entries,
         kind="acquisition",
     )

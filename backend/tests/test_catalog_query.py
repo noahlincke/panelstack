@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.app.models import (
     Base,
+    ReadingPath,
     CanonicalIssue,
     CanonicalSeries,
     CatalogCollection,
@@ -15,7 +16,13 @@ from backend.app.models import (
     CatalogCollectionTag,
     Publisher,
 )
-from backend.app.services.catalog_query import catalog_chronology, catalog_collections, catalog_facets
+from backend.app.services.catalog_query import (
+    catalog_chronology,
+    catalog_collections,
+    catalog_facets,
+    catalog_publishers,
+    catalog_series,
+)
 
 
 class CatalogQueryTests(unittest.TestCase):
@@ -150,6 +157,80 @@ class CatalogQueryTests(unittest.TestCase):
     def test_chronology_window_uses_issue_dates_not_collection_dates(self) -> None:
         _, total = catalog_chronology(self.db, publisher=["dc"], start=date(2025, 1, 1), end=date(2025, 12, 31))
         self.assertEqual(total, 2)
+
+
+class SeriesGroupingTests(unittest.TestCase):
+    """Collections browse as publisher -> series -> issues, not a flat volume list."""
+
+    def setUp(self) -> None:
+        engine = create_engine("sqlite://", future=True)
+        Base.metadata.create_all(engine)
+        self.db = sessionmaker(bind=engine, future=True)()
+        dc = Publisher(slug="dc", name="DC Comics")
+        manga = Publisher(slug="shueisha", name="Shueisha")
+        self.db.add_all([dc, manga])
+        self.db.flush()
+        self._series(dc, "Absolute Batman", 2024, None, volumes=3, latest=date.today())
+        self._series(dc, "Old Run", 1990, 1992, volumes=2, latest=date(1992, 5, 1))
+        self._series(manga, "Jujutsu Kaisen", 2018, None, volumes=4, latest=date.today())
+        self.db.commit()
+
+    def tearDown(self) -> None:
+        self.db.close()
+
+    def _series(self, publisher, title, start, end, *, volumes, latest) -> None:
+        series = CanonicalSeries(
+            slug=title.lower().replace(" ", "-"),
+            title=title,
+            publisher_id=publisher.id,
+            start_year=start,
+            end_year=end,
+        )
+        self.db.add(series)
+        self.db.flush()
+        for index in range(volumes):
+            path = ReadingPath(slug=f"{series.slug}-vol-{index + 1}", title=f"{title}: Vol. {index + 1}", status="published")
+            self.db.add(path)
+            self.db.flush()
+            self.db.add(
+                CatalogCollection(
+                    slug=f"{series.slug}-{index}",
+                    title=f"{title}: Vol. {index + 1}",
+                    sort_title=title.lower(),
+                    publisher_id=publisher.id,
+                    canonical_series_id=series.id,
+                    reading_path_id=path.id,
+                    line="series",
+                    collection_type="run",
+                    sequence_number=index,
+                    first_published_on=date(start, 1, 1),
+                    latest_published_on=latest,
+                )
+            )
+
+    def test_volumes_group_into_one_series_entry(self) -> None:
+        groups = {g.title: g for g in catalog_series(self.db, "dc")}
+        self.assertEqual(groups["Absolute Batman"].volume_count, 3)
+        self.assertEqual(len(groups["Absolute Batman"].reading_path_ids), 3)
+
+    def test_an_ongoing_run_leaves_the_end_year_open(self) -> None:
+        group = next(g for g in catalog_series(self.db, "dc") if g.title == "Absolute Batman")
+        self.assertTrue(group.is_ongoing)
+        self.assertEqual(group.display_title(with_years=True), "Absolute Batman (2024–)")
+
+    def test_a_finished_run_shows_both_years(self) -> None:
+        group = next(g for g in catalog_series(self.db, "dc") if g.title == "Old Run")
+        self.assertFalse(group.is_ongoing)
+        self.assertEqual(group.display_title(with_years=True), "Old Run (1990–1992)")
+
+    def test_manga_titles_carry_no_run_years(self) -> None:
+        group = catalog_series(self.db, "shueisha")[0]
+        self.assertEqual(group.display_title(with_years=False), "Jujutsu Kaisen")
+
+    def test_publishers_are_ranked_by_volume_count(self) -> None:
+        publishers = [p.value for p in catalog_publishers(self.db)]
+        self.assertEqual(publishers[0], "dc")
+        self.assertIn("shueisha", publishers)
 
 
 if __name__ == "__main__":
