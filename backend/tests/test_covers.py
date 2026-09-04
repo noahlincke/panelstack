@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -191,6 +192,14 @@ class CoverParsingTests(unittest.TestCase):
 
 class CoverAssetTests(unittest.TestCase):
     def setUp(self) -> None:
+        # These exercise the real caching path, which refuses to write when the
+        # machine is low on disk. Pin the floor so the test measures caching
+        # rather than however full this disk happens to be.
+        self._free_space_floor = patch.dict(
+            os.environ, {"PANELSTACK_COVER_CACHE_MIN_FREE_BYTES": "1"}
+        )
+        self._free_space_floor.start()
+        self.addCleanup(self._free_space_floor.stop)
         self.temp_dir = tempfile.TemporaryDirectory()
         db_path = Path(self.temp_dir.name) / "test.db"
         engine = create_engine(f"sqlite:///{db_path}", future=True)

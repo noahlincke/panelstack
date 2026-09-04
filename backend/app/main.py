@@ -3343,6 +3343,22 @@ def set_reading_path_entry_state(
     return IssueStateRead.model_validate(state)
 
 
+def _collection_cover_response(entry: ReadingPathEntry) -> FileResponse | None:
+    """The volume's own cover, used when an issue has none of its own.
+
+    Individual issues rarely carry a cover URL, and the host does not fetch
+    remote images, so without this an OPDS reader shows a shelf of blank tiles.
+    """
+    reading_path = entry.reading_path
+    asset = reading_path.cover_asset if reading_path is not None else None
+    if asset is None or asset.status != "ready" or not asset.cached_path:
+        return None
+    cached_path = Path(asset.cached_path)
+    if not cached_path.exists():
+        return None
+    return FileResponse(cached_path, media_type=asset.content_type or "image/jpeg", filename=cached_path.name)
+
+
 @app.get("/reading-paths/{reading_path_id}/entries/{entry_id}/cover-image")
 def get_reading_path_entry_cover_image(
     reading_path_id: int,
@@ -3352,7 +3368,7 @@ def get_reading_path_entry_cover_image(
     entry = db.scalars(
         select(ReadingPathEntry)
         .options(
-            selectinload(ReadingPathEntry.reading_path),
+            selectinload(ReadingPathEntry.reading_path).selectinload(ReadingPath.cover_asset),
             selectinload(ReadingPathEntry.canonical_issue).selectinload(CanonicalIssue.series),
             selectinload(ReadingPathEntry.issue).selectinload(Issue.series),
         )
@@ -3364,6 +3380,9 @@ def get_reading_path_entry_cover_image(
     if entry.canonical_issue is not None and _canonical_issue_cover_url(entry.canonical_issue):
         image_url = _provider_issue_cover_url(entry.canonical_issue) or _canonical_issue_cover_url(entry.canonical_issue)
         if not _remote_cover_fetch_enabled() and not _should_proxy_provider_cover_url(image_url):
+            fallback = _collection_cover_response(entry)
+            if fallback is not None:
+                return fallback
             raise HTTPException(status_code=404, detail="Cover image proxying is disabled")
         referer_source = entry.reading_path.source_url if entry.reading_path is not None else entry.canonical_issue.provider_url
         cached_path, content_type = ensure_remote_cover_image(
@@ -3377,6 +3396,9 @@ def get_reading_path_entry_cover_image(
 
     query, expected_series_title, expected_issue_number, expected_year = _reading_path_entry_cover_context(entry)
     if not _remote_cover_fetch_enabled():
+        fallback = _collection_cover_response(entry)
+        if fallback is not None:
+            return fallback
         raise HTTPException(status_code=404, detail="Cover image lookup is disabled")
     try:
         cached_path, content_type, cover = ensure_query_cover_image(
