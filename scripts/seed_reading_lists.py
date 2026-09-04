@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Turn the recommendation brief's sections into reading lists.
+"""Build the curated reading lists.
 
-Each list is a section of the brief. Collections are resolved by reading-path
-slug, and anything that fails to resolve is reported rather than silently
-dropped, so a missing catalogue entry is visible.
+Each list targets one thing: a character's run, a team, a line, or a crossover.
+Lists reference whole series rather than individual volumes, and expand to that
+series' collected editions plus whatever issues no trade covers yet — so a trade
+released later replaces its issues the next time this runs.
 
-    python3 scripts/seed_reading_lists.py [--dry-run]
+    python3 scripts/seed_reading_lists.py [--replace] [--dry-run]
 """
 from __future__ import annotations
 
@@ -22,106 +23,122 @@ from sqlalchemy.orm import selectinload  # noqa: E402
 
 from backend.app.db import SessionLocal, engine  # noqa: E402
 from backend.app.main import _collection_download_entries  # noqa: E402
-from backend.app.models import Base, ReadingList, ReadingListItem, ReadingPath, ReadingPathEntry  # noqa: E402
+from backend.app.models import (  # noqa: E402
+    Base,
+    CanonicalSeries,
+    CatalogCollection,
+    Publisher,
+    ReadingList,
+    ReadingListItem,
+    ReadingPath,
+    ReadingPathEntry,
+)
 
-# name -> ordered reading-path slugs.
-LISTS: dict[str, list[str]] = {
-    "Flight tier 1 — almost guaranteed": [
-        "house-of-x-powers-of-x-2019-vol-1",
-        "absolute-batman-2024-vol-1",
-        "ultimate-spider-man-2024-first-year",
-        "worlds-finest-2022-vol-1",
+# Each entry is (series title, start year) so a title reused across eras — three
+# different Daredevil runs, two Nightwings — resolves to exactly one of them.
+Series = tuple[str, int | None]
+
+LISTS: dict[str, list[Series]] = {
+    # --- Characters ------------------------------------------------------
+    "Batman: Current Run": [("Batman", 2016)],
+    "Detective Comics: Current Run": [("Detective Comics", 1937)],
+    "Nightwing: Tom Taylor Run": [("Nightwing", 2021)],
+    "Superman: Current Run": [("Superman", 2023), ("Action Comics", 2016), ("Superman Unlimited", 2025)],
+    "Green Lantern: Current Run": [("Green Lantern", 2023)],
+    "Wonder Woman: Tom King Run": [("Wonder Woman", 2023)],
+    "The Flash: Current Run": [("The Flash", 2023)],
+    "Green Arrow: Current Run": [("Green Arrow", 2023)],
+    "Amazing Spider-Man: Current Run": [("The Amazing Spider-Man", 2025)],
+    "Daredevil: Chip Zdarsky Run": [
+        ("Daredevil", 2019),
+        ("Devil's Reign", 2021),
+        ("Daredevil", 2022),
     ],
-    "Flight tier 2 — likely rabbit holes": [
-        "immortal-x-men-2022-vol-1",
-        "x-men-red-2022-vol-1",
-        "daredevil-2019-vol-1",
-        "green-lantern-2023-vol-1",
-        "absolute-wonder-woman-2024-vol-1",
+    "Immortal Hulk: Complete": [("Immortal Hulk", 2018)],
+    "Moon Knight: Jed MacKay Run": [("Moon Knight", 2021)],
+    "Doctor Strange: Jed MacKay Run": [("Doctor Strange", 2023)],
+    # --- Teams -----------------------------------------------------------
+    "X-Men: Krakoa Era": [
+        ("House of X / Powers of X", 2019),
+        ("X-Men", 2019),
+        ("Marauders", 2019),
+        ("Excalibur", 2019),
+        ("X-Force", 2019),
+        ("New Mutants", 2019),
+        ("Hellions", 2020),
+        ("X-Factor", 2020),
+        ("X of Swords", 2020),
+        ("Immortal X-Men", 2022),
+        ("X-Men Red", 2022),
+        ("A.X.E.: Judgment Day", 2022),
+        ("Fall of the House of X", 2024),
+        ("Rise of the Powers of X", 2024),
     ],
-    "Flight tier 3 — different flavour": [
-        "far-sector-2019-vol-1",
-        "human-target-2021-vol-1",
-        "immortal-hulk-2018-vol-1",
-        "supergirl-woman-of-tomorrow-2021-vol-1",
+    "X-Men: From the Ashes": [
+        ("X-Men", 2024),
+        ("Uncanny X-Men", 2024),
+        ("Exceptional X-Men", 2024),
+        ("NYX", 2024),
+        ("Phoenix", 2024),
+        ("Storm", 2024),
     ],
-    "DC shortlist": [
-        "absolute-batman-2024-vol-1",
-        "worlds-finest-2022-vol-1",
-        "green-lantern-2023-vol-1",
-        "absolute-wonder-woman-2024-vol-1",
-        "absolute-green-lantern-2025-vol-1",
-        "nightwing-2021-vol-1",
-        "batman-the-knight-2022-vol-1",
-        "far-sector-2019-vol-1",
-        "supergirl-woman-of-tomorrow-2021-vol-1",
-        "human-target-2021-vol-1",
-    ],
-    "Krakoa era, the selective route": [
-        "house-of-x-powers-of-x-2019-vol-1",
-        "x-men-2019-vol-1",
-        "x-men-2019-vol-2",
-        "hellions-2020-vol-1",
-        "x-of-swords-2020-vol-1",
-        "immortal-x-men-2022-vol-1",
-        "immortal-x-men-2022-vol-2",
-        "x-men-red-2022-vol-1",
-        "x-men-red-2022-vol-2",
-        "axe-judgment-day-2022-vol-1",
-    ],
-    "Krakoa, the full collapse": [
-        "fall-of-the-house-of-x-2024-vol-1",
-        "rise-of-the-powers-of-x-2024-vol-1",
-    ],
-    "Marvel outside the X-Men": [
-        "daredevil-2019-vol-1",
-        "devils-reign-2021-vol-1",
-        "daredevil-2022-vol-1",
-        "immortal-hulk-2018-vol-1",
-        "moon-knight-2021-vol-1",
-        "doctor-strange-2023-vol-1",
-        "scarlet-witch-2023-vol-1",
-    ],
-    "The Ultimate Universe, start to finish": [
-        "ultimate-invasion-2023-vol-1",
-        "ultimate-spider-man-2024-first-year",
-        "ultimates-2024-first-wave",
-        "ultimate-black-panther-2024-opening-arc",
-        "ultimate-x-men-2024-vol-1",
-        "ultimate-wolverine-2025-opening-arc",
-        "ultimate-endgame-2026-vol-1",
-    ],
+    "Avengers: Current Run": [("Avengers", 2023), ("West Coast Avengers", 2024)],
+    "Justice League Unlimited": [("Justice League Unlimited", 2024)],
+    "Fantastic Four: Current Run": [("Fantastic Four", 2022)],
+    "Titans: Current Run": [("Titans", 2023)],
+    # --- Lines -----------------------------------------------------------
+    "Absolute Batman": [("Absolute Batman", 2024)],
     "Absolute Universe": [
-        "absolute-batman-2024-vol-1",
-        "absolute-batman-2024-vol-2",
-        "absolute-wonder-woman-2024-vol-1",
-        "absolute-superman-2024-vol-1",
-        "absolute-flash-2025-vol-1",
-        "absolute-green-lantern-2025-vol-1",
-        "absolute-martian-manhunter-2025-vol-1",
-        "absolute-green-arrow-2026-vol-1",
-        "absolute-catwoman-2026-vol-1",
+        ("Absolute Batman", 2024),
+        ("Absolute Wonder Woman", 2024),
+        ("Absolute Superman", 2024),
+        ("Absolute Flash", 2025),
+        ("Absolute Green Lantern", 2025),
+        ("Absolute Martian Manhunter", 2025),
+        ("Absolute Green Arrow", 2026),
+        ("Absolute Catwoman", 2026),
     ],
-    "Absolute Batman": [
-        "absolute-batman-2024-vol-1",
-        "absolute-batman-2024-vol-2",
+    "Ultimate Universe": [
+        ("Ultimate Invasion", 2023),
+        ("Ultimate Spider-Man", 2024),
+        ("Ultimates", 2024),
+        ("Ultimate Black Panther", 2024),
+        ("Ultimate X-Men", 2024),
+        ("Ultimate Wolverine", 2025),
+        ("Ultimate Endgame", 2026),
     ],
-    "Just read the damn book": [
-        "batman-year-one-1987-vol-1",
-        "batman-the-long-halloween-1996-vol-1",
-        "batman-the-black-mirror-2010-vol-1",
-        "batman-snyder-capullo-2011-vol-1",
-        "gotham-central-2003-vol-1",
-        "all-star-superman-2005-vol-1",
-        "kingdom-come-1996-vol-1",
-        "green-lantern-rebirth-2004-vol-1",
-        "ultimate-spider-man-2000-vol-1",
-        "new-x-men-2001-vol-1",
-        "astonishing-x-men-2004-vol-1",
-        "uncanny-x-force-2010-vol-1",
-        "daredevil-bendis-2001-vol-1",
-        "hawkeye-2012-vol-1",
-        "vision-2015-vol-1",
+    # --- Crossovers ------------------------------------------------------
+    "Absolute Power": [("Absolute Power", 2024)],
+    "Dark Nights: Death Metal": [("Dark Nights: Death Metal", 2020)],
+    "Dark Crisis on Infinite Earths": [("Dark Crisis on Infinite Earths", 2022)],
+    "A.X.E.: Judgment Day": [("A.X.E.: Judgment Day", 2022)],
+    "X of Swords": [("X of Swords", 2020)],
+    "Devil's Reign": [("Devil's Reign", 2021)],
+    # --- Standalone ------------------------------------------------------
+    "Batman: Essential Classics": [
+        ("Batman: Year One", 1987),
+        ("Batman: The Long Halloween", 1996),
+        ("Batman: The Black Mirror", 2010),
+        ("Batman", 2011),
+        ("Gotham Central", 2003),
+        ("Batman: The Knight", 2022),
+    ],
+    "Superman: Essential Classics": [("All-Star Superman", 2005), ("Kingdom Come", 1996)],
+    "X-Men: Essential Classics": [
+        ("New X-Men", 2001),
+        ("Astonishing X-Men", 2004),
+        ("Uncanny X-Force", 2010),
+    ],
+    "Spider-Man: Original Ultimate Run": [("Ultimate Spider-Man", 2000)],
+    "Modern Standalone Greats": [
+        ("Far Sector", 2019),
+        ("The Human Target", 2021),
+        ("Supergirl: Woman of Tomorrow", 2021),
+        ("Strange Adventures", 2020),
+        ("Batman/Superman: World's Finest", 2022),
+        ("Hawkeye", 2012),
+        ("The Vision", 2015),
+        ("Scarlet Witch", 2023),
     ],
 }
 
@@ -132,51 +149,80 @@ def entry_title(entry: ReadingPathEntry) -> str:
     return entry.label or f"Entry {entry.id}"
 
 
+def reading_paths_for(db, title: str, start_year: int | None) -> list[ReadingPath]:
+    """Every volume of one series, in publication order."""
+    stmt = select(CanonicalSeries.id).where(CanonicalSeries.title == title)
+    if start_year is not None:
+        stmt = stmt.where(CanonicalSeries.start_year == start_year)
+    series_ids = list(db.scalars(stmt))
+    if not series_ids:
+        return []
+    path_ids = list(
+        db.scalars(
+            select(CatalogCollection.reading_path_id)
+            .where(
+                CatalogCollection.canonical_series_id.in_(series_ids),
+                CatalogCollection.reading_path_id.is_not(None),
+            )
+            .order_by(CatalogCollection.first_published_on.asc(), CatalogCollection.sequence_number.asc())
+        )
+    )
+    if not path_ids:
+        return []
+    paths = {
+        path.id: path
+        for path in db.scalars(
+            select(ReadingPath)
+            .options(
+                selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue),
+                selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.issue),
+            )
+            .where(ReadingPath.id.in_(path_ids))
+        )
+    }
+    return [paths[pid] for pid in path_ids if pid in paths]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument(
-        "--replace",
-        action="store_true",
-        help="Rebuild each seeded list from scratch, dropping items curation no longer produces.",
-    )
+    parser.add_argument("--replace", action="store_true", help="Rebuild each list from scratch.")
+    parser.add_argument("--prune", action="store_true", help="Delete lists this script no longer defines.")
     args = parser.parse_args()
 
     Base.metadata.create_all(bind=engine)
     missing: list[str] = []
 
     with SessionLocal() as db:
-        for name, slugs in LISTS.items():
-            paths = []
-            for slug in slugs:
-                path = db.scalars(
-                    select(ReadingPath)
-                    .options(
-                        selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue),
-                        selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.issue),
-                    )
-                    .where(ReadingPath.slug == slug)
-                ).first()
-                if path is None:
-                    missing.append(f"{name}: {slug}")
+        if args.prune and not args.dry_run:
+            for stale in db.scalars(select(ReadingList).where(ReadingList.name.not_in(list(LISTS)))):
+                print(f"pruning {stale.name!r}")
+                db.delete(stale)
+            db.commit()
+
+        for name, series_refs in LISTS.items():
+            paths: list[ReadingPath] = []
+            for title, year in series_refs:
+                found = reading_paths_for(db, title, year)
+                if not found:
+                    missing.append(f"{name}: {title} ({year})")
                     continue
-                paths.append(path)
+                paths.extend(found)
 
             downloadable = {path.id: _collection_download_entries(path) for path in paths}
-            total_entries = sum(len(entries) for entries in downloadable.values())
-            print(f"{name}: {len(paths)}/{len(slugs)} collections, {total_entries} issues")
+            total = sum(len(entries) for entries in downloadable.values())
+            print(f"{name}: {len(paths)} volumes, {total} items")
             if args.dry_run:
                 continue
 
             reading_list = db.scalar(select(ReadingList).where(ReadingList.name == name))
             if reading_list is None:
-                reading_list = ReadingList(name=name, description="Seeded from the recommendation brief.")
+                reading_list = ReadingList(name=name, description="Curated by Panel Stack.")
                 db.add(reading_list)
                 db.flush()
-
             if args.replace:
-                for stale in list(reading_list.items):
-                    db.delete(stale)
+                for stale_item in list(reading_list.items):
+                    db.delete(stale_item)
                 db.flush()
                 db.refresh(reading_list)
 
@@ -200,11 +246,11 @@ def main() -> int:
             db.commit()
 
     if missing:
-        print("\nUnresolved collections:")
+        print(f"\n{len(missing)} unresolved series:")
         for item in missing:
             print(f"  {item}")
         return 1
-    print("\nEvery referenced collection resolved.")
+    print("\nEvery referenced series resolved.")
     return 0
 
 
