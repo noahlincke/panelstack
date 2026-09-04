@@ -285,6 +285,45 @@ def _stub_entry():
     return Entry()
 
 
+class DeliveryModeTests(unittest.TestCase):
+    """Which handover a reader supports can only be settled by trying it.
+
+    The default relays the bytes, which is what Panels works with; redirect=1
+    hands over the mirror URL. The flag has to reach acquisition links, not just
+    the catalog URL.
+    """
+
+    def test_the_default_link_carries_only_the_token(self) -> None:
+        import backend.app.main as main
+
+        self.assertEqual(
+            main._opds_link("https://example.test/panels/opds/lists", "tok"),
+            "https://example.test/panels/opds/lists?key=tok",
+        )
+
+    def test_the_delivery_mode_travels_with_the_token(self) -> None:
+        import backend.app.main as main
+
+        self.assertEqual(
+            main._opds_link("https://example.test/panels/opds/lists", "tok", True),
+            "https://example.test/panels/opds/lists?key=tok&redirect=1",
+        )
+
+    def test_acquisition_links_inherit_the_mode(self) -> None:
+        import backend.app.main as main
+
+        plain = main._opds_entry_download_href("https://example.test/panels", 2, 64329, "tok", False)
+        redirected = main._opds_entry_download_href("https://example.test/panels", 2, 64329, "tok", True)
+        self.assertEqual(plain, "https://example.test/panels/opds/download/2/64329?key=tok")
+        self.assertEqual(redirected, "https://example.test/panels/opds/download/2/64329?key=tok&redirect=1")
+
+    def test_covers_never_carry_the_mode(self) -> None:
+        import backend.app.main as main
+
+        cover = main._opds_entry_cover_href("https://example.test/panels", 2, 64329, "tok")
+        self.assertNotIn("redirect", cover)
+
+
 if __name__ == "__main__":
     unittest.main()
 
