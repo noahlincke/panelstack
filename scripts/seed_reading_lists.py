@@ -22,7 +22,7 @@ from sqlalchemy import select  # noqa: E402
 from sqlalchemy.orm import selectinload  # noqa: E402
 
 from backend.app.db import SessionLocal, engine  # noqa: E402
-from backend.app.main import _collection_download_entries  # noqa: E402
+from backend.app.main import _series_download_entries  # noqa: E402
 from backend.app.models import (  # noqa: E402
     Base,
     CanonicalSeries,
@@ -41,7 +41,7 @@ Series = tuple[str, int | None]
 LISTS: dict[str, list[Series]] = {
     # --- Characters ------------------------------------------------------
     "Batman: Current Run": [("Batman", 2016)],
-    "Detective Comics: Current Run": [("Detective Comics", 1937)],
+    "Detective Comics: Tom Taylor Run": [("Detective Comics", 1937)],
     "Nightwing: Tom Taylor Run": [("Nightwing", 2021)],
     "Superman: Current Run": [("Superman", 2023), ("Action Comics", 2016), ("Superman Unlimited", 2025)],
     "Green Lantern: Current Run": [("Green Lantern", 2023)],
@@ -56,7 +56,28 @@ LISTS: dict[str, list[Series]] = {
     ],
     "Immortal Hulk: Complete": [("Immortal Hulk", 2018)],
     "Moon Knight: Jed MacKay Run": [("Moon Knight", 2021)],
-    "Doctor Strange: Jed MacKay Run": [("Doctor Strange", 2023)],
+    "Doctor Strange: Jed MacKay Run": [("Doctor Strange", 2023), ("Doctor Strange of Asgard", 2025)],
+    "Batman: Scott Snyder Run": [("Batman", 2011)],
+    "Batman and Robin: Current Run": [("Batman and Robin", 2023)],
+    "Shazam!: Current Run": [("Shazam!", 2023)],
+    "Iron Man: Current Run": [("Iron Man", 2024)],
+    "Captain America: Current Run": [("Captain America", 2025)],
+    "Deadpool: Current Run": [("Deadpool", 2024)],
+    "Wolverine: Current Run": [("Wolverine", 2024)],
+    "Thor: Immortal Thor Run": [("Immortal Thor", 2023)],
+    "Hulk: Current Run": [("Incredible Hulk", 2023)],
+    "Daredevil: Complete Modern Run": [
+        ("Daredevil", 2001),
+        ("Daredevil", 2019),
+        ("Devil's Reign", 2021),
+        ("Daredevil", 2022),
+        ("Daredevil", 2023),
+    ],
+    "Green Lantern: From Rebirth": [
+        ("Green Lantern: Rebirth", 2004),
+        ("Far Sector", 2019),
+        ("Green Lantern", 2023),
+    ],
     # --- Teams -----------------------------------------------------------
     "X-Men: Krakoa Era": [
         ("House of X / Powers of X", 2019),
@@ -114,6 +135,9 @@ LISTS: dict[str, list[Series]] = {
     "A.X.E.: Judgment Day": [("A.X.E.: Judgment Day", 2022)],
     "X of Swords": [("X of Swords", 2020)],
     "Devil's Reign": [("Devil's Reign", 2021)],
+    "House of M": [("House of M", 2005), ("New Avengers: Illuminati", 2006)],
+    "Infinite Crisis": [("Countdown to Infinite Crisis", 2005), ("Crisis on Infinite Earths", 1985)],
+    "DCeased": [("DCeased", 2019)],
     # --- Standalone ------------------------------------------------------
     "Batman: Essential Classics": [
         ("Batman: Year One", 1987),
@@ -201,17 +225,19 @@ def main() -> int:
             db.commit()
 
         for name, series_refs in LISTS.items():
-            paths: list[ReadingPath] = []
+            grouped: list[list[ReadingPath]] = []
             for title, year in series_refs:
                 found = reading_paths_for(db, title, year)
                 if not found:
                     missing.append(f"{name}: {title} ({year})")
                     continue
-                paths.extend(found)
+                grouped.append(found)
+            paths = [path for series_paths in grouped for path in series_paths]
 
-            downloadable = {path.id: _collection_download_entries(path) for path in paths}
-            total = sum(len(entries) for entries in downloadable.values())
-            print(f"{name}: {len(paths)} volumes, {total} items")
+            # Coverage is worked out per series, so a trade on one volume still
+            # stands in for issues that live on the next one.
+            shelf = [pair for series_paths in grouped for pair in _series_download_entries(series_paths)]
+            print(f"{name}: {len(paths)} volumes, {len(shelf)} items")
             if args.dry_run:
                 continue
 
@@ -228,21 +254,20 @@ def main() -> int:
 
             existing = {item.reading_path_entry_id for item in reading_list.items}
             sort_order = max((item.sort_order for item in reading_list.items), default=-1) + 1
-            for path in paths:
-                for entry in downloadable[path.id]:
-                    if entry.id in existing:
-                        continue
-                    db.add(
-                        ReadingListItem(
-                            reading_list_id=reading_list.id,
-                            reading_path_id=path.id,
-                            reading_path_entry_id=entry.id,
-                            title=entry_title(entry),
-                            sort_order=sort_order,
-                        )
+            for path, entry in shelf:
+                if entry.id in existing:
+                    continue
+                db.add(
+                    ReadingListItem(
+                        reading_list_id=reading_list.id,
+                        reading_path_id=path.id,
+                        reading_path_entry_id=entry.id,
+                        title=entry_title(entry),
+                        sort_order=sort_order,
                     )
-                    existing.add(entry.id)
-                    sort_order += 1
+                )
+                existing.add(entry.id)
+                sort_order += 1
             db.commit()
 
     if missing:

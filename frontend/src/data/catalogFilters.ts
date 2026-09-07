@@ -445,11 +445,19 @@ export function matchesAnyCatalogFilter(path: ReadingPath): boolean {
 }
 
 /**
- * The catalog tags characters as "<name>-family". Most FILTER_GROUPS ids already
- * use that form; Batman is the one that does not, so it is mapped explicitly.
+ * DC and Marvel tag characters as "<name>-family", which mostly matches the
+ * FILTER_GROUPS ids. Manga is tagged with the plain series slug instead, so
+ * those are mapped here rather than renaming the groups the browse page uses.
  */
 const ICON_BY_TAG_OVERRIDE: Record<string, string> = {
   'bat-family': batmanIcon,
+  berserk: berserkIcon,
+  'chainsaw-man': chainsawManIcon,
+  'frieren-beyond-journey-s-end': frierenIcon,
+  'hunter-x-hunter': hunterXHunterIcon,
+  'one-piece': onePieceIcon,
+  'spy-x-family': spyXFamilyIcon,
+  'vinland-saga': vinlandSagaIcon,
 };
 
 export function characterIcon(tag: string): string | undefined {

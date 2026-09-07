@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../api/client';
-import { CatalogFilterBar, defaultCatalogFilters } from '../components/CatalogFilterBar';
+import { CatalogFilterBar } from '../components/CatalogFilterBar';
 import { ChronologyLanes, availableLanes } from '../components/ChronologyLanes';
 import { CoverImage } from '../components/CoverImage';
 import { monthKey, monthLabel } from '../lib/catalogWindow';
-import type { CatalogCollection, CatalogFacets, CatalogFilterState, ChronologyEntry } from '../api/types';
+import { useFilterParams } from '../lib/filterParams';
+import type { CatalogCollection, CatalogFacets, ChronologyEntry } from '../api/types';
 
 const TIMELINE_PAGE_SIZE = 200;
 const LANE_PAGE_SIZE = 400;
@@ -14,8 +15,6 @@ const DEFAULT_LANE_COUNT = 6;
 type ChronologyPageProps = {
   searchQuery: string;
 };
-
-type ChronologyView = 'timeline' | 'lanes';
 
 function groupByMonth(entries: ChronologyEntry[]) {
   const months = new Map<string, { key: string; label: string; entries: ChronologyEntry[] }>();
@@ -29,13 +28,12 @@ function groupByMonth(entries: ChronologyEntry[]) {
 }
 
 export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
-  const [view, setView] = useState<ChronologyView>('lanes');
+  const { filters, extra, setFilters, setExtra } = useFilterParams({ view: 'lanes', lanes: '' });
+  const view = extra.view === 'timeline' ? 'timeline' : 'lanes';
   const [facets, setFacets] = useState<CatalogFacets | undefined>();
-  const [filters, setFilters] = useState<CatalogFilterState>(defaultCatalogFilters());
   const [entries, setEntries] = useState<ChronologyEntry[]>([]);
   const [collections, setCollections] = useState<CatalogCollection[]>([]);
   const [total, setTotal] = useState(0);
-  const [laneIds, setLaneIds] = useState<string[] | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -45,18 +43,14 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
 
   const allLanes = useMemo(() => availableLanes(facets?.characters ?? []), [facets]);
 
-  // Character lanes only exist once facets arrive, so seed the default from those
-  // rather than from the line lanes that are present on the first render.
-  useEffect(() => {
-    if (laneIds === undefined && facets) {
-      setLaneIds(allLanes.slice(0, DEFAULT_LANE_COUNT).map((lane) => lane.id));
-    }
-  }, [allLanes, facets, laneIds]);
+  // Character lanes only exist once facets arrive, so the default is taken from
+  // those rather than from the line lanes present on the first render.
+  const laneIds = useMemo(() => {
+    if (extra.lanes) return extra.lanes.split(',');
+    return allLanes.slice(0, DEFAULT_LANE_COUNT).map((lane) => lane.id);
+  }, [allLanes, extra.lanes]);
 
-  const activeLanes = useMemo(
-    () => allLanes.filter((lane) => (laneIds ?? []).includes(lane.id)),
-    [allLanes, laneIds],
-  );
+  const activeLanes = useMemo(() => allLanes.filter((lane) => laneIds.includes(lane.id)), [allLanes, laneIds]);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,11 +92,12 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
       .catch((cause: Error) => setError(cause.message));
   };
 
-  const toggleLane = (laneId: string) =>
-    setLaneIds((current) => {
-      const active = current ?? [];
-      return active.includes(laneId) ? active.filter((id) => id !== laneId) : [...active, laneId];
-    });
+  const toggleLane = (laneId: string) => {
+    const next = laneIds.includes(laneId) ? laneIds.filter((id) => id !== laneId) : [...laneIds, laneId];
+    // An empty pick has to be recorded as something, or the URL would fall back
+    // to the default lanes and the board would refuse to clear.
+    setExtra({ lanes: next.length > 0 ? next.join(',') : 'none' });
+  };
 
   return (
     <section className="view view--chronology">
@@ -110,10 +105,10 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
         <div className="view__header-row">
           <h1>Chronology</h1>
           <div className="view-switch" role="group" aria-label="Chronology view">
-            <button type="button" aria-pressed={view === 'lanes'} onClick={() => setView('lanes')}>
+            <button type="button" aria-pressed={view === 'lanes'} onClick={() => setExtra({ view: 'lanes' })}>
               Lanes
             </button>
-            <button type="button" aria-pressed={view === 'timeline'} onClick={() => setView('timeline')}>
+            <button type="button" aria-pressed={view === 'timeline'} onClick={() => setExtra({ view: 'timeline' })}>
               Timeline
             </button>
           </div>
@@ -129,6 +124,7 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
         facets={facets}
         value={filters}
         onChange={setFilters}
+        showLibraryFilter={false}
         resultLabel={
           view === 'timeline'
             ? `${total} ${total === 1 ? 'issue' : 'issues'}`
@@ -145,7 +141,7 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
                 key={lane.id}
                 type="button"
                 className="filter-chip"
-                aria-pressed={(laneIds ?? []).includes(lane.id)}
+                aria-pressed={laneIds.includes(lane.id)}
                 onClick={() => toggleLane(lane.id)}
               >
                 {lane.iconSrc ? <img className="filter-chip__icon" src={lane.iconSrc} alt="" aria-hidden="true" /> : null}
@@ -165,7 +161,12 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
 
       {!isLoading && view === 'timeline' ? (
         <>
-          {entries.length === 0 && !error ? <p className="view__empty">No issues match these filters.</p> : null}
+          {entries.length === 0 && !error ? (
+            <p className="view__empty">
+              No dated issues match these filters. Manga chapters carry no publication date, so a manga
+              publisher only appears in Lanes.
+            </p>
+          ) : null}
           <ol className="chronology">
             {months.map((month) => (
               <li className="chronology__month" key={month.key}>

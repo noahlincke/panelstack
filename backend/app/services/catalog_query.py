@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
 
-from sqlalchemy import Select, func, or_, select
+from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..models import (
@@ -15,12 +16,19 @@ from ..models import (
     CatalogCollectionTag,
     Publisher,
 )
+from .library import slugify
 
 # Character and team tags are written by the catalog sync as "<slug>-family".
 FAMILY_SUFFIX = "-family"
-# The suffix also matches manga titles such as "Spy x Family", so character facets
+# The suffix also matches manga titles such as "Spy x Family", so family facets
 # are scoped to the publishers that actually use family groupings.
 FAMILY_PUBLISHER_SLUGS = ("dc", "marvel")
+# Every collection also carries its publisher slug and its line as tags. Neither
+# says anything about who is in the book, so they never become a facet.
+NON_CHARACTER_TAGS = {"series", "event", "absolute", "ultimate", "run", "arc"}
+# A manga line has no family groupings; its series slug is the useful grouping,
+# but only once more than one volume shares it.
+MIN_SERIES_TAG_COLLECTIONS = 2
 
 
 @dataclass(frozen=True)
@@ -51,7 +59,33 @@ def _titleize(slug: str) -> str:
 
 
 def _character_label(tag: str) -> str:
-    return _titleize(tag).replace("X Men", "X-Men")
+    return _titleize(tag).replace("X Men", "X-Men").replace("Jojo", "JoJo")
+
+
+def _series_year(column) -> Select:  # noqa: ANN001 - a mapped column of CanonicalSeries
+    return (
+        select(column)
+        .where(CanonicalSeries.id == CatalogCollection.canonical_series_id)
+        .correlate(CatalogCollection)
+        .scalar_subquery()
+    )
+
+
+def _series_ends_on_or_after(year: int):  # noqa: ANN201 - a SQLAlchemy boolean clause
+    """Undated runs fall back to the series' own years.
+
+    MangaPill publishes no chapter dates, so every manga collection has null
+    publication dates. Dropping them from a date window made the chronology look
+    empty for every publisher but DC and Marvel; an open-ended series is treated
+    as still running.
+    """
+    end = _series_year(CanonicalSeries.end_year)
+    return or_(end.is_(None), end >= year)
+
+
+def _series_starts_on_or_before(year: int):  # noqa: ANN201 - a SQLAlchemy boolean clause
+    start = _series_year(CanonicalSeries.start_year)
+    return or_(start.is_(None), start <= year)
 
 
 def _apply_filters(
@@ -76,9 +110,25 @@ def _apply_filters(
             )
         )
     if start:
-        stmt = stmt.where(CatalogCollection.latest_published_on.is_not(None), CatalogCollection.latest_published_on >= start)
+        stmt = stmt.where(
+            or_(
+                and_(
+                    CatalogCollection.latest_published_on.is_not(None),
+                    CatalogCollection.latest_published_on >= start,
+                ),
+                and_(CatalogCollection.latest_published_on.is_(None), _series_ends_on_or_after(start.year)),
+            )
+        )
     if end:
-        stmt = stmt.where(CatalogCollection.first_published_on.is_not(None), CatalogCollection.first_published_on <= end)
+        stmt = stmt.where(
+            or_(
+                and_(
+                    CatalogCollection.first_published_on.is_not(None),
+                    CatalogCollection.first_published_on <= end,
+                ),
+                and_(CatalogCollection.first_published_on.is_(None), _series_starts_on_or_before(end.year)),
+            )
+        )
     if owned is not None:
         owns = CatalogCollection.id.in_(
             select(CatalogCollectionItem.collection_id).where(CatalogCollectionItem.issue_id.is_not(None))
@@ -95,6 +145,51 @@ def _apply_filters(
     return stmt
 
 
+def _character_facet_rows(db: Session) -> list[tuple[str, int, str]]:
+    """The groupings worth putting a filter chip or a chronology lane on.
+
+    DC and Marvel are curated into "<who>-family" tags, which are exactly right.
+    Manga lines have no such curation, so the series slug shared by a title's
+    volumes stands in for it — without that, every non-DC/Marvel publisher had
+    nothing to filter or lane by and the chronology looked empty for all of them.
+    """
+    counts = select(
+        CatalogCollectionTag.tag,
+        func.count(CatalogCollectionTag.collection_id).label("collections"),
+    ).join(CatalogCollection, CatalogCollection.id == CatalogCollectionTag.collection_id)
+
+    family = db.execute(
+        counts.join(Publisher, Publisher.id == CatalogCollection.publisher_id)
+        .where(CatalogCollectionTag.tag.like(f"%{FAMILY_SUFFIX}"), Publisher.slug.in_(FAMILY_PUBLISHER_SLUGS))
+        .group_by(CatalogCollectionTag.tag)
+    ).all()
+
+    publisher_slugs = set(db.scalars(select(Publisher.slug)))
+    other = db.execute(
+        counts.join(Publisher, Publisher.id == CatalogCollection.publisher_id)
+        .where(Publisher.slug.not_in(FAMILY_PUBLISHER_SLUGS))
+        .group_by(CatalogCollectionTag.tag)
+        .having(func.count(CatalogCollectionTag.collection_id) >= MIN_SERIES_TAG_COLLECTIONS)
+    ).all()
+
+    # Slugs like "frieren-beyond-journey-s-end" do not titleize into anything a
+    # human would recognise, so a series tag borrows its series' real title. The
+    # tag is slugified from either the series slug (minus its trailing start
+    # year) or the title, depending on which sync wrote it, so both are indexed.
+    titles: dict[str, str] = {}
+    for slug, title in db.execute(select(CanonicalSeries.slug, CanonicalSeries.title)).all():
+        titles.setdefault(re.sub(r"-\d{4}$", "", slug), title)
+        titles.setdefault(slugify(title), title)
+
+    rows = [(tag, count, _character_label(tag)) for tag, count in family]
+    rows += [
+        (tag, count, titles.get(tag) or _character_label(tag))
+        for tag, count in other
+        if tag not in publisher_slugs and tag not in NON_CHARACTER_TAGS
+    ]
+    return sorted(rows, key=lambda row: (-row[1], row[2]))
+
+
 def catalog_facets(db: Session) -> CatalogFacets:
     publisher_rows = db.execute(
         select(Publisher.slug, Publisher.name, func.count(CatalogCollection.id))
@@ -107,23 +202,28 @@ def catalog_facets(db: Session) -> CatalogFacets:
         .group_by(CatalogCollection.line)
         .order_by(func.count(CatalogCollection.id).desc())
     ).all()
-    character_rows = db.execute(
-        select(CatalogCollectionTag.tag, func.count(CatalogCollectionTag.collection_id))
-        .join(CatalogCollection, CatalogCollection.id == CatalogCollectionTag.collection_id)
-        .join(Publisher, Publisher.id == CatalogCollection.publisher_id)
-        .where(CatalogCollectionTag.tag.like(f"%{FAMILY_SUFFIX}"), Publisher.slug.in_(FAMILY_PUBLISHER_SLUGS))
-        .group_by(CatalogCollectionTag.tag)
-        .order_by(func.count(CatalogCollectionTag.collection_id).desc(), CatalogCollectionTag.tag.asc())
-    ).all()
+    character_rows = _character_facet_rows(db)
     span = db.execute(
         select(func.min(CatalogCollection.first_published_on), func.max(CatalogCollection.latest_published_on))
     ).one()
+    # Undated runs would otherwise fall outside the range offered to the user.
+    series_span = db.execute(
+        select(func.min(CanonicalSeries.start_year), func.max(CanonicalSeries.end_year)).join(
+            CatalogCollection, CatalogCollection.canonical_series_id == CanonicalSeries.id
+        )
+    ).one()
+    min_year = min(year for year in (span[0].year if span[0] else None, series_span[0]) if year) if (
+        span[0] or series_span[0]
+    ) else None
+    max_year = max(year for year in (span[1].year if span[1] else None, series_span[1]) if year) if (
+        span[1] or series_span[1]
+    ) else None
     return CatalogFacets(
         publishers=[Facet(value=slug, label=name, count=count) for slug, name, count in publisher_rows],
         lines=[Facet(value=line, label=_titleize(line), count=count) for line, count in line_rows],
-        characters=[Facet(value=tag, label=_character_label(tag), count=count) for tag, count in character_rows],
-        min_year=span[0].year if span[0] else None,
-        max_year=span[1].year if span[1] else None,
+        characters=[Facet(value=tag, label=label, count=count) for tag, count, label in character_rows],
+        min_year=min_year,
+        max_year=max_year,
     )
 
 
@@ -156,6 +256,42 @@ def catalog_collections(
         CatalogCollection.id.asc(),
     )
     return list(db.scalars(stmt.offset(offset).limit(limit))), int(total or 0)
+
+
+def collection_year_spans(
+    db: Session, collections: Sequence[CatalogCollection]
+) -> dict[int, tuple[int | None, int | None]]:
+    """The years each collection covers, for placing it on the chronology board.
+
+    Publication dates are used where they exist. Manga has none, so its series'
+    run years stand in — the only date signal MangaPill gives us.
+    """
+    undated = {
+        collection.canonical_series_id
+        for collection in collections
+        if collection.first_published_on is None and collection.canonical_series_id is not None
+    }
+    series_years: dict[int, tuple[int | None, int | None]] = {}
+    if undated:
+        series_years = {
+            series_id: (start, end)
+            for series_id, start, end in db.execute(
+                select(CanonicalSeries.id, CanonicalSeries.start_year, CanonicalSeries.end_year).where(
+                    CanonicalSeries.id.in_(undated)
+                )
+            ).all()
+        }
+
+    spans: dict[int, tuple[int | None, int | None]] = {}
+    for collection in collections:
+        if collection.first_published_on is not None:
+            latest = collection.latest_published_on or collection.first_published_on
+            spans[collection.id] = (collection.first_published_on.year, latest.year)
+            continue
+        start, end = series_years.get(collection.canonical_series_id or -1, (None, None))
+        # An open-ended run is still going, so it reaches the present year.
+        spans[collection.id] = (start, end or (date.today().year if start else None))
+    return spans
 
 
 def owned_counts(db: Session, collection_ids: Sequence[int]) -> dict[int, int]:

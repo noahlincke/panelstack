@@ -3,6 +3,11 @@ import { apiClient } from '../api/client';
 import { CoverImage } from '../components/CoverImage';
 import { ListItemPicker } from '../components/ListItemPicker';
 import { formatBytes } from '../lib/formatBytes';
+import {
+  getCollectionProgressKey,
+  getIssueProgressKey,
+  setCollectionIssueReadState,
+} from '../lib/readingProgress';
 import type {
   AppSettings,
   DownloadEstimate,
@@ -13,6 +18,12 @@ import type {
 } from '../api/types';
 
 const POLL_INTERVAL_MS = 1500;
+
+/** The publication years a list spans, shown next to its name. */
+function yearRange(first?: number, last?: number): string {
+  if (!first) return '';
+  return last && last !== first ? `${first}–${last}` : String(first);
+}
 
 export function ListsPage() {
   const [settings, setSettings] = useState<AppSettings | undefined>();
@@ -146,6 +157,23 @@ export function ListsPage() {
       .catch((cause: Error) => setError(cause.message));
   };
 
+  const toggleRead = (item: ReadingList['items'][number]) => {
+    const read = !item.isRead;
+    // Written both server-side and locally so the collection pages agree, and
+    // so the row updates without waiting for the round trip.
+    setCollectionIssueReadState(
+      getCollectionProgressKey({ readingPathId: item.readingPathId }),
+      getIssueProgressKey({ canonicalIssueId: item.canonicalIssueId, entryId: item.entryId }),
+      read,
+    );
+    setOpenList((current) =>
+      current ? { ...current, items: current.items.map((i) => (i.id === item.id ? { ...i, isRead: read } : i)) } : current,
+    );
+    apiClient
+      .setReadingPathEntryReadState(item.readingPathId, item.entryId, read)
+      .catch((cause: Error) => setError(cause.message));
+  };
+
   const isRunning = queue?.status === 'running';
 
   return (
@@ -183,7 +211,12 @@ export function ListsPage() {
                   aria-pressed={openList?.id === list.id}
                   onClick={() => openListById(list.id)}
                 >
-                  <span>{list.name}</span>
+                  <span className="lists__index-name">
+                    {list.name}
+                    {list.firstYear ? (
+                      <span className="lists__index-years">{yearRange(list.firstYear, list.lastYear)}</span>
+                    ) : null}
+                  </span>
                   <span className="lists__index-count">{list.itemCount}</span>
                 </button>
               </li>
@@ -221,7 +254,7 @@ export function ListsPage() {
               </div>
               <ul className="lists__item-list">
                 {openList.items.map((item) => (
-                  <li key={item.id} className="lists__item">
+                  <li key={item.id} className={`lists__item ${item.isRead ? 'lists__item--read' : ''}`}>
                     <label className={`lists__item-label ${item.owned ? 'lists__item-label--owned' : ''}`}>
                       <input
                         type="checkbox"
@@ -235,6 +268,16 @@ export function ListsPage() {
                       <span className="lists__item-title">{item.title}</span>
                       {item.owned ? <span className="chip">In library</span> : null}
                     </label>
+                    <button
+                      type="button"
+                      className={`lists__item-read ${item.isRead ? 'lists__item-read--active' : ''}`}
+                      aria-pressed={item.isRead}
+                      aria-label={`Mark ${item.title} as ${item.isRead ? 'unread' : 'read'}`}
+                      title={item.isRead ? 'Mark unread' : 'Mark read'}
+                      onClick={() => toggleRead(item)}
+                    >
+                      <span aria-hidden="true">👀</span>
+                    </button>
                     <button
                       type="button"
                       className="lists__item-remove"

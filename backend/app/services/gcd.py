@@ -9,10 +9,15 @@ What the API actually does, verified against www.comics.org:
 - Nothing supports filtering. ``/api/series/?publisher=54`` ignores the parameter
   and returns all 232k series, so the publisher of a weekly row can only be
   learned by following its ``series`` link.
-- Anonymous use is throttled hard. Measured on 2026-09-01: roughly fifty requests
-  in a few minutes returned ``429`` with ``Retry-After: 3417``, i.e. an hourly
-  window. Every run is therefore request-budgeted and a throttle is a clean stop
-  that keeps the cursor, not an error.
+- Anonymous use is throttled hard. Re-measured on 2026-09-07: the 30th request
+  in a few minutes returned ``429`` with ``Retry-After: 3581``, i.e. roughly
+  thirty requests per hour. At that rate a full 2019-2026 backfill is hundreds
+  of hours, so it is not a practical way to load the catalogue from cold.
+  Every run is therefore request-budgeted and a throttle is a clean stop that
+  keeps the cursor, not an error.
+- GCD documents larger limits for logged-in clients over HTTP Basic auth. Set
+  ``GCD_USERNAME`` and ``GCD_PASSWORD`` and every request is authenticated; the
+  weekly reconciliation stays well inside even the anonymous budget either way.
 - A weekly row carries ``series``, ``series_name`` and ``descriptor`` but no
   publisher and no dates worth trusting.
 
@@ -24,6 +29,7 @@ what makes both the local backfill and the weekly reconciliation quota-safe.
 """
 from __future__ import annotations
 
+import os
 import re
 import time
 from collections.abc import Callable, Iterator
@@ -93,10 +99,24 @@ def _identifier(url: str, kind: str) -> str:
     return match.group(1)
 
 
+def gcd_credentials() -> tuple[str, str] | None:
+    """A comics.org login, if one has been configured.
+
+    Anonymous callers get about thirty requests an hour, which is too few to
+    backfill from cold. Registering is free and lifts the limit.
+    """
+    username = os.getenv("GCD_USERNAME", "").strip()
+    password = os.getenv("GCD_PASSWORD", "")
+    return (username, password) if username and password else None
+
+
 def build_fetcher(session: requests.Session | None = None, *, interval: float = REQUEST_INTERVAL_SECONDS) -> Fetch:
     """A polite JSON fetcher that also counts what it used."""
     http = session or requests.Session()
     http.headers.setdefault("User-Agent", USER_AGENT)
+    credentials = gcd_credentials()
+    if credentials is not None and http.auth is None:
+        http.auth = credentials
     last_call = [0.0]
 
     def fetch(url: str) -> dict[str, Any]:

@@ -22,6 +22,7 @@ from backend.app.services.catalog_query import (
     catalog_facets,
     catalog_publishers,
     catalog_series,
+    collection_year_spans,
 )
 
 
@@ -235,3 +236,113 @@ class SeriesGroupingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class UndatedPublisherTests(unittest.TestCase):
+    """MangaPill gives no chapter dates, which used to hide manga entirely.
+
+    Every non-DC/Marvel publisher fell out of the chronology: the date window
+    dropped undated collections, and there were no character facets to lane by.
+    """
+
+    def setUp(self) -> None:
+        engine = create_engine("sqlite://", future=True)
+        Base.metadata.create_all(engine)
+        self.db = sessionmaker(bind=engine, future=True)()
+        dc = Publisher(slug="dc", name="DC Comics")
+        shueisha = Publisher(slug="shueisha", name="Shueisha")
+        self.db.add_all([dc, shueisha])
+        self.db.flush()
+
+        self.chainsaw = CanonicalSeries(
+            slug="chainsaw-man-2018", title="Chainsaw Man", publisher_id=shueisha.id, start_year=2018
+        )
+        finished = CanonicalSeries(
+            slug="vinland-saga-2005", title="Vinland Saga", publisher_id=shueisha.id, start_year=2005, end_year=2021
+        )
+        batman = CanonicalSeries(slug="absolute-batman-2024", title="Absolute Batman", publisher_id=dc.id)
+        self.db.add_all([self.chainsaw, finished, batman])
+        self.db.flush()
+
+        for index in range(3):
+            self._undated(shueisha, self.chainsaw, f"Chainsaw Man: Ch. {index + 1}", index, ["chainsaw-man", "shueisha", "series"])
+        self._undated(shueisha, finished, "Vinland Saga: Ch. 1", 0, ["vinland-saga", "shueisha", "series"])
+        # A single-collection tag is noise, not a grouping worth a lane.
+        self._undated(shueisha, finished, "Vinland Saga: Ch. 2", 1, ["vinland-saga", "one-off", "shueisha"])
+        dated = CatalogCollection(
+            slug="absolute-batman-vol-1",
+            title="Absolute Batman: Vol. 1",
+            sort_title="absolute batman",
+            publisher_id=dc.id,
+            canonical_series_id=batman.id,
+            line="absolute",
+            collection_type="run",
+            sequence_number=0,
+            first_published_on=date(2024, 10, 1),
+            latest_published_on=date(2025, 3, 1),
+        )
+        self.db.add(dated)
+        self.db.flush()
+        self.db.add(CatalogCollectionTag(collection_id=dated.id, tag="bat-family"))
+        self.db.commit()
+
+    def tearDown(self) -> None:
+        self.db.close()
+
+    def _undated(self, publisher, series, title, index, tags) -> None:
+        collection = CatalogCollection(
+            slug=title.lower().replace(" ", "-").replace(".", "").replace(":", ""),
+            title=title,
+            sort_title=title.lower(),
+            publisher_id=publisher.id,
+            canonical_series_id=series.id,
+            line="series",
+            collection_type="run",
+            sequence_number=index,
+        )
+        self.db.add(collection)
+        self.db.flush()
+        for tag in tags:
+            self.db.add(CatalogCollectionTag(collection_id=collection.id, tag=tag))
+
+    def test_an_undated_run_stays_in_a_date_window_via_its_series_years(self) -> None:
+        _, total = catalog_collections(self.db, publisher=["shueisha"], start=date(2019, 1, 1), end=date(2026, 8, 31))
+        # Chainsaw Man is open-ended and Vinland Saga ran to 2021, so all five.
+        self.assertEqual(total, 5)
+
+    def test_a_window_that_predates_every_series_excludes_it(self) -> None:
+        _, total = catalog_collections(self.db, publisher=["shueisha"], end=date(2004, 12, 31))
+        self.assertEqual(total, 0)
+
+    def test_a_window_after_a_finished_run_excludes_it(self) -> None:
+        collections, _ = catalog_collections(self.db, publisher=["shueisha"], start=date(2023, 1, 1))
+        self.assertEqual({c.title for c in collections}, {f"Chainsaw Man: Ch. {n}" for n in (1, 2, 3)})
+
+    def test_a_manga_series_tag_becomes_a_facet(self) -> None:
+        values = {facet.value: facet.label for facet in catalog_facets(self.db).characters}
+        self.assertEqual(values.get("chainsaw-man"), "Chainsaw Man")
+        self.assertEqual(values.get("vinland-saga"), "Vinland Saga")
+        self.assertIn("bat-family", values)
+
+    def test_publisher_and_line_tags_never_become_facets(self) -> None:
+        values = {facet.value for facet in catalog_facets(self.db).characters}
+        self.assertNotIn("shueisha", values)
+        self.assertNotIn("series", values)
+        self.assertNotIn("one-off", values)
+
+    def test_the_offered_year_range_covers_undated_series(self) -> None:
+        facets = catalog_facets(self.db)
+        self.assertEqual(facets.min_year, 2005)
+
+    def test_undated_collections_get_a_year_span_from_their_series(self) -> None:
+        collections, _ = catalog_collections(self.db, publisher=["shueisha"])
+        spans = collection_year_spans(self.db, collections)
+        chainsaw = next(c for c in collections if c.title == "Chainsaw Man: Ch. 1")
+        vinland = next(c for c in collections if c.title == "Vinland Saga: Ch. 1")
+        self.assertEqual(spans[chainsaw.id], (2018, date.today().year))
+        self.assertEqual(spans[vinland.id], (2005, 2021))
+
+    def test_a_dated_collection_still_uses_its_own_dates(self) -> None:
+        collections, _ = catalog_collections(self.db, publisher=["dc"])
+        spans = collection_year_spans(self.db, collections)
+        self.assertEqual(spans[collections[0].id], (2024, 2025))

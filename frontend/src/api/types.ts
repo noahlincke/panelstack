@@ -229,6 +229,10 @@ export type CatalogCollection = {
   tags: string[];
   firstPublishedOn?: string;
   latestPublishedOn?: string;
+  /** The years the run covers. Manga has no chapter dates, so these come from
+   *  the series' run years and are the only way to place it on the board. */
+  startYear?: number;
+  endYear?: number;
   readingPathId?: string;
   coverUrl?: string;
 };
@@ -296,6 +300,8 @@ export type ReadingListSummary = {
   name: string;
   description?: string;
   itemCount: number;
+  firstYear?: number;
+  lastYear?: number;
 };
 
 export type ReadingListItem = {
@@ -305,7 +311,10 @@ export type ReadingListItem = {
   title: string;
   sortOrder: number;
   owned: boolean;
+  isRead: boolean;
   coverUrl?: string;
+  canonicalIssueId?: string;
+  publishedOn?: string;
 };
 
 export type ReadingList = {

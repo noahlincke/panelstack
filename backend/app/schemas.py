@@ -420,6 +420,10 @@ class CatalogCollectionSummary(APIBaseModel):
     tags: list[str] = []
     first_published_on: date | None = None
     latest_published_on: date | None = None
+    # The years the run covers. Manga has no chapter dates, so these fall back to
+    # the series' own run years and are the only way to place it on a timeline.
+    start_year: int | None = None
+    end_year: int | None = None
     reading_path_id: int | None = None
     cover_url: str | None = None
 
@@ -530,7 +534,12 @@ class ReadingListItemRead(APIBaseModel):
     title: str
     sort_order: int
     owned: bool = False
+    is_read: bool = False
     cover_url: str | None = None
+    # Read state is keyed on the canonical issue, so a book marked read in the
+    # catalog shows as read in every list that holds it.
+    canonical_issue_id: int | None = None
+    published_on: date | None = None
 
 
 class ReadingListSummary(APIBaseModel):
@@ -538,6 +547,8 @@ class ReadingListSummary(APIBaseModel):
     name: str
     description: str | None = None
     item_count: int
+    first_year: int | None = None
+    last_year: int | None = None
 
 
 class ReadingListRead(APIBaseModel):

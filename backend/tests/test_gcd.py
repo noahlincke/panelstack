@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import os
 import unittest
 from typing import Any
+from unittest.mock import patch
+
+import requests
 
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import sessionmaker
@@ -16,6 +20,8 @@ from backend.app.models import (
 )
 from backend.app.services.gcd import (
     GcdThrottledError,
+    build_fetcher,
+    gcd_credentials,
     iso_week_of,
     run_backfill,
     sync_week,
@@ -217,3 +223,28 @@ class IsoWeekTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CredentialTests(unittest.TestCase):
+    """Anonymous GCD allows about thirty requests an hour, so a login matters."""
+
+    def test_no_credentials_means_anonymous(self) -> None:
+        with patch.dict(os.environ, {"GCD_USERNAME": "", "GCD_PASSWORD": ""}):
+            self.assertIsNone(gcd_credentials())
+
+    def test_a_username_without_a_password_is_not_used(self) -> None:
+        with patch.dict(os.environ, {"GCD_USERNAME": "reader", "GCD_PASSWORD": ""}):
+            self.assertIsNone(gcd_credentials())
+
+    def test_the_fetcher_authenticates_when_configured(self) -> None:
+        session = requests.Session()
+        with patch.dict(os.environ, {"GCD_USERNAME": "reader", "GCD_PASSWORD": "secret"}):
+            build_fetcher(session)
+        self.assertEqual(session.auth, ("reader", "secret"))
+
+    def test_an_explicit_session_auth_is_left_alone(self) -> None:
+        session = requests.Session()
+        session.auth = ("someone", "else")
+        with patch.dict(os.environ, {"GCD_USERNAME": "reader", "GCD_PASSWORD": "secret"}):
+            build_fetcher(session)
+        self.assertEqual(session.auth, ("someone", "else"))

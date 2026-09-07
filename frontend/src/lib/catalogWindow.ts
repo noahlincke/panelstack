@@ -1,8 +1,3 @@
-/** The curated catalog window: modern DC/Marvel continuity through the present. */
-export const CATALOG_WINDOW = {
-  start: '2019-01-01',
-  end: '2026-08-31',
-} as const;
 
 /** The catalog is curated around modern DC and Marvel continuity. */
 export const DEFAULT_PUBLISHERS = ['dc', 'marvel'];

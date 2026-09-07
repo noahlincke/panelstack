@@ -21,7 +21,7 @@ export function availableLanes(characters: CatalogFacet[]): Lane[] {
   return [
     ...characters.map((character) => ({
       id: character.value,
-      label: character.label.replace(/ Family$/, ''),
+      label: character.label,
       iconSrc: characterIcon(character.value),
     })),
     ...LINE_LANES,
@@ -47,9 +47,11 @@ type Placed = {
 };
 
 function yearSpan(collection: CatalogCollection): number[] {
-  const first = Number(collection.firstPublishedOn?.slice(0, 4));
+  // startYear falls back to the series' run years, which is all manga has —
+  // without it every non-DC/Marvel publisher fell off the board entirely.
+  const first = collection.startYear ?? Number(collection.firstPublishedOn?.slice(0, 4));
   if (!first) return [];
-  const last = Number(collection.latestPublishedOn?.slice(0, 4)) || first;
+  const last = collection.endYear ?? (Number(collection.latestPublishedOn?.slice(0, 4)) || first);
   const years = [];
   for (let year = first; year <= Math.max(first, last); year += 1) {
     years.push(year);

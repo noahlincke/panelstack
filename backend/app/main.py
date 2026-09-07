@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -55,6 +56,7 @@ from .models import (
     ReadingPath,
     ReadingList,
     ReadingListItem,
+    ReadingPathCoverAsset,
     ReadingPathEntry,
     Series,
     StoryArc,
@@ -143,6 +145,7 @@ from .services.catalog_query import (
     catalog_facets,
     catalog_publishers,
     catalog_series,
+    collection_year_spans,
     owned_counts,
 )
 from .services.downloads_queue import QUEUE, DownloadTarget, QueueItem, destination_space, resolve_targets
@@ -528,6 +531,33 @@ def _reading_path_ready_cover_url(reading_path: ReadingPath) -> str | None:
             else provider_cover_url
         )
     return None
+
+
+def _series_cover_urls(db: Session, series_ids: Sequence[int]) -> dict[int, str]:
+    """One usable cover per series, for volumes that have none of their own.
+
+    A volume that has not shipped yet has no first issue to look a cover up from,
+    so it would render as a blank tile forever. Borrowing a sibling volume's
+    cover says "this is that series" rather than saying nothing at all.
+    """
+    wanted = {series_id for series_id in series_ids if series_id is not None}
+    if not wanted:
+        return {}
+    rows = db.execute(
+        select(CatalogCollection.canonical_series_id, ReadingPathCoverAsset.reading_path_id)
+        .join(ReadingPathCoverAsset, ReadingPathCoverAsset.reading_path_id == CatalogCollection.reading_path_id)
+        .where(
+            CatalogCollection.canonical_series_id.in_(wanted),
+            ReadingPathCoverAsset.status == "ready",
+            ReadingPathCoverAsset.cached_path.is_not(None),
+        )
+        # The earliest volume is the one whose cover reads as the series' own.
+        .order_by(CatalogCollection.sequence_number.asc())
+    ).all()
+    covers: dict[int, str] = {}
+    for series_id, reading_path_id in rows:
+        covers.setdefault(series_id, f"/reading-paths/{reading_path_id}/cover-image")
+    return covers
 
 
 # Hosts whose covers are proxied even when remote cover fetching is otherwise off.
@@ -1876,6 +1906,8 @@ def list_catalog_collections(
         offset=offset,
     )
     owned_by_collection = owned_counts(db, [collection.id for collection in collections])
+    series_covers = _series_cover_urls(db, [collection.canonical_series_id for collection in collections])
+    year_spans = collection_year_spans(db, collections)
     return CatalogCollectionListResponse(
         items=[
             CatalogCollectionSummary(
@@ -1891,8 +1923,13 @@ def list_catalog_collections(
                 tags=[tag.tag for tag in collection.tags],
                 first_published_on=collection.first_published_on,
                 latest_published_on=collection.latest_published_on,
+                start_year=year_spans.get(collection.id, (None, None))[0],
+                end_year=year_spans.get(collection.id, (None, None))[1],
                 reading_path_id=collection.reading_path_id,
-                cover_url=_reading_path_ready_cover_url(collection.reading_path) if collection.reading_path else None,
+                cover_url=(
+                    (_reading_path_ready_cover_url(collection.reading_path) if collection.reading_path else None)
+                    or series_covers.get(collection.canonical_series_id)
+                ),
             )
             for collection in collections
         ],
@@ -1925,6 +1962,7 @@ def get_catalog_chronology(
         limit=limit,
         offset=offset,
     )
+    series_covers = _series_cover_urls(db, [row.collection.canonical_series_id for row in rows])
     return ChronologyResponse(
         items=[
             ChronologyEntryRead(
@@ -1938,7 +1976,8 @@ def get_catalog_chronology(
                 collection_title=row.collection.title,
                 reading_path_id=row.collection.reading_path_id,
                 cover_url=_canonical_issue_cover_url(row.canonical_issue)
-                or (_reading_path_ready_cover_url(row.collection.reading_path) if row.collection.reading_path else None),
+                or (_reading_path_ready_cover_url(row.collection.reading_path) if row.collection.reading_path else None)
+                or series_covers.get(row.collection.canonical_series_id),
             )
             for row in rows
         ],
@@ -1946,33 +1985,42 @@ def get_catalog_chronology(
     )
 
 
-def _collection_download_entries(reading_path: ReadingPath) -> list[ReadingPathEntry]:
-    """Prefer trades, then fill in issues the trades do not cover.
-
-    A collected edition is one download instead of six, so when a run has one it
-    stands in for the issues it collects. Issues published since the last trade
-    still come through individually.
-    """
-    collected = [entry for entry in reading_path.entries if entry.entry_type == "collection"]
-    issues = [entry for entry in reading_path.entries if entry.entry_type == "issue"]
-    if not collected:
-        return issues
-
+def _collected_issue_numbers(entries: Sequence[ReadingPathEntry]) -> set[str]:
+    """The issue numbers the given collected editions cover."""
     covered: set[str] = set()
-    for entry in collected:
+    for entry in entries:
         issue = entry.canonical_issue
-        if issue is None or "-" not in issue.issue_number:
+        if entry.entry_type != "collection" or issue is None or "-" not in issue.issue_number:
             continue
         first, _, last = issue.issue_number.partition("-")
         if first.strip().isdigit() and last.strip().isdigit():
             covered.update(str(number) for number in range(int(first), int(last) + 1))
+    return covered
 
-    uncollected = [
-        entry
-        for entry in issues
-        if entry.canonical_issue is None or entry.canonical_issue.issue_number not in covered
-    ]
-    return collected + uncollected
+
+def _series_download_entries(reading_paths: Sequence[ReadingPath]) -> list[tuple[ReadingPath, ReadingPathEntry]]:
+    """A whole series as one shelf: its trades, then the issues none of them cover.
+
+    Coverage has to be worked out across the series rather than per volume. A
+    trade lives on whichever volume holds its first issue, so Detective Comics
+    Vol. 3 sits on the volume that starts at #1101 while #1102-1106 sit on the
+    next one — computing coverage a volume at a time offered those five issues
+    as loose downloads even though the book already collects them.
+    """
+    all_entries = [entry for path in reading_paths for entry in path.entries]
+    covered = _collected_issue_numbers(all_entries)
+
+    shelf: list[tuple[ReadingPath, ReadingPathEntry]] = []
+    for path in reading_paths:
+        # Trades lead their volume: one book beats the issues it collects.
+        shelf.extend((path, entry) for entry in path.entries if entry.entry_type == "collection")
+        shelf.extend(
+            (path, entry)
+            for entry in path.entries
+            if entry.entry_type == "issue"
+            and (entry.canonical_issue is None or entry.canonical_issue.issue_number not in covered)
+        )
+    return shelf
 
 
 def _reading_list(db: Session, reading_list_id: int) -> ReadingList:
@@ -1984,7 +2032,44 @@ def _reading_list(db: Session, reading_list_id: int) -> ReadingList:
     return reading_list
 
 
-def _reading_list_item_read(item: ReadingListItem, entry: ReadingPathEntry | None) -> ReadingListItemRead:
+def _reading_list_year_spans(
+    db: Session, reading_lists: Sequence[ReadingList]
+) -> dict[int, tuple[int | None, int | None]]:
+    """First and last publication year of each list's contents."""
+    entry_ids = [item.reading_path_entry_id for reading_list in reading_lists for item in reading_list.items]
+    if not entry_ids:
+        return {}
+    published = {
+        entry_id: published_on
+        for entry_id, published_on in db.execute(
+            select(ReadingPathEntry.id, CanonicalIssue.published_on)
+            .join(CanonicalIssue, CanonicalIssue.id == ReadingPathEntry.canonical_issue_id)
+            .where(ReadingPathEntry.id.in_(entry_ids), CanonicalIssue.published_on.is_not(None))
+        ).all()
+    }
+    spans: dict[int, tuple[int | None, int | None]] = {}
+    for reading_list in reading_lists:
+        years = [
+            published[item.reading_path_entry_id].year
+            for item in reading_list.items
+            if item.reading_path_entry_id in published
+        ]
+        spans[reading_list.id] = (min(years), max(years)) if years else (None, None)
+    return spans
+
+
+def _reading_list_item_read(
+    item: ReadingListItem,
+    entry: ReadingPathEntry | None,
+    cover_url: str | None,
+    state_map: dict[str, UserIssueState],
+) -> ReadingListItemRead:
+    issue_key = (
+        _issue_state_key(issue_id=entry.issue_id, canonical_issue_id=entry.canonical_issue_id)
+        if entry is not None
+        else None
+    )
+    state = state_map.get(issue_key) if issue_key is not None else None
     return ReadingListItemRead(
         id=item.id,
         reading_path_id=item.reading_path_id,
@@ -1992,12 +2077,31 @@ def _reading_list_item_read(item: ReadingListItem, entry: ReadingPathEntry | Non
         title=item.title,
         sort_order=item.sort_order,
         owned=_entry_has_local_match(entry) if entry is not None else False,
-        cover_url=(
-            _provider_issue_cover_url(entry.canonical_issue)
+        cover_url=cover_url,
+        is_read=bool(state is not None and state.is_read),
+        canonical_issue_id=entry.canonical_issue_id if entry is not None else None,
+        published_on=(
+            entry.canonical_issue.published_on
             if entry is not None and entry.canonical_issue is not None
             else None
         ),
     )
+
+
+def _reading_list_item_cover_url(entry: ReadingPathEntry | None, reading_path: ReadingPath | None) -> str | None:
+    """Covers for a list row, in order of how specific they are.
+
+    DC and Marvel canonical issues carry no cover of their own, so relying on the
+    provider URL alone left every reading list without a single cover. The
+    volume's cached cover is the one the rest of the app already shows.
+    """
+    if entry is not None and entry.canonical_issue is not None:
+        issue_cover = _provider_issue_cover_url(entry.canonical_issue)
+        if issue_cover and not _should_proxy_provider_cover_url(issue_cover):
+            return issue_cover
+    if reading_path is not None:
+        return _reading_path_ready_cover_url(reading_path)
+    return None
 
 
 def _reading_list_read(db: Session, reading_list: ReadingList) -> ReadingListRead:
@@ -2017,11 +2121,52 @@ def _reading_list_read(db: Session, reading_list: ReadingList) -> ReadingListRea
             .where(ReadingPathEntry.id.in_(entry_ids))
         )
     } if entry_ids else {}
+
+    path_ids = {item.reading_path_id for item in reading_list.items}
+    paths = {
+        path.id: path
+        for path in db.scalars(
+            select(ReadingPath)
+            .options(
+                selectinload(ReadingPath.cover_asset),
+                selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue),
+            )
+            .where(ReadingPath.id.in_(path_ids))
+        )
+    } if path_ids else {}
+    # A volume still to ship has no cover of its own; its series' does.
+    series_ids = db.execute(
+        select(CatalogCollection.reading_path_id, CatalogCollection.canonical_series_id).where(
+            CatalogCollection.reading_path_id.in_(path_ids)
+        )
+    ).all() if path_ids else []
+    series_by_path = {path_id: series_id for path_id, series_id in series_ids}
+    series_covers = _series_cover_urls(db, list(series_by_path.values()))
+
+    # Read state is shared with the collection pages, so a book marked read in
+    # one place shows as read in the other.
+    state_map = _read_state_map(
+        db,
+        canonical_issue_ids={e.canonical_issue_id for e in entries.values() if e.canonical_issue_id},
+        issue_ids={e.issue_id for e in entries.values() if e.issue_id},
+    )
+
     return ReadingListRead(
         id=reading_list.id,
         name=reading_list.name,
         description=reading_list.description,
-        items=[_reading_list_item_read(item, entries.get(item.reading_path_entry_id)) for item in reading_list.items],
+        items=[
+            _reading_list_item_read(
+                item,
+                entries.get(item.reading_path_entry_id),
+                _reading_list_item_cover_url(
+                    entries.get(item.reading_path_entry_id), paths.get(item.reading_path_id)
+                )
+                or series_covers.get(series_by_path.get(item.reading_path_id, -1)),
+                state_map,
+            )
+            for item in reading_list.items
+        ],
     )
 
 
@@ -2030,6 +2175,7 @@ def list_reading_lists(db: Session = Depends(get_db)) -> ReadingListListResponse
     lists = db.scalars(
         select(ReadingList).options(selectinload(ReadingList.items)).order_by(ReadingList.name.asc())
     ).all()
+    spans = _reading_list_year_spans(db, lists)
     return ReadingListListResponse(
         items=[
             ReadingListSummary(
@@ -2037,6 +2183,8 @@ def list_reading_lists(db: Session = Depends(get_db)) -> ReadingListListResponse
                 name=reading_list.name,
                 description=reading_list.description,
                 item_count=len(reading_list.items),
+                first_year=spans.get(reading_list.id, (None, None))[0],
+                last_year=spans.get(reading_list.id, (None, None))[1],
             )
             for reading_list in lists
         ],
@@ -2597,30 +2745,31 @@ def opds_series(publisher_slug: str, series_id: int, request: Request, db: Sessi
     if group is None:
         raise HTTPException(status_code=404, detail=f"Series {series_id} not found for {publisher_slug}")
 
-    entries = []
-    for reading_path_id in group.reading_path_ids:
-        reading_path = db.scalars(
+    by_id = {
+        path.id: path
+        for path in db.scalars(
             select(ReadingPath)
             .options(selectinload(ReadingPath.entries).selectinload(ReadingPathEntry.canonical_issue))
-            .where(ReadingPath.id == reading_path_id)
-        ).first()
-        if reading_path is None:
-            continue
-        for entry in _collection_download_entries(reading_path):
-            entries.append(
-                opds.acquisition_entry(
-                    identifier=f"{OPDS_ROOT_ID}:entry:{entry.id}",
-                    title=_opds_entry_title(entry),
-                    download_href=_opds_entry_download_href(base, reading_path.id, entry.id, token, redirect),
-                    media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
-                    cover_href=_opds_entry_cover_href(base, reading_path.id, entry.id, token),
-                    updated=(
-                        entry.canonical_issue.published_on.strftime("%Y-%m-%dT00:00:00Z")
-                        if entry.canonical_issue is not None and entry.canonical_issue.published_on
-                        else None
-                    ),
-                )
-            )
+            .where(ReadingPath.id.in_(group.reading_path_ids))
+        )
+    }
+    ordered = [by_id[path_id] for path_id in group.reading_path_ids if path_id in by_id]
+
+    entries = [
+        opds.acquisition_entry(
+            identifier=f"{OPDS_ROOT_ID}:entry:{entry.id}",
+            title=_opds_entry_title(entry),
+            download_href=_opds_entry_download_href(base, reading_path.id, entry.id, token, redirect),
+            media_type=opds.DEFAULT_ARCHIVE_MEDIA_TYPE,
+            cover_href=_opds_entry_cover_href(base, reading_path.id, entry.id, token),
+            updated=(
+                entry.canonical_issue.published_on.strftime("%Y-%m-%dT00:00:00Z")
+                if entry.canonical_issue is not None and entry.canonical_issue.published_on
+                else None
+            ),
+        )
+        for reading_path, entry in _series_download_entries(ordered)
+    ]
 
     body = opds.feed(
         feed_id=f"{OPDS_ROOT_ID}:series:{series_id}",
