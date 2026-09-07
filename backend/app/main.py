@@ -2039,14 +2039,17 @@ def _reading_list_year_spans(
     entry_ids = [item.reading_path_entry_id for reading_list in reading_lists for item in reading_list.items]
     if not entry_ids:
         return {}
-    published = {
-        entry_id: published_on
-        for entry_id, published_on in db.execute(
-            select(ReadingPathEntry.id, CanonicalIssue.published_on)
-            .join(CanonicalIssue, CanonicalIssue.id == ReadingPathEntry.canonical_issue_id)
-            .where(ReadingPathEntry.id.in_(entry_ids), CanonicalIssue.published_on.is_not(None))
-        ).all()
-    }
+    # Every list's entries at once runs to thousands of ids, well past SQLite's
+    # 999-variable limit on the host, so the lookup is batched.
+    published: dict[int, date] = {}
+    for id_batch in _chunked_ids(set(entry_ids)):
+        published.update(
+            db.execute(
+                select(ReadingPathEntry.id, CanonicalIssue.published_on)
+                .join(CanonicalIssue, CanonicalIssue.id == ReadingPathEntry.canonical_issue_id)
+                .where(ReadingPathEntry.id.in_(id_batch), CanonicalIssue.published_on.is_not(None))
+            ).all()
+        )
     spans: dict[int, tuple[int | None, int | None]] = {}
     for reading_list in reading_lists:
         years = [

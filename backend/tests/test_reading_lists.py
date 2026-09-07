@@ -144,6 +144,51 @@ class ReadingListTests(unittest.TestCase):
         spans = _reading_list_year_spans(self.db, [self.reading_list])
         self.assertEqual(spans[self.reading_list.id], (2024, 2026))
 
+    def test_year_spans_survive_more_entries_than_sqlite_allows_variables(self) -> None:
+        """SQLite caps a statement at 999 variables on the host.
+
+        Asking for every list's entries in one IN clause ran to thousands of ids
+        and made /reading-lists fail outright once enough lists existed.
+        """
+        crowded = ReadingList(name="Everything")
+        self.db.add(crowded)
+        self.db.flush()
+        path, _ = self.shipped
+        for order in range(1200):
+            issue = CanonicalIssue(
+                series_id=self.series.id,
+                legacy_key=f"filler#{order}",
+                issue_number=f"filler-{order}",
+                issue_kind="issue",
+                sort_order=order,
+                published_on=date(2020 + order % 5, 1, 1),
+            )
+            self.db.add(issue)
+            self.db.flush()
+            entry = ReadingPathEntry(
+                reading_path_id=path.id,
+                canonical_issue_id=issue.id,
+                sort_order=1000 + order,
+                entry_type="issue",
+                importance="main",
+            )
+            self.db.add(entry)
+            self.db.flush()
+            self.db.add(
+                ReadingListItem(
+                    reading_list_id=crowded.id,
+                    reading_path_id=path.id,
+                    reading_path_entry_id=entry.id,
+                    title=f"Filler #{order}",
+                    sort_order=order,
+                )
+            )
+        self.db.commit()
+
+        spans = _reading_list_year_spans(self.db, [crowded])
+
+        self.assertEqual(spans[crowded.id], (2020, 2024))
+
     def test_an_empty_list_has_no_years(self) -> None:
         empty = ReadingList(name="Nothing yet")
         self.db.add(empty)
