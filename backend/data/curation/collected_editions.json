@@ -1,0 +1,62 @@
+{
+  "_comment": [
+    "Collected editions verified against publisher and retailer listings.",
+    "The generated catalogue guesses that a run's trades line up with its volume",
+    "splits, which is wrong often enough to matter: Absolute Batman Vol. 2 was",
+    "recorded as collecting #7-12 when it collects #7-14, so #13 and #14 showed",
+    "up in reading lists as loose issues that a trade already covers.",
+    "Each entry names the series, the issues the trade actually collects, and the",
+    "on-sale date. scripts/apply_collected_editions.py writes them into",
+    "reading_paths.json, replacing any conflicting range on the same volume."
+  ],
+  "editions": [
+    {
+      "series_slug": "absolute-batman-2024",
+      "title": "Absolute Batman Vol. 1 - The Zoo (TPB)",
+      "first_issue": 1,
+      "last_issue": 6,
+      "published_on": "2025-06-01",
+      "source": "https://www.dc.com/graphic-novels/absolute-batman-2024/absolute-batman-vol-1-the-zoo"
+    },
+    {
+      "series_slug": "absolute-batman-2024",
+      "title": "Absolute Batman Vol. 2 - Abomination (TPB)",
+      "first_issue": 7,
+      "last_issue": 14,
+      "published_on": "2026-01-01",
+      "source": "https://www.penguinrandomhouse.com/books/811773/absolute-batman-vol-2-abomination-by-scott-snyder/"
+    },
+    {
+      "series_slug": "absolute-batman-2024",
+      "title": "Absolute Batman Vol. 3 - Devil's Workshop (TPB)",
+      "first_issue": 15,
+      "last_issue": 18,
+      "published_on": "2026-09-08",
+      "source": "https://www.penguinrandomhouse.com/books/828470/absolute-batman-vol-3-devils-workshop-by-scott-snyder/"
+    },
+    {
+      "series_slug": "detective-comics-1937",
+      "title": "Batman - Detective Comics Vol. 1 - Mercy of the Father (TPB)",
+      "first_issue": 1090,
+      "last_issue": 1096,
+      "published_on": "2025-07-01",
+      "source": "https://www.dc.com/graphic-novels/detective-comics-2016/batman-detective-comics-vol-1-mercy-of-the-father"
+    },
+    {
+      "series_slug": "detective-comics-1937",
+      "title": "Batman - Detective Comics Vol. 2 - Elixir (TPB)",
+      "first_issue": 1097,
+      "last_issue": 1100,
+      "published_on": "2026-02-01",
+      "source": "https://www.penguinrandomhouseretail.com/author/?authorid=156266"
+    },
+    {
+      "series_slug": "detective-comics-1937",
+      "title": "Batman - Detective Comics Vol. 3 - The Courage That Kills (TPB)",
+      "first_issue": 1101,
+      "last_issue": 1106,
+      "published_on": "2026-08-01",
+      "source": "https://www.penguinrandomhouseretail.com/author/?authorid=156266"
+    }
+  ]
+}

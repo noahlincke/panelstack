@@ -650,7 +650,10 @@ type BackendReadingList = {
     title: string;
     sort_order: number;
     owned: boolean;
+    is_read: boolean;
     cover_url: string | null;
+    canonical_issue_id: number | null;
+    published_on: string | null;
   }[];
 };
 
@@ -666,7 +669,20 @@ function readingList(payload: BackendReadingList): ReadingList {
       title: item.title,
       sortOrder: item.sort_order,
       owned: item.owned,
+      // Read state also lives in localStorage for issues the server cannot key,
+      // so both sources are merged the way the collection pages do it.
+      isRead:
+        item.is_read ||
+        isCollectionIssueRead(
+          getCollectionProgressKey({ readingPathId: String(item.reading_path_id) }),
+          getIssueProgressKey({
+            canonicalIssueId: item.canonical_issue_id ? String(item.canonical_issue_id) : undefined,
+            entryId: String(item.entry_id),
+          }),
+        ),
       coverUrl: item.cover_url ? resolveApiUrl(item.cover_url) : undefined,
+      canonicalIssueId: item.canonical_issue_id ? String(item.canonical_issue_id) : undefined,
+      publishedOn: item.published_on ?? undefined,
     })),
   };
 }
@@ -674,13 +690,22 @@ function readingList(payload: BackendReadingList): ReadingList {
 export const apiClient = {
   async listReadingLists(): Promise<ReadingListSummary[]> {
     const payload = await fetchJson<{
-      items: { id: number; name: string; description: string | null; item_count: number }[];
+      items: {
+        id: number;
+        name: string;
+        description: string | null;
+        item_count: number;
+        first_year: number | null;
+        last_year: number | null;
+      }[];
     }>('/reading-lists');
     return payload.items.map((item) => ({
       id: String(item.id),
       name: item.name,
       description: item.description ?? undefined,
       itemCount: item.item_count,
+      firstYear: item.first_year ?? undefined,
+      lastYear: item.last_year ?? undefined,
     }));
   },
 
@@ -810,6 +835,8 @@ export const apiClient = {
         tags: string[];
         first_published_on: string | null;
         latest_published_on: string | null;
+        start_year: number | null;
+        end_year: number | null;
         reading_path_id: number | null;
         cover_url: string | null;
       }[];
@@ -830,6 +857,8 @@ export const apiClient = {
         tags: item.tags ?? [],
         firstPublishedOn: item.first_published_on ?? undefined,
         latestPublishedOn: item.latest_published_on ?? undefined,
+        startYear: item.start_year ?? undefined,
+        endYear: item.end_year ?? undefined,
         readingPathId: item.reading_path_id ? String(item.reading_path_id) : undefined,
         coverUrl: item.cover_url ? resolveApiUrl(item.cover_url) : undefined,
       })),

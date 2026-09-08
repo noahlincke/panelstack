@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { apiClient } from '../api/client';
 import { CatalogFilterBar } from '../components/CatalogFilterBar';
 import { CoverImage } from '../components/CoverImage';
-import { CATALOG_WINDOW, DEFAULT_PUBLISHERS } from '../lib/catalogWindow';
-import type { CatalogCollection, CatalogFacets, CatalogFilterState } from '../api/types';
+import { useFilterParams } from '../lib/filterParams';
+import type { CatalogCollection, CatalogFacets } from '../api/types';
 
 const PAGE_SIZE = 60;
 
@@ -15,7 +15,7 @@ type CatalogPageProps = {
 
 export function CatalogPage({ searchQuery, refreshToken }: CatalogPageProps) {
   const [facets, setFacets] = useState<CatalogFacets | undefined>();
-  const [filters, setFilters] = useState<CatalogFilterState>({ ...CATALOG_WINDOW, publisher: [...DEFAULT_PUBLISHERS] });
+  const { filters, setFilters } = useFilterParams({});
   const [collections, setCollections] = useState<CatalogCollection[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,8 +60,7 @@ export function CatalogPage({ searchQuery, refreshToken }: CatalogPageProps) {
       <header className="view__header">
         <h1>Catalog</h1>
         <p className="view__lede">
-          Curated DC and Marvel runs and collected editions, {CATALOG_WINDOW.start.slice(0, 4)} through{' '}
-          {CATALOG_WINDOW.end}.
+          Curated runs and collected editions. Narrow by publisher, character or year.
         </p>
       </header>
 
@@ -100,7 +99,7 @@ export function CatalogPage({ searchQuery, refreshToken }: CatalogPageProps) {
               <span>
                 {collection.issueCount} {collection.issueCount === 1 ? 'issue' : 'issues'}
               </span>
-              <span>{collection.firstPublishedOn?.slice(0, 4) ?? '—'}</span>
+              <span>{collection.startYear ?? '—'}</span>
             </div>
           </article>
         ))}

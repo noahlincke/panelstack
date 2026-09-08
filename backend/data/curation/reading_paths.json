@@ -2552,14 +2552,6 @@
           "summary": "Collects Absolute Batman #1-6."
         },
         {
-          "issue_number": "7-12",
-          "issue_kind": "collection",
-          "title": "Absolute Batman Vol. 2 - Abomination (TPB)",
-          "published_on": "2026-01-01",
-          "sort_order": 14500,
-          "summary": "Collects Absolute Batman #7-12."
-        },
-        {
           "issue_number": "15",
           "title": "Absolute Batman #15",
           "published_on": "2025-12-01"
@@ -2608,6 +2600,22 @@
           "issue_number": "24",
           "title": "Absolute Batman #24",
           "published_on": "2026-09-01"
+        },
+        {
+          "issue_number": "7-14",
+          "issue_kind": "collection",
+          "title": "Absolute Batman Vol. 2 - Abomination (TPB)",
+          "published_on": "2026-01-01",
+          "sort_order": 14500,
+          "summary": "Collects Absolute Batman #7-14."
+        },
+        {
+          "issue_number": "15-18",
+          "issue_kind": "collection",
+          "title": "Absolute Batman Vol. 3 - Devil's Workshop (TPB)",
+          "published_on": "2026-09-08",
+          "sort_order": 14500,
+          "summary": "Collects Absolute Batman #15-18."
         }
       ],
       "end_year": 2026
@@ -4567,7 +4575,7 @@
           "issue_kind": "collection",
           "title": "Batman - Detective Comics Vol. 1 - Mercy of the Father (TPB)",
           "published_on": "2025-07-01",
-          "sort_order": 1096500,
+          "sort_order": 14500,
           "summary": "Collects Detective Comics #1090-1096."
         },
         {
@@ -4654,6 +4662,22 @@
           "issue_number": "1113",
           "title": "Detective Comics #1113",
           "published_on": "2026-09-01"
+        },
+        {
+          "issue_number": "1097-1100",
+          "issue_kind": "collection",
+          "title": "Batman - Detective Comics Vol. 2 - Elixir (TPB)",
+          "published_on": "2026-02-01",
+          "sort_order": 14500,
+          "summary": "Collects Detective Comics #1097-1100."
+        },
+        {
+          "issue_number": "1101-1106",
+          "issue_kind": "collection",
+          "title": "Batman - Detective Comics Vol. 3 - The Courage That Kills (TPB)",
+          "published_on": "2026-08-01",
+          "sort_order": 14500,
+          "summary": "Collects Detective Comics #1101-1106."
         }
       ],
       "end_year": 2026
@@ -14405,7 +14429,7 @@
           "importance": "main"
         },
         {
-          "sort_order": 1000,
+          "sort_order": 1001,
           "canonical_issue_key": "absolute-batman-2024#1-6",
           "story_arc_slug": "absolute-batman-2024-vol-1",
           "entry_type": "collection",
@@ -14479,12 +14503,12 @@
           "importance": "main"
         },
         {
-          "sort_order": 1000,
-          "canonical_issue_key": "absolute-batman-2024#7-12",
+          "sort_order": 1007,
+          "canonical_issue_key": "absolute-batman-2024#7-14",
           "story_arc_slug": "absolute-batman-2024-vol-2",
           "entry_type": "collection",
           "importance": "collected-edition",
-          "note": "Collects Absolute Batman #7-12."
+          "note": "Collects Absolute Batman #7-14."
         }
       ]
     },
@@ -16208,7 +16232,7 @@
           "importance": "main"
         },
         {
-          "sort_order": 1000,
+          "sort_order": 2090,
           "canonical_issue_key": "detective-comics-1937#1090-1096",
           "story_arc_slug": "detective-comics-1937-vol-1",
           "entry_type": "collection",
@@ -16259,6 +16283,22 @@
           "story_arc_slug": "detective-comics-1937-vol-2",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 2097,
+          "canonical_issue_key": "detective-comics-1937#1097-1100",
+          "story_arc_slug": "detective-comics-1937-vol-2",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Detective Comics #1097-1100."
+        },
+        {
+          "sort_order": 2101,
+          "canonical_issue_key": "detective-comics-1937#1101-1106",
+          "story_arc_slug": "detective-comics-1937-vol-2",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Detective Comics #1101-1106."
         }
       ]
     },
@@ -28851,6 +28891,14 @@
           "story_arc_slug": "absolute-batman-2024-vol-3",
           "entry_type": "issue",
           "importance": "main"
+        },
+        {
+          "sort_order": 1015,
+          "canonical_issue_key": "absolute-batman-2024#15-18",
+          "story_arc_slug": "absolute-batman-2024-vol-3",
+          "entry_type": "collection",
+          "importance": "collected-edition",
+          "note": "Collects Absolute Batman #15-18."
         }
       ]
     },

@@ -1,15 +1,8 @@
 import { characterIcon } from '../data/catalogFilters';
-import { CATALOG_WINDOW, DEFAULT_PUBLISHERS } from '../lib/catalogWindow';
+import { DEFAULT_PUBLISHERS } from '../lib/catalogWindow';
 import type { CatalogFacet, CatalogFacets, CatalogFilterState } from '../api/types';
 
 const CURATED_SCOPE = 'curated';
-
-/** Every browsing surface shows the same groups in the same order. */
-const WINDOW_OPTIONS: { value: string; label: string; start?: string }[] = [
-  { value: 'modern', label: '2019 →', start: CATALOG_WINDOW.start },
-  { value: 'recent', label: '2024 →', start: '2024-01-01' },
-  { value: 'all', label: 'All years' },
-];
 
 function publisherScope(selected?: string[]): string | undefined {
   if (!selected) {
@@ -21,8 +14,17 @@ function publisherScope(selected?: string[]): string | undefined {
   return selected[0];
 }
 
-function windowScope(start?: string): string {
-  return WINDOW_OPTIONS.find((option) => option.start === start)?.value ?? 'all';
+/** An ISO date is stored, but only the year is ever typed. */
+function yearOf(isoDate?: string): string {
+  return isoDate ? isoDate.slice(0, 4) : '';
+}
+
+function startOfYear(year: string): string | undefined {
+  return /^\d{4}$/.test(year) ? `${year}-01-01` : undefined;
+}
+
+function endOfYear(year: string): string | undefined {
+  return /^\d{4}$/.test(year) ? `${year}-12-31` : undefined;
 }
 
 type ChipProps = {
@@ -66,39 +68,56 @@ type CatalogFilterBarProps = {
   value: CatalogFilterState;
   onChange: (next: CatalogFilterState) => void;
   resultLabel: string;
+  /** Chronology is about what was published, not about what is on disk. */
+  showLibraryFilter?: boolean;
 };
 
 export function defaultCatalogFilters(): CatalogFilterState {
-  return { ...CATALOG_WINDOW, publisher: [...DEFAULT_PUBLISHERS] };
+  return { publisher: [...DEFAULT_PUBLISHERS] };
 }
 
-export function CatalogFilterBar({ facets, value, onChange, resultLabel }: CatalogFilterBarProps) {
+export function CatalogFilterBar({
+  facets,
+  value,
+  onChange,
+  resultLabel,
+  showLibraryFilter = true,
+}: CatalogFilterBarProps) {
   const scope = publisherScope(value.publisher);
+  const defaults = defaultCatalogFilters();
   const hasFilters =
     scope !== CURATED_SCOPE ||
     Boolean(value.line || value.character) ||
     value.owned !== undefined ||
-    value.start !== CATALOG_WINDOW.start;
-
-  const setWindow = (option: (typeof WINDOW_OPTIONS)[number]) =>
-    onChange({ ...value, start: option.start, end: option.start ? CATALOG_WINDOW.end : undefined });
+    value.start !== defaults.start ||
+    value.end !== defaults.end;
 
   return (
     <div className="catalog-filters">
       <div className="catalog-filters__head">
         <span className="catalog-filters__count">{resultLabel}</span>
         {hasFilters ? (
-          <button type="button" className="text-button" onClick={() => onChange(defaultCatalogFilters())}>
+          <button type="button" className="text-button" onClick={() => onChange(defaults)}>
             Reset filters
           </button>
         ) : null}
       </div>
 
-      <FilterGroup label="Library">
-        <FilterChip label="Everything" isActive={value.owned === undefined} onClick={() => onChange({ ...value, owned: undefined })} />
-        <FilterChip label="In library" isActive={value.owned === true} onClick={() => onChange({ ...value, owned: true })} />
-        <FilterChip label="Not yet owned" isActive={value.owned === false} onClick={() => onChange({ ...value, owned: false })} />
-      </FilterGroup>
+      {showLibraryFilter ? (
+        <FilterGroup label="Library">
+          <FilterChip
+            label="Everything"
+            isActive={value.owned === undefined}
+            onClick={() => onChange({ ...value, owned: undefined })}
+          />
+          <FilterChip label="In library" isActive={value.owned === true} onClick={() => onChange({ ...value, owned: true })} />
+          <FilterChip
+            label="Not yet owned"
+            isActive={value.owned === false}
+            onClick={() => onChange({ ...value, owned: false })}
+          />
+        </FilterGroup>
+      ) : null}
 
       <FilterGroup label="Publisher">
         <FilterChip
@@ -126,8 +145,7 @@ export function CatalogFilterBar({ facets, value, onChange, resultLabel }: Catal
           {(facets?.characters ?? []).map((character: CatalogFacet) => (
             <FilterChip
               key={character.value}
-              label={character.label.replace(/ Family$/, '')}
-              hint="family"
+              label={character.label}
               iconSrc={characterIcon(character.value)}
               count={character.count}
               isActive={value.character === character.value}
@@ -153,14 +171,31 @@ export function CatalogFilterBar({ facets, value, onChange, resultLabel }: Catal
       </FilterGroup>
 
       <FilterGroup label="Published">
-        {WINDOW_OPTIONS.map((option) => (
-          <FilterChip
-            key={option.value}
-            label={option.label}
-            isActive={windowScope(value.start) === option.value}
-            onClick={() => setWindow(option)}
+        <div className="year-range">
+          <input
+            type="text"
+            inputMode="numeric"
+            className="year-range__input"
+            aria-label="Earliest year"
+            placeholder={facets?.minYear ? `Earliest (${facets.minYear})` : 'Earliest'}
+            defaultValue={yearOf(value.start)}
+            key={`start-${value.start ?? ''}`}
+            onBlur={(event) => onChange({ ...value, start: startOfYear(event.target.value.trim()) })}
+            onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.blur()}
           />
-        ))}
+          <span className="year-range__dash">–</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            className="year-range__input"
+            aria-label="Latest year"
+            placeholder={facets?.maxYear ? `Latest (${facets.maxYear})` : 'Latest'}
+            defaultValue={yearOf(value.end)}
+            key={`end-${value.end ?? ''}`}
+            onBlur={(event) => onChange({ ...value, end: endOfYear(event.target.value.trim()) })}
+            onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.blur()}
+          />
+        </div>
       </FilterGroup>
     </div>
   );

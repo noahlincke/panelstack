@@ -3733,3 +3733,79 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 .lists__hosted-hint {
   font-size: 0.78rem;
 }
+
+/* Two year boxes instead of preset window chips: the reader types a range, or
+   leaves both blank for everything the catalog holds. */
+.year-range {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.year-range__input {
+  width: 11ch;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.year-range__input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.year-range__dash {
+  color: var(--muted);
+}
+
+/* A list row carries its own read toggle, so progress can be kept without
+   opening the collection the issue came from. */
+.lists__index-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.lists__index-years {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lists__item-read {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lists__item-read span {
+  filter: grayscale(1);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.lists__item-read--active {
+  border-color: var(--accent);
+  background: rgba(77, 124, 254, 0.18);
+}
+
+.lists__item-read--active span {
+  filter: none;
+}
+
+.lists__item--read .lists__item-title {
+  color: var(--muted);
+}
