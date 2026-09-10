@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import tempfile
 import unittest
@@ -13,10 +14,16 @@ from sqlalchemy.orm import sessionmaker
 from backend.app.main import get_reading_path_covers
 from backend.app.models import Base, ReadingPath, ReadingPathCoverAsset
 from backend.app.services.covers import (
+    COVER_OVERRIDES_PATH,
+    cover_overrides,
     ensure_query_cover_image,
     ensure_reading_path_cover_asset,
     fetch_getcomics_cover,
+    find_getcomics_post,
+    override_cover_url,
     parse_getcomics_search_results,
+    title_years,
+    year_conflicts,
 )
 
 
@@ -405,3 +412,133 @@ class CoverAssetCreationTests(unittest.TestCase):
         self.assertIsNotNone(asset)
         self.assertEqual(asset.query, "New Run #1")
         db.close()
+
+
+class PostYearMatchTests(unittest.TestCase):
+    """GetComics search matches titles only, so the year has to be enforced.
+
+    Searching "X-Men #1" returns a page of 2026 one-shots and never Hickman's
+    2019 book; every one of them outscored nothing at all, so the download
+    handed over "X-Men - Outback #1 (2026)".
+    """
+
+    def test_a_title_year_is_read_off_the_post_title(self) -> None:
+        self.assertEqual(title_years("X-Men – Outback #1 (2026)"), {2026})
+        self.assertEqual(title_years("X-Men #1 (2019)"), {2019})
+
+    def test_a_year_range_expands_to_every_year_it_covers(self) -> None:
+        self.assertEqual(title_years("X-Men Vol. 4 #1 – 21 (2019-2021)"), {2019, 2020, 2021})
+
+    def test_a_title_with_no_year_claims_none(self) -> None:
+        self.assertEqual(title_years("Absolute Batman Vol. 3"), set())
+        self.assertEqual(title_years(None), set())
+
+    def test_a_different_year_conflicts(self) -> None:
+        self.assertTrue(year_conflicts("X-Men – Outback #1 (2026)", 2019))
+
+    def test_the_expected_year_inside_a_range_does_not_conflict(self) -> None:
+        self.assertFalse(year_conflicts("X-Men Vol. 4 #1 – 21 (2019-2021)", 2020))
+
+    def test_an_undated_title_never_conflicts(self) -> None:
+        self.assertFalse(year_conflicts("Absolute Batman Vol. 3", 2026))
+
+    def test_nothing_conflicts_when_no_year_is_expected(self) -> None:
+        self.assertFalse(year_conflicts("X-Men – Outback #1 (2026)", None))
+
+    def test_a_nonsense_range_keeps_both_endpoints_without_exploding(self) -> None:
+        # "(1996-1997 - 2019)" parses as a 23-year span; expanding it is useless
+        # but must not build a huge set or drop the years entirely.
+        self.assertEqual(title_years("Adventures of the X-Men #1 – 12 (1900-2019)"), {1900, 2019})
+
+
+class FindGetcomicsPostTests(unittest.TestCase):
+    """The download resolver discards a match dated to the wrong year."""
+
+    def _search(self, query: str, titles: list[str], **expected):
+        candidates = [
+            SimpleNamespace(image_url=f"https://img.test/{index}.jpg", post_url=f"https://getcomics.test/{index}/", post_title=title)
+            for index, title in enumerate(titles)
+        ]
+        reader = MagicMock()
+        reader.read.return_value = b"<html></html>"
+        opened = MagicMock()
+        opened.__enter__ = MagicMock(return_value=reader)
+        opened.__exit__ = MagicMock(return_value=False)
+        with patch("backend.app.services.covers.urlopen", return_value=opened), patch(
+            "backend.app.services.covers.parse_getcomics_search_candidates", return_value=candidates
+        ):
+            return find_getcomics_post(query, **expected)
+
+    def test_a_post_from_another_year_is_never_returned(self) -> None:
+        match = self._search(
+            "unique-query-outback",
+            ["X-Men – Outback #1 (2026)", "X-Men – The Hellfire Murder #1 (2026)"],
+            expected_series_title="X-Men",
+            expected_issue_number="1",
+            expected_year=2019,
+        )
+        self.assertIsNone(match.post_url)
+
+    def test_the_right_year_wins_over_a_longer_same_year_title(self) -> None:
+        match = self._search(
+            "unique-query-xmen-2019",
+            ["X-Men – Facsimile Edition #1 (2019)", "X-Men #1 (2019)", "X-Men – Outback #1 (2026)"],
+            expected_series_title="X-Men",
+            expected_issue_number="1",
+            expected_year=2019,
+        )
+        self.assertEqual(match.post_title, "X-Men #1 (2019)")
+
+    def test_an_undated_post_is_still_eligible(self) -> None:
+        match = self._search(
+            "unique-query-undated",
+            ["Absolute Batman Vol. 3 - Devil's Workshop"],
+            expected_series_title="Absolute Batman Vol. 3 - Devil's Workshop",
+            expected_issue_number="15-18",
+            expected_year=2026,
+        )
+        self.assertEqual(match.post_title, "Absolute Batman Vol. 3 - Devil's Workshop")
+
+
+class CoverOverrideTests(unittest.TestCase):
+    """An escape hatch for books whose best-matching post has the wrong image."""
+
+    def setUp(self) -> None:
+        cover_overrides.cache_clear()
+
+    def tearDown(self) -> None:
+        cover_overrides.cache_clear()
+
+    def _with_file(self, payload: str):
+        temp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+        temp.write(payload)
+        temp.close()
+        return patch("backend.app.services.covers.COVER_OVERRIDES_PATH", Path(temp.name))
+
+    def test_an_override_is_read_by_reading_path_slug(self) -> None:
+        with self._with_file('{"covers": {"a-slug": {"image_url": "https://img.test/a.jpg"}}}'):
+            self.assertEqual(override_cover_url("a-slug"), "https://img.test/a.jpg")
+
+    def test_an_unlisted_slug_has_no_override(self) -> None:
+        with self._with_file('{"covers": {"a-slug": {"image_url": "https://img.test/a.jpg"}}}'):
+            self.assertIsNone(override_cover_url("other-slug"))
+            self.assertIsNone(override_cover_url(None))
+
+    def test_an_entry_with_no_image_url_is_ignored(self) -> None:
+        with self._with_file('{"covers": {"a-slug": {"note": "todo"}}}'):
+            self.assertIsNone(override_cover_url("a-slug"))
+
+    def test_a_missing_or_broken_file_is_not_an_error(self) -> None:
+        with patch("backend.app.services.covers.COVER_OVERRIDES_PATH", Path("/nonexistent/nope.json")):
+            self.assertEqual(cover_overrides(), {})
+        cover_overrides.cache_clear()
+        with self._with_file("{not json"):
+            self.assertEqual(cover_overrides(), {})
+
+    def test_the_shipped_overrides_all_name_a_reason_and_an_image(self) -> None:
+        payload = json.loads(COVER_OVERRIDES_PATH.read_text())
+        self.assertTrue(payload["covers"])
+        for slug, entry in payload["covers"].items():
+            with self.subTest(slug):
+                self.assertTrue(entry["image_url"].startswith("https://"))
+                self.assertTrue(entry.get("note"), "an override should say why it exists")

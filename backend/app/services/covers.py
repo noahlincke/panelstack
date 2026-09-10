@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 import html
 import hashlib
+import json
 import mimetypes
 from pathlib import Path
 import re
@@ -21,6 +22,7 @@ from ..models import ReadingPathCoverAsset
 
 SEARCH_URL_TEMPLATE = "https://getcomics.org/?s={query}"
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+COVER_OVERRIDES_PATH = BASE_DIR / "data" / "curation" / "cover_overrides.json"
 COVER_CACHE_DIR = BASE_DIR / "data" / "cache" / "reading_path_covers"
 ENTRY_COVER_CACHE_DIR = BASE_DIR / "data" / "cache" / "reading_path_entry_covers"
 REMOTE_COVER_CACHE_DIR = BASE_DIR / "data" / "cache" / "remote_covers"
@@ -130,6 +132,63 @@ def parse_getcomics_search_results(raw_html: str, query: str) -> GetComicsCoverR
     )
 
 
+@lru_cache(maxsize=1)
+def cover_overrides() -> dict[str, str]:
+    """Hand-picked covers by reading path slug.
+
+    The automatic lookup uses whatever image the best-matching GetComics post
+    carries, which is occasionally not a cover: All-Star Superman matched a 2024
+    reprint whose post image is the comic's first interior page. An override is
+    the honest fix for those, and for books with no usable post at all.
+    """
+    try:
+        payload = json.loads(COVER_OVERRIDES_PATH.read_text())
+    except (OSError, ValueError):
+        return {}
+    return {
+        slug: entry["image_url"]
+        for slug, entry in payload.get("covers", {}).items()
+        if isinstance(entry, dict) and entry.get("image_url")
+    }
+
+
+def override_cover_url(reading_path_slug: str | None) -> str | None:
+    return cover_overrides().get(reading_path_slug) if reading_path_slug else None
+
+
+# Years a GetComics post title carries, e.g. "(2019)" or "(2019-2021)".
+TITLE_YEARS_PATTERN = re.compile(r"\((\d{4})(?:\s*[-–]\s*(\d{4}))?\)")
+
+
+def title_years(post_title: str | None) -> set[int]:
+    """Every year a post title claims, expanding a range into its members."""
+    if not post_title:
+        return set()
+    years: set[int] = set()
+    for first, last in TITLE_YEARS_PATTERN.findall(post_title):
+        start = int(first)
+        end = int(last) if last else start
+        if end < start or end - start > 60:
+            years.update({start, end})
+            continue
+        years.update(range(start, end + 1))
+    return years
+
+
+def year_conflicts(post_title: str | None, expected_year: int | None) -> bool:
+    """Whether a title names years, none of which is the one we want.
+
+    GetComics search is title-only, so "X-Men #1" surfaces a dozen 2026 one-shots
+    and never Hickman's 2019 book. Every one of them scored well enough to win,
+    and the download handed over "X-Men - Outback #1 (2026)". A title that dates
+    itself to another year is simply a different comic.
+    """
+    if expected_year is None:
+        return False
+    years = title_years(post_title)
+    return bool(years) and expected_year not in years
+
+
 def _issue_number_tokens(issue_number: str | None) -> set[str]:
     if not issue_number:
         return set()
@@ -225,6 +284,59 @@ def fetch_getcomics_cover(
         )
 
     return parse_getcomics_search_results(raw_html, normalized_query)
+
+
+@lru_cache(maxsize=256)
+def find_getcomics_post(
+    query: str,
+    expected_series_title: str | None = None,
+    expected_issue_number: str | None = None,
+    expected_year: int | None = None,
+) -> GetComicsCoverResult:
+    """Resolve a post to download, refusing a match from the wrong year.
+
+    Cover lookup takes the best-scoring candidate whatever it is, because a
+    slightly wrong cover still beats a blank tile. A download has no such
+    excuse: handing over the wrong comic wastes the reader's time and bandwidth,
+    so a title dated to another year is discarded rather than merely penalised.
+    """
+    normalized_query = " ".join(query.split()).strip()
+    if not normalized_query:
+        return GetComicsCoverResult(query=query, image_url=None, post_url=None, post_title=None)
+
+    request = Request(
+        SEARCH_URL_TEMPLATE.format(query=quote_plus(normalized_query)),
+        headers={"User-Agent": USER_AGENT},
+    )
+    try:
+        with urlopen(request, timeout=15) as response:
+            raw_html = response.read().decode("utf-8", errors="replace")
+    except (HTTPError, URLError, TimeoutError):
+        return GetComicsCoverResult(query=normalized_query, image_url=None, post_url=None, post_title=None)
+
+    candidates = [
+        candidate
+        for candidate in parse_getcomics_search_candidates(raw_html)
+        if candidate.post_url and not year_conflicts(candidate.post_title, expected_year)
+    ]
+    if not candidates:
+        return GetComicsCoverResult(query=normalized_query, image_url=None, post_url=None, post_title=None)
+
+    best = max(
+        candidates,
+        key=lambda candidate: _score_candidate(
+            candidate,
+            expected_series_title=expected_series_title,
+            expected_issue_number=expected_issue_number,
+            expected_year=expected_year,
+        ),
+    )
+    return GetComicsCoverResult(
+        query=normalized_query,
+        image_url=best.image_url,
+        post_url=best.post_url,
+        post_title=best.post_title,
+    )
 
 
 def _guess_extension(source_url: str | None, content_type: str | None) -> str:

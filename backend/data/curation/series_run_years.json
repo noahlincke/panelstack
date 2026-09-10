@@ -1,0 +1,30 @@
+{
+  "_comment": [
+    "Hand-entered run years for series whose provider gives no dates.",
+    "MangaPill lists chapters with no publication date at all, so every manga",
+    "series arrived with a start year guessed from its slug and no end year —",
+    "which made finished runs like Jujutsu Kaisen and JoJolion look like they are",
+    "still going, and stretched them across every year of the chronology board.",
+    "end_year null means genuinely still running. Volume is low enough to keep",
+    "this by hand; scripts/apply_series_run_years.py writes it into the database."
+  ],
+  "series": {
+    "berserk-1989": { "start_year": 1989, "end_year": null, "note": "Continued by Studio Gaga after Miura's death in 2021." },
+    "vinland-saga-2005": { "start_year": 2005, "end_year": 2025, "note": "Ended with chapter 220 on 2025-07-25 after 20 years." },
+    "frieren-2020": { "start_year": 2020, "end_year": null },
+    "chainsaw-man-2018": { "start_year": 2018, "end_year": null, "note": "Part 2 began 2022; still running." },
+    "hunter-x-hunter-1998": { "start_year": 1998, "end_year": null, "note": "On indefinite hiatus, not concluded." },
+    "one-piece-1997": { "start_year": 1997, "end_year": null },
+    "spy-x-family-2019": { "start_year": 2019, "end_year": null },
+    "jujutsu-kaisen-2018": { "start_year": 2018, "end_year": 2024, "note": "Ended with chapter 271 in September 2024." },
+    "jojo-phantom-blood-1986": { "start_year": 1986, "end_year": 1987 },
+    "jojo-battle-tendency-1987": { "start_year": 1987, "end_year": 1989 },
+    "jojo-stardust-crusaders-1989": { "start_year": 1989, "end_year": 1992 },
+    "jojo-diamond-is-unbreakable-1992": { "start_year": 1992, "end_year": 1995 },
+    "jojo-golden-wind-1995": { "start_year": 1995, "end_year": 1999 },
+    "jojo-stone-ocean-1999": { "start_year": 1999, "end_year": 2003 },
+    "jojo-steel-ball-run-2004": { "start_year": 2004, "end_year": 2011 },
+    "jojo-jojolion-2011": { "start_year": 2011, "end_year": 2021, "note": "Serialised 2011-05-19 to 2021-08-19." },
+    "jojo-the-jojolands-2023": { "start_year": 2023, "end_year": null, "note": "Began 2023-02-17." }
+  }
+}

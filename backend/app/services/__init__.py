@@ -5,6 +5,8 @@ from .covers import (
     ensure_query_cover_image,
     ensure_reading_path_cover_asset,
     fetch_getcomics_cover,
+    find_getcomics_post,
+    override_cover_url,
     parse_getcomics_search_results,
 )
 from .curation import (
@@ -60,6 +62,8 @@ __all__ = [
     "ensure_query_cover_image",
     "ensure_reading_path_cover_asset",
     "fetch_getcomics_cover",
+    "find_getcomics_post",
+    "override_cover_url",
     "GetComicsCoverResult",
     "InMemoryJobStore",
     "IngestError",
