@@ -20,6 +20,7 @@ from backend.app.models import (  # noqa: E402
     CanonicalIssueSource,
     CanonicalSeries,
     CanonicalSeriesSource,
+    CatalogCollection,
     Publisher,
     ReadingList,
     ReadingListItem,
@@ -301,3 +302,96 @@ class CurationSeedPruneTests(unittest.TestCase):
         prune_curation_seed([("batman-2016", "164")], self.path)
         other = next(s for s in self._payload()["series"] if s["slug"] == "detective-comics-1937")
         self.assertEqual([i["issue_number"] for i in other["issues"]], ["164"])
+
+
+class EmptiedVolumeTests(unittest.TestCase):
+    """A volume left holding nothing is rebuilt as an empty shelf if it survives."""
+
+    def setUp(self) -> None:
+        engine = create_engine("sqlite://", future=True)
+        Base.metadata.create_all(engine)
+        self.db = sessionmaker(bind=engine, future=True)()
+        publisher = Publisher(slug="dc", name="DC Comics")
+        self.db.add(publisher)
+        self.db.flush()
+        series = CanonicalSeries(slug="batman-2016", title="Batman", publisher_id=publisher.id)
+        self.db.add(series)
+        self.db.flush()
+
+        def issue(number: str) -> CanonicalIssue:
+            row = CanonicalIssue(
+                series_id=series.id, legacy_key=f"batman-2016#{number}", issue_number=number,
+                issue_kind="issue", title=f"Batman #{number}", sort_order=int(number),
+            )
+            self.db.add(row)
+            self.db.flush()
+            return row
+
+        self.phantom = issue("176")
+        self.real = issue("163")
+        self.vol4 = ReadingPath(slug="batman-2016-vol-4", title="Batman: Vol. 4", status="published")
+        self.vol1 = ReadingPath(slug="batman-2016-vol-1", title="Batman: Vol. 1", status="published")
+        self.db.add_all([self.vol4, self.vol1])
+        self.db.flush()
+        self.db.add_all([
+            ReadingPathEntry(reading_path_id=self.vol4.id, canonical_issue_id=self.phantom.id,
+                             sort_order=10, entry_type="issue", importance="core", is_optional=False),
+            ReadingPathEntry(reading_path_id=self.vol1.id, canonical_issue_id=self.real.id,
+                             sort_order=10, entry_type="issue", importance="core", is_optional=False),
+        ])
+        self.db.commit()
+
+    def tearDown(self) -> None:
+        self.db.close()
+
+    def test_a_volume_emptied_by_the_prune_is_deleted(self) -> None:
+        prune(self.db, [self.phantom])
+        slugs = [p.slug for p in self.db.scalars(select(ReadingPath))]
+        self.assertNotIn("batman-2016-vol-4", slugs)
+
+    def test_a_volume_that_still_holds_something_survives(self) -> None:
+        prune(self.db, [self.phantom])
+        slugs = [p.slug for p in self.db.scalars(select(ReadingPath))]
+        self.assertIn("batman-2016-vol-1", slugs)
+
+
+class EmptiedCollectionTests(unittest.TestCase):
+    """The catalogue tile outlives its reading path unless it is removed too."""
+
+    def setUp(self) -> None:
+        engine = create_engine("sqlite://", future=True)
+        Base.metadata.create_all(engine)
+        self.db = sessionmaker(bind=engine, future=True)()
+        publisher = Publisher(slug="dc", name="DC Comics")
+        self.db.add(publisher)
+        self.db.flush()
+        series = CanonicalSeries(slug="batman-2016", title="Batman", publisher_id=publisher.id)
+        self.db.add(series)
+        self.db.flush()
+        self.phantom = CanonicalIssue(
+            series_id=series.id, legacy_key="batman-2016#176", issue_number="176",
+            issue_kind="issue", title="Batman #176", sort_order=176,
+        )
+        self.db.add(self.phantom)
+        path = ReadingPath(slug="batman-2016-vol-4", title="Batman: Vol. 4", status="published")
+        self.db.add(path)
+        self.db.flush()
+        self.db.add(ReadingPathEntry(
+            reading_path_id=path.id, canonical_issue_id=self.phantom.id,
+            sort_order=10, entry_type="issue", importance="core", is_optional=False,
+        ))
+        self.db.add(CatalogCollection(
+            id=path.id, reading_path_id=path.id, canonical_series_id=series.id,
+            slug="batman-2016-vol-4", title="Batman: Vol. 4",
+        ))
+        self.db.commit()
+
+    def tearDown(self) -> None:
+        self.db.close()
+
+    def test_the_catalogue_tile_goes_with_the_volume(self) -> None:
+        prune(self.db, [self.phantom])
+        self.assertEqual(
+            list(self.db.scalars(select(CatalogCollection))), [],
+            "a surviving collection renders as a blank tile with no issues",
+        )
