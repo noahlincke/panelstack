@@ -35,7 +35,7 @@ from datetime import date, datetime, timezone
 from typing import Any
 
 import requests
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from ..models import (
@@ -163,6 +163,53 @@ def _paginate(url: str, fetch: Fetch) -> Iterator[dict[str, Any]]:
         url = payload.get("next") or ""
 
 
+def _series_title_of(row: dict[str, Any]) -> str:
+    """The bare series title, from either endpoint's shape.
+
+    /series/ returns it as the string "Detective Comics (2016)"; /issue/ nests it
+    as {"name": "Detective Comics", "year_began": 2016}.
+    """
+    series = row.get("series")
+    if isinstance(series, dict):
+        return str(series.get("name", "")).strip()
+    return re.sub(r"\s*\(\d{4}\)\s*$", "", str(series or "")).strip()
+
+
+def find_series_id_by_issue(
+    title: str, probe_number: str, fetch: Fetch, start_year: int | None = None
+) -> int | None:
+    """Metron's id for our series, found via an issue we actually hold.
+
+    Matching on the year our catalogue records is not safe. Our Detective Comics
+    starts in 1937 because that is when the legacy numbering began, but the run
+    we curate is the modern one; Metron files those under "Detective Comics
+    (2016)" and keeps a separate 883-issue "Detective Comics (1937)". Matching on
+    the year picked the wrong volume and pulled in the entire golden age.
+
+    Looking up an issue number we hold identifies the volume unambiguously.
+    """
+    query = (
+        f"{METRON_API_ROOT}/issue/?series_name={requests.utils.quote(title)}"
+        f"&number={requests.utils.quote(probe_number)}"
+    )
+    results = fetch(query).get("results", [])
+    exact = [row for row in results if _series_title_of(row).lower() == title.strip().lower()]
+    if not exact:
+        return None
+    if len(exact) > 1:
+        # Several volumes share a title and carry this issue number. Our own
+        # start year decides between them where it can — three different books
+        # are called "Absolute Batman #1" — and the newest wins otherwise.
+        exact.sort(
+            key=lambda row: (
+                (row["series"].get("year_began") == start_year) if start_year else False,
+                row["series"].get("year_began") or 0,
+            ),
+            reverse=True,
+        )
+    return int(exact[0]["series"]["id"])
+
+
 def find_series_id(title: str, start_year: int | None, fetch: Fetch) -> int | None:
     """Metron's id for one of our series, matched on title and first year."""
     query = f"{METRON_API_ROOT}/series/?name={requests.utils.quote(title)}"
@@ -174,7 +221,7 @@ def find_series_id(title: str, start_year: int | None, fetch: Fetch) -> int | No
     # A name search is a contains-match, so prefer the exact title before
     # falling back to whatever came first.
     for row in results:
-        if str(row.get("series", "")).rsplit(" (", 1)[0].strip().lower() == title.strip().lower():
+        if _series_title_of(row).lower() == title.strip().lower():
             return int(row["id"])
     return int(results[0]["id"])
 
@@ -196,27 +243,39 @@ def _normalize_number(value: Any) -> str:
     return str(value or "").strip()
 
 
-def sync_series(db: Session, series: CanonicalSeries, fetch: Fetch) -> SeriesResult:
-    """Correct and extend one curated series from Metron.
+def sync_series(
+    db: Session, series: CanonicalSeries, fetch: Fetch, *, create_missing: bool = False
+) -> SeriesResult:
+    """Correct one curated series against Metron.
 
-    Existing issues keep their identity; only the facts Metron is authoritative
-    about are written. Issues we hold that Metron does not know are reported
-    rather than deleted -- they are usually the monthly extrapolation, but that
-    is the reader's call to make, not this script's.
+    By default this writes only to issues the catalogue already holds: their
+    publication date and cover art. It deliberately does not import a series'
+    whole history — Metron's Detective Comics carries 883 issues and the
+    catalogue curates twenty-four of them, so creating everything it knows about
+    tripled the database with books that are never shown. Pass create_missing to
+    add issues the catalogue lacks.
+
+    Issues we hold that Metron has no record of are reported, not deleted. They
+    are usually the monthly extrapolation, but that is the reader's call.
     """
     before = getattr(fetch, "calls", 0)
     result = SeriesResult(title=series.title, start_year=series.start_year)
-
-    metron_series_id = find_series_id(series.title, series.start_year, fetch)
-    result.metron_series_id = metron_series_id
-    if metron_series_id is None:
-        result.requests_made = getattr(fetch, "calls", 0) - before
-        return result
 
     existing = {
         _normalize_number(issue.issue_number): issue
         for issue in db.scalars(select(CanonicalIssue).where(CanonicalIssue.series_id == series.id))
     }
+    # The earliest issue is the one least likely to be an extrapolation, so it
+    # makes the most reliable probe for identifying the volume.
+    probes = sorted((number for number in existing if number and "-" not in number), key=issue_sort_order)
+    metron_series_id = (
+        find_series_id_by_issue(series.title, probes[0], fetch, series.start_year) if probes else None
+    ) or find_series_id(series.title, series.start_year, fetch)
+    result.metron_series_id = metron_series_id
+    if metron_series_id is None:
+        result.requests_made = getattr(fetch, "calls", 0) - before
+        return result
+
     seen: set[str] = set()
 
     for row in iter_series_issues(metron_series_id, fetch):
@@ -231,6 +290,8 @@ def sync_series(db: Session, series: CanonicalSeries, fetch: Fetch) -> SeriesRes
         image = row.get("image") or None
 
         issue = existing.get(number)
+        if issue is None and not create_missing:
+            continue
         if issue is None:
             issue = CanonicalIssue(
                 series_id=series.id,
@@ -284,6 +345,15 @@ def sync_series(db: Session, series: CanonicalSeries, fetch: Fetch) -> SeriesRes
     return result
 
 
+def allow_for_the_running_app(db: Session) -> None:
+    """Wait rather than fail when the web app holds the write lock.
+
+    SQLite's default is to give up immediately, so an import running against the
+    live site died partway through the first time it collided with a request.
+    """
+    db.execute(text("PRAGMA busy_timeout = 30000"))
+
+
 def curated_series(db: Session, publisher_slugs: tuple[str, ...] = ("dc", "marvel")) -> list[CanonicalSeries]:
     """The series this catalogue actually shows, which is all we import."""
     return list(
@@ -302,9 +372,11 @@ def run_backfill(
     fetch: Fetch,
     publisher_slugs: tuple[str, ...] = ("dc", "marvel"),
     max_requests: int | None = None,
+    create_missing: bool = False,
     on_series: Callable[[SeriesResult], None] | None = None,
 ) -> BackfillResult:
     """Walk the curated series, stopping cleanly when the budget runs out."""
+    allow_for_the_running_app(db)
     started = getattr(fetch, "calls", 0)
     outcome = BackfillResult()
 
@@ -313,7 +385,7 @@ def run_backfill(
             outcome.stopped_early = True
             break
         try:
-            result = sync_series(db, series, fetch)
+            result = sync_series(db, series, fetch, create_missing=create_missing)
         except MetronThrottledError:
             db.rollback()
             outcome.stopped_early = True

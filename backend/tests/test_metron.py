@@ -24,6 +24,7 @@ from backend.app.services.metron import (
     build_fetcher,
     curated_series,
     find_series_id,
+    find_series_id_by_issue,
     metron_credentials,
     run_backfill,
     sync_series,
@@ -106,16 +107,35 @@ class FetcherTests(unittest.TestCase):
 class FakeApi:
     """Just enough of Metron to drive the importer."""
 
-    def __init__(self, series: list[dict[str, Any]], issues: dict[int, list[dict[str, Any]]], page_size: int = 100) -> None:
+    def __init__(
+        self,
+        series: list[dict[str, Any]],
+        issues: dict[int, list[dict[str, Any]]],
+        page_size: int = 100,
+        series_name: str = "Absolute Batman",
+        year_began: int = 2024,
+    ) -> None:
         self.series = series
         self.issues = issues
         self.page_size = page_size
+        self.series_name = series_name
+        self.year_began = year_began
         self.calls = 0
 
     def __call__(self, url: str) -> dict[str, Any]:
         self.calls += 1
         if "/series/" in url:
             return {"count": len(self.series), "next": None, "results": self.series}
+        if "series_name=" in url:
+            # The volume probe: an issue lookup that reports which series it is in.
+            rows = [
+                {**row, "series": {"id": series_id, "name": self.series_name, "year_began": self.year_began}}
+                for series_id, issues in self.issues.items()
+                for row in issues
+            ]
+            number = url.split("number=")[1].split("&")[0]
+            matched = [row for row in rows if row["number"] == number]
+            return {"count": len(matched), "next": None, "results": matched}
         series_id = int(url.split("series_id=")[1].split("&")[0].split("?")[0])
         rows = self.issues.get(series_id, [])
         offset = int(url.split("offset=")[1].split("&")[0]) if "offset=" in url else 0
@@ -181,7 +201,7 @@ class SyncSeriesTests(unittest.TestCase):
         self.assertEqual(result.dates_corrected, 2)
 
     def test_an_issue_the_catalogue_lacks_is_created(self) -> None:
-        result = sync_series(self.db, self.series, self.api)
+        result = sync_series(self.db, self.series, self.api, create_missing=True)
         self.assertEqual(result.issues_created, 1)
         issue = self.db.scalar(
             select(CanonicalIssue).where(CanonicalIssue.series_id == self.series.id, CanonicalIssue.issue_number == "3")
@@ -207,18 +227,27 @@ class SyncSeriesTests(unittest.TestCase):
         )
         self.assertIsNotNone(survivor, "deleting is the reader's call, not the importer's")
 
+    def test_nothing_is_created_unless_asked(self) -> None:
+        result = sync_series(self.db, self.series, self.api)
+        self.assertEqual(result.issues_created, 0)
+        missing = self.db.scalar(
+            select(CanonicalIssue).where(CanonicalIssue.series_id == self.series.id, CanonicalIssue.issue_number == "3")
+        )
+        self.assertIsNone(missing, "a series' whole history is not the catalogue's to import")
+
     def test_provenance_is_recorded_separately_from_identity(self) -> None:
         sync_series(self.db, self.series, self.api)
         sources = list(self.db.scalars(select(CanonicalIssueSource)))
-        self.assertEqual(len(sources), 3)
+        # Only the two issues the catalogue holds and Metron also knows.
+        self.assertEqual(len(sources), 2)
         self.assertEqual({source.source_name for source in sources}, {"Metron"})
         # The series keeps the catalogue's own slug and title.
         self.db.refresh(self.series)
         self.assertEqual(self.series.slug, "absolute-batman-2024")
 
     def test_running_twice_creates_nothing_the_second_time(self) -> None:
-        sync_series(self.db, self.series, self.api)
-        second = sync_series(self.db, self.series, self.api)
+        sync_series(self.db, self.series, self.api, create_missing=True)
+        second = sync_series(self.db, self.series, self.api, create_missing=True)
         self.assertEqual(second.issues_created, 0)
         self.assertEqual(second.dates_corrected, 0)
         self.assertEqual(len(list(self.db.scalars(select(CanonicalIssueSource)))), 3)
@@ -235,10 +264,48 @@ class SyncSeriesTests(unittest.TestCase):
             for n in range(1, 251)
         ]
         api = FakeApi(series=[{"id": 42, "series": "Absolute Batman (2024)"}], issues={42: rows}, page_size=100)
-        result = sync_series(self.db, self.series, api)
+        result = sync_series(self.db, self.series, api, create_missing=True)
         # #1, #2 and #99 already exist in the fixture, so 250 - 3 are new.
         self.assertEqual(result.issues_created, 247)
         self.assertEqual(result.issues_updated, 3)
+
+
+class VolumeProbeTests(unittest.TestCase):
+    """Three different books are called "Absolute Batman #1"."""
+
+    def _api(self, volumes: list[tuple[int, int]]) -> FakeApi:
+        api = FakeApi(series=[], issues={})
+
+        def call(url: str) -> dict[str, Any]:
+            api.calls += 1
+            return {
+                "count": len(volumes),
+                "next": None,
+                "results": [
+                    {"id": 900 + series_id, "number": "1",
+                     "series": {"id": series_id, "name": "Absolute Batman", "year_began": year}}
+                    for series_id, year in volumes
+                ],
+            }
+
+        call.calls = 0  # type: ignore[attr-defined]
+        return call  # type: ignore[return-value]
+
+    def test_our_own_start_year_picks_the_volume(self) -> None:
+        api = self._api([(8477, 2024), (13742, 2026)])
+        self.assertEqual(find_series_id_by_issue("Absolute Batman", "1", api, 2024), 8477)
+
+    def test_the_newest_volume_wins_when_our_year_matches_nothing(self) -> None:
+        api = self._api([(8477, 2024), (13742, 2026)])
+        self.assertEqual(find_series_id_by_issue("Absolute Batman", "1", api, 1999), 13742)
+
+    def test_a_title_that_only_contains_ours_is_not_a_match(self) -> None:
+        def call(url: str) -> dict[str, Any]:
+            return {"count": 1, "next": None, "results": [
+                {"id": 1, "number": "1", "series": {"id": 5, "name": "Absolute Batman and Robin", "year_began": 2026}}
+            ]}
+
+        self.assertIsNone(find_series_id_by_issue("Absolute Batman", "1", call, 2024))
 
 
 class SeriesLookupTests(unittest.TestCase):

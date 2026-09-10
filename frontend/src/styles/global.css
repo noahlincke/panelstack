@@ -2677,8 +2677,12 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 }
 
 .lists__index-count {
+  /* Each row is its own grid, so an auto column sizes per row and the numbers
+     would not line up down the list. Fixed widths make them a real column. */
+  min-width: 3ch;
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .lists__items-head {
@@ -3779,11 +3783,12 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 }
 
 .lists__index-years {
-  justify-self: end;
+  min-width: 9ch;
   color: var(--muted);
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  text-align: right;
 }
 
 .lists__item-read {
