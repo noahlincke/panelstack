@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 import zipfile
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from sqlalchemy import create_engine, select
@@ -12,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.app.models import (
     Base,
     CanonicalIssue,
+    CanonicalIssueSource,
     CanonicalSeries,
     Event,
     IssueMatch,
@@ -21,7 +23,11 @@ from backend.app.models import (
     Series,
     StoryArc,
 )
-from backend.app.services.curation import CURATION_DATA_PATH, sync_curation_data
+from backend.app.services.curation import (
+    CURATION_DATA_PATH,
+    _upsert_canonical_issue,
+    sync_curation_data,
+)
 from backend.app.services.ingest import scan_source
 from backend.app.services.library import persist_scans
 
@@ -336,3 +342,99 @@ class CurationSyncTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SourcedFieldsSurviveResyncTests(unittest.TestCase):
+    """The curation file is a seed, not an authority.
+
+    Its publication dates are extrapolated monthly and it carries no cover art.
+    The sync runs on every app start, so re-applying those fields threw away
+    everything Metron had corrected the moment the site restarted.
+    """
+
+    def setUp(self) -> None:
+        engine = create_engine("sqlite://", future=True)
+        Base.metadata.create_all(engine)
+        self.db = sessionmaker(bind=engine, future=True)()
+        publisher = Publisher(slug="dc", name="DC Comics")
+        self.db.add(publisher)
+        self.db.flush()
+        self.series = CanonicalSeries(
+            slug="absolute-batman-2024", title="Absolute Batman", publisher_id=publisher.id, start_year=2024
+        )
+        self.db.add(self.series)
+        self.db.flush()
+        self.payload = {
+            "issue_number": "1",
+            "title": "Absolute Batman #1",
+            "published_on": "2024-10-01",
+        }
+
+    def tearDown(self) -> None:
+        self.db.close()
+
+    def _sync(self) -> CanonicalIssue:
+        return _upsert_canonical_issue(self.db, self.series, self.payload, {})
+
+    def test_a_seeded_issue_takes_the_files_values(self) -> None:
+        issue = self._sync()
+        self.assertEqual(issue.published_on, date(2024, 10, 1))
+
+    def test_a_sourced_date_is_not_overwritten_by_the_seed(self) -> None:
+        issue = self._sync()
+        issue.published_on = date(2024, 12, 1)
+        issue.cover_url = "https://static.metron.cloud/1.jpg"
+        self.db.add(
+            CanonicalIssueSource(
+                canonical_issue_id=issue.id,
+                source_name="Metron",
+                source_issue_id="127884",
+                source_url="https://metron.cloud/api/issue/127884/",
+                last_seen_at=datetime.now(timezone.utc),
+            )
+        )
+        self.db.commit()
+
+        self._sync()
+
+        self.db.refresh(issue)
+        self.assertEqual(issue.published_on, date(2024, 12, 1))
+        self.assertEqual(issue.cover_url, "https://static.metron.cloud/1.jpg")
+
+    def test_the_seed_still_fills_a_gap_a_source_left(self) -> None:
+        issue = self._sync()
+        issue.published_on = None
+        self.db.add(
+            CanonicalIssueSource(
+                canonical_issue_id=issue.id,
+                source_name="Metron",
+                source_issue_id="127885",
+                source_url="https://metron.cloud/api/issue/127885/",
+                last_seen_at=datetime.now(timezone.utc),
+            )
+        )
+        self.db.commit()
+
+        self._sync()
+
+        self.db.refresh(issue)
+        self.assertEqual(issue.published_on, date(2024, 10, 1))
+
+    def test_fields_the_file_does_own_are_still_applied(self) -> None:
+        issue = self._sync()
+        self.db.add(
+            CanonicalIssueSource(
+                canonical_issue_id=issue.id,
+                source_name="Metron",
+                source_issue_id="127886",
+                source_url="https://metron.cloud/api/issue/127886/",
+                last_seen_at=datetime.now(timezone.utc),
+            )
+        )
+        self.db.commit()
+        self.payload["title"] = "Absolute Batman #1 (renamed)"
+
+        self._sync()
+
+        self.db.refresh(issue)
+        self.assertEqual(issue.title, "Absolute Batman #1 (renamed)")
