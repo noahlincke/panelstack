@@ -211,6 +211,35 @@ class CanonicalIssueSource(Base, TimestampMixin):
     canonical_issue: Mapped["CanonicalIssue"] = relationship(back_populates="sources")
 
 
+class CanonicalSeriesSource(Base, TimestampMixin):
+    """Which series in an external database we decided one of ours is.
+
+    Kept so an audit can show its working. Whether an issue is invented depends
+    entirely on whether the volume was matched correctly, and the shape of the
+    match — how long the source thinks the run is, when it ended — is what makes
+    a bad match visible instead of silently authoritative.
+    """
+
+    __tablename__ = "canonical_series_sources"
+    __table_args__ = (
+        UniqueConstraint("canonical_series_id", "source_name", name="uq_canonical_series_source_identity"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    canonical_series_id: Mapped[int] = mapped_column(
+        ForeignKey("canonical_series.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    source_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_series_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    source_series_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # What the source thinks the run looks like, so a mismatch is obvious.
+    source_issue_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    source_last_issue_number: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    source_year_began: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    matched_issue_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class Issue(Base, TimestampMixin):
     __tablename__ = "issues"
     __table_args__ = (

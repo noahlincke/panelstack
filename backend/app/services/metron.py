@@ -42,6 +42,7 @@ from ..models import (
     CanonicalIssue,
     CanonicalIssueSource,
     CanonicalSeries,
+    CanonicalSeriesSource,
     Publisher,
 )
 from .library import issue_sort_order
@@ -83,6 +84,9 @@ class SeriesResult:
     issues_updated: int = 0
     dates_corrected: int = 0
     covers_added: int = 0
+    # What Metron thinks the run is, so a bad volume match is visible.
+    source_issue_count: int | None = None
+    source_last_issue_number: str | None = None
     # Issues we hold that this Metron series has no record of. Usually the
     # monthly extrapolation, but also anything the two model differently -- a
     # crossover we keep as one series is several series on Metron -- so this is
@@ -241,6 +245,40 @@ def _parse_date(value: str | None) -> date | None:
         return None
 
 
+def _record_series_match(
+    db: Session,
+    series: CanonicalSeries,
+    metron_series_id: int,
+    *,
+    title: str | None,
+    year_began: int | None,
+    issue_count: int,
+    last_issue_number: str | None,
+    matched: int,
+) -> None:
+    """Remember which Metron volume this is, and what shape Metron thinks it is."""
+    source = db.scalar(
+        select(CanonicalSeriesSource).where(
+            CanonicalSeriesSource.canonical_series_id == series.id,
+            CanonicalSeriesSource.source_name == SOURCE_NAME,
+        )
+    )
+    if source is None:
+        source = CanonicalSeriesSource(
+            canonical_series_id=series.id,
+            source_name=SOURCE_NAME,
+            source_series_id=str(metron_series_id),
+        )
+        db.add(source)
+    source.source_series_id = str(metron_series_id)
+    source.source_series_title = title
+    source.source_issue_count = issue_count
+    source.source_last_issue_number = last_issue_number
+    source.source_year_began = year_began
+    source.matched_issue_count = matched
+    source.last_seen_at = datetime.now(timezone.utc)
+
+
 def _normalize_number(value: Any) -> str:
     return str(value or "").strip()
 
@@ -279,8 +317,14 @@ def sync_series(
         return result
 
     seen: set[str] = set()
+    source_title: str | None = None
+    source_year_began: int | None = None
 
     for row in iter_series_issues(metron_series_id, fetch):
+        if source_title is None:
+            source_title = _series_title_of(row)
+            nested = row.get("series")
+            source_year_began = nested.get("year_began") if isinstance(nested, dict) else None
         number = _normalize_number(row.get("number"))
         if not number:
             continue
@@ -341,6 +385,18 @@ def sync_series(
     result.unmatched_issue_numbers = sorted(
         (number for number in existing if number and number not in seen and "-" not in number),
         key=issue_sort_order,
+    )
+    result.source_issue_count = len(seen)
+    result.source_last_issue_number = max(seen, key=issue_sort_order) if seen else None
+    _record_series_match(
+        db,
+        series,
+        metron_series_id,
+        title=source_title,
+        year_began=source_year_began,
+        issue_count=len(seen),
+        last_issue_number=result.source_last_issue_number,
+        matched=len(seen & set(existing)),
     )
     db.commit()
     result.requests_made = getattr(fetch, "calls", 0) - before
