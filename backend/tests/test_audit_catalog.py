@@ -24,7 +24,7 @@ from backend.app.models import (  # noqa: E402
     ReadingPath,
     ReadingPathEntry,
 )
-from scripts.audit_catalog import audit, prune  # noqa: E402
+from scripts.audit_catalog import SeriesAudit, audit, prune, reject_wrong_volume  # noqa: E402
 
 
 class AuditTests(unittest.TestCase):
@@ -194,3 +194,32 @@ class PruneTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class WrongVolumeRejectionTests(unittest.TestCase):
+    """A volume exactly as long as our run means we are that volume."""
+
+    def _entry(self, title: str, start_year: int, last_phantom: str) -> object:
+        series = CanonicalSeries(slug="x", title=title, start_year=start_year)
+        entry = SeriesAudit(series, "marvel")
+        entry.phantoms = [
+            CanonicalIssue(series_id=1, legacy_key="x#1", issue_number=last_phantom,
+                           issue_kind="issue", title="x", sort_order=1)
+        ]
+        return entry
+
+    def test_an_exact_length_match_means_we_mislabelled_the_volume(self) -> None:
+        # Our "X-Force (2019)" runs to #50; Metron's X-Force (2020) has exactly 50.
+        entry = self._entry("X-Force", 2019, "50")
+        volumes = [{"series": "X-Force (2019)", "issue_count": 10}, {"series": "X-Force (2020)", "issue_count": 50}]
+        self.assertIn("X-Force (2020)", reject_wrong_volume(entry, volumes) or "")
+
+    def test_a_merely_longer_volume_is_not_a_reason_to_doubt(self) -> None:
+        # Batman (1940) has 715 issues; that says nothing about Batman (2016).
+        entry = self._entry("Batman", 2016, "176")
+        volumes = [{"series": "Batman (1940)", "issue_count": 715}, {"series": "Batman (2016)", "issue_count": 163}]
+        self.assertIsNone(reject_wrong_volume(entry, volumes))
+
+    def test_nothing_to_judge_when_there_are_no_phantoms(self) -> None:
+        entry = SeriesAudit(CanonicalSeries(slug="x", title="Batman", start_year=2016), "dc")
+        self.assertIsNone(reject_wrong_volume(entry, [{"series": "Batman (1940)", "issue_count": 715}]))

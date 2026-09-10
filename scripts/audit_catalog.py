@@ -88,6 +88,18 @@ def audit(db: Session) -> list[SeriesAudit]:
         beyond = [i for i in ours if issue_sort_order(i.issue_number) > cutoff]
         unconfirmed_within = [i for i in within if i.id not in sourced_ids]
 
+        same_title = (entry.match.source_series_title or "").strip().lower() == series.title.strip().lower()
+        same_year = entry.match.source_year_began == series.start_year
+        if not (same_title and same_year):
+            # We matched a different book. Our Daredevil (2001) matched Metron's
+            # Daredevil (2026); our Black Mirror (2010) matched their 2013 one.
+            entry.verdict = "review"
+            entry.reason = (
+                f"matched {entry.match.source_series_title} ({entry.match.source_year_began}), "
+                f"which is not {series.title} ({series.start_year})"
+            )
+            continue
+
         if unconfirmed_within:
             # Metron does not know issues we hold from inside its own run, so the
             # two disagree about what this series even is.
@@ -105,6 +117,25 @@ def audit(db: Session) -> list[SeriesAudit]:
             f"{entry.match.source_issue_count} issues through #{entry.match.source_last_issue_number}"
         )
     return results
+
+
+def reject_wrong_volume(entry: SeriesAudit, volumes: list[dict]) -> str | None:
+    """A volume of this title exactly as long as our run means we are that one.
+
+    Our "X-Force (2019)" holds 50 issues and matched a 10-issue Metron series of
+    the same name and year -- but Metron also has X-Force (2020) with exactly 50.
+    Ours is that run, mislabelled, and its issues are real. Same for our
+    "Fantastic Four (2022)", which is really their 48-issue 2018 volume.
+    """
+    if not entry.phantoms:
+        return None
+    ours_max = _as_int(entry.phantoms[-1].issue_number)
+    if ours_max is None:
+        return None
+    for volume in volumes:
+        if (volume.get("issue_count") or 0) == ours_max:
+            return f"{volume.get('series')} has exactly {ours_max} issues, so ours is probably that run"
+    return None
 
 
 def prune(db: Session, phantoms: list[CanonicalIssue]) -> tuple[int, int, int]:
@@ -128,6 +159,13 @@ def prune(db: Session, phantoms: list[CanonicalIssue]) -> tuple[int, int, int]:
     return issues.rowcount, entries.rowcount, (items.rowcount if items is not None else 0)
 
 
+def _as_int(value: str | None) -> int | None:
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+
+
 def _numbers(issues: list[CanonicalIssue], limit: int = 8) -> str:
     shown = ", ".join(f"#{i.issue_number}" for i in issues[:limit])
     return shown + (f" (+{len(issues) - limit} more)" if len(issues) > limit else "")
@@ -136,10 +174,41 @@ def _numbers(issues: list[CanonicalIssue], limit: int = 8) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prune", action="store_true", help="Delete the invented issues.")
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Ask Metron whether another volume of the same title is exactly as long as our run, "
+        "which would mean ours is that volume and its issues are real. Required before --prune.",
+    )
     args = parser.parse_args()
+    if args.prune and not args.verify:
+        print("error: --prune needs --verify; the offline signals alone cannot tell an invented "
+              "issue from a mislabelled volume.", file=sys.stderr)
+        return 2
 
     with SessionLocal() as db:
         results = audit(db)
+        if args.verify:
+            import requests  # noqa: PLC0415
+            from backend.app.services.metron import (  # noqa: PLC0415
+                METRON_API_ROOT,
+                _series_title_of,
+                build_fetcher,
+            )
+
+            fetch = build_fetcher()
+            for entry in [r for r in results if r.verdict == "invented"]:
+                payload = fetch(f"{METRON_API_ROOT}/series/?name={requests.utils.quote(entry.series.title)}")
+                volumes = [
+                    row for row in payload.get("results", [])
+                    if _series_title_of(row).lower() == entry.series.title.strip().lower()
+                ]
+                rejection = reject_wrong_volume(entry, volumes)
+                if rejection:
+                    entry.verdict = "review"
+                    entry.reason = rejection
+                    entry.phantoms = []
+
         invented = [r for r in results if r.verdict == "invented"]
         review = [r for r in results if r.verdict == "review"]
         unmatched = [r for r in results if r.verdict == "unmatched"]
