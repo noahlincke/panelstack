@@ -41,8 +41,10 @@ from backend.app.models import (  # noqa: E402
     CanonicalIssueSource,
     CanonicalSeries,
     CanonicalSeriesSource,
+    CatalogCollection,
     Publisher,
     ReadingListItem,
+    ReadingPath,
     ReadingPathEntry,
 )
 from backend.app.services.curation import CURATION_DATA_PATH  # noqa: E402
@@ -154,9 +156,30 @@ def prune(db: Session, phantoms: list[CanonicalIssue]) -> tuple[int, int, int]:
     entry_ids = list(
         db.scalars(select(ReadingPathEntry.id).where(ReadingPathEntry.canonical_issue_id.in_(ids)))
     )
+    touched_paths = set(
+        db.scalars(
+            select(ReadingPathEntry.reading_path_id).where(ReadingPathEntry.canonical_issue_id.in_(ids))
+        )
+    )
     items = db.execute(delete(ReadingListItem).where(ReadingListItem.reading_path_entry_id.in_(entry_ids))) if entry_ids else None
     entries = db.execute(delete(ReadingPathEntry).where(ReadingPathEntry.canonical_issue_id.in_(ids)))
     issues = db.execute(delete(CanonicalIssue).where(CanonicalIssue.id.in_(ids)))
+    db.flush()
+
+    # A volume emptied by the prune has to go as well, or the catalogue rebuilds
+    # it as a collection holding nothing — which is what Batman: Vol. 4 was.
+    emptied = [
+        path_id for path_id in touched_paths
+        if not db.scalar(
+            select(ReadingPathEntry.id).where(ReadingPathEntry.reading_path_id == path_id).limit(1)
+        )
+    ]
+    if emptied:
+        # The shelf entry in the catalogue outlives its reading path — the
+        # foreign key says SET NULL and SQLite does not enforce it anyway — so
+        # the collection has to be removed by hand or it lingers as a blank tile.
+        db.execute(delete(CatalogCollection).where(CatalogCollection.reading_path_id.in_(emptied)))
+        db.execute(delete(ReadingPath).where(ReadingPath.id.in_(emptied)))
     db.commit()
     return issues.rowcount, entries.rowcount, (items.rowcount if items is not None else 0)
 
