@@ -172,10 +172,10 @@
     },
     {
       "slug": "batman-2016-vol-1",
-      "title": "Vol. 1",
+      "title": "H2SH",
       "phase": "series",
       "status": "published",
-      "description": "The H2SH collection from Batman #158-163."
+      "description": "Jeph Loeb and Jim Lee's sequel to Hush, running through Batman #158-163."
     },
     {
       "slug": "batman-2016-vol-2",
@@ -2462,6 +2462,76 @@
       "phase": "series",
       "status": "published",
       "description": "The Absolute line's take on Selina Kyle."
+    },
+    {
+      "slug": "batman-2025-vol-1",
+      "title": "Volume One",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #1-6 of the run."
+    },
+    {
+      "slug": "batman-2025-vol-2",
+      "title": "Volume Two",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #7-12 of the run."
+    },
+    {
+      "slug": "batman-2025-vol-3",
+      "title": "Volume Three",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #13-15 of the run."
+    },
+    {
+      "slug": "fantastic-four-2025-vol-1",
+      "title": "Volume One",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #1-6 of the run."
+    },
+    {
+      "slug": "fantastic-four-2025-vol-2",
+      "title": "Volume Two",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #7-12 of the run."
+    },
+    {
+      "slug": "fantastic-four-2025-vol-3",
+      "title": "Volume Three",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #13-18 of the run."
+    },
+    {
+      "slug": "doctor-strange-2026-vol-1",
+      "title": "Volume One",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #1-6 of the run."
+    },
+    {
+      "slug": "doctor-strange-2026-vol-2",
+      "title": "Volume Two",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #7-10 of the run."
+    },
+    {
+      "slug": "iron-man-2026-vol-1",
+      "title": "Volume One",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #1-6 of the run."
+    },
+    {
+      "slug": "iron-man-2026-vol-2",
+      "title": "Volume Two",
+      "phase": "series",
+      "status": "published",
+      "description": "Issues #7-11 of the run."
     }
   ],
   "series": [
@@ -13625,6 +13695,316 @@
           "published_on": "2016-10-01"
         }
       ]
+    },
+    {
+      "slug": "batman-2025",
+      "publisher_slug": "dc",
+      "title": "Batman",
+      "volume": 1,
+      "start_year": 2025,
+      "description": "The 2025 Batman relaunch, restarting at #1. Volume one is collected as Daylight.",
+      "issues": [
+        {
+          "issue_number": "1",
+          "title": "Batman (2025) #1",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "2",
+          "title": "Batman (2025) #2",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "3",
+          "title": "Batman (2025) #3",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "4",
+          "title": "Batman (2025) #4",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "5",
+          "title": "Batman (2025) #5",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "6",
+          "title": "Batman (2025) #6",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Batman (2025) #7",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Batman (2025) #8",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Batman (2025) #9",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Batman (2025) #10",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Batman (2025) #11",
+          "published_on": "2026-09-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Batman (2025) #12",
+          "published_on": "2026-10-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Batman (2025) #13",
+          "published_on": "2026-11-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Batman (2025) #14",
+          "published_on": "2026-12-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Batman (2025) #15",
+          "published_on": "2027-01-01"
+        }
+      ]
+    },
+    {
+      "slug": "fantastic-four-2025",
+      "publisher_slug": "marvel",
+      "title": "Fantastic Four",
+      "volume": 1,
+      "start_year": 2025,
+      "description": "The 2025 Fantastic Four relaunch, restarting at #1.",
+      "issues": [
+        {
+          "issue_number": "1",
+          "title": "Fantastic Four (2025) #1",
+          "published_on": "2025-09-01"
+        },
+        {
+          "issue_number": "2",
+          "title": "Fantastic Four (2025) #2",
+          "published_on": "2025-10-01"
+        },
+        {
+          "issue_number": "3",
+          "title": "Fantastic Four (2025) #3",
+          "published_on": "2025-11-01"
+        },
+        {
+          "issue_number": "4",
+          "title": "Fantastic Four (2025) #4",
+          "published_on": "2025-12-01"
+        },
+        {
+          "issue_number": "5",
+          "title": "Fantastic Four (2025) #5",
+          "published_on": "2026-01-01"
+        },
+        {
+          "issue_number": "6",
+          "title": "Fantastic Four (2025) #6",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Fantastic Four (2025) #7",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Fantastic Four (2025) #8",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Fantastic Four (2025) #9",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Fantastic Four (2025) #10",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Fantastic Four (2025) #11",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "12",
+          "title": "Fantastic Four (2025) #12",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "13",
+          "title": "Fantastic Four (2025) #13",
+          "published_on": "2026-09-01"
+        },
+        {
+          "issue_number": "14",
+          "title": "Fantastic Four (2025) #14",
+          "published_on": "2026-09-01"
+        },
+        {
+          "issue_number": "15",
+          "title": "Fantastic Four (2025) #15",
+          "published_on": "2026-10-01"
+        },
+        {
+          "issue_number": "16",
+          "title": "Fantastic Four (2025) #16",
+          "published_on": "2026-11-01"
+        },
+        {
+          "issue_number": "17",
+          "title": "Fantastic Four (2025) #17",
+          "published_on": "2026-11-01"
+        },
+        {
+          "issue_number": "18",
+          "title": "Fantastic Four (2025) #18",
+          "published_on": "2026-12-01"
+        }
+      ]
+    },
+    {
+      "slug": "doctor-strange-2026",
+      "publisher_slug": "marvel",
+      "title": "Doctor Strange",
+      "volume": 1,
+      "start_year": 2026,
+      "description": "The 2026 Doctor Strange relaunch, restarting at #1.",
+      "issues": [
+        {
+          "issue_number": "1",
+          "title": "Doctor Strange (2026) #1",
+          "published_on": "2026-02-01"
+        },
+        {
+          "issue_number": "2",
+          "title": "Doctor Strange (2026) #2",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "3",
+          "title": "Doctor Strange (2026) #3",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "4",
+          "title": "Doctor Strange (2026) #4",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "5",
+          "title": "Doctor Strange (2026) #5",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "6",
+          "title": "Doctor Strange (2026) #6",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Doctor Strange (2026) #7",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Doctor Strange (2026) #8",
+          "published_on": "2026-09-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Doctor Strange (2026) #9",
+          "published_on": "2026-10-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Doctor Strange (2026) #10",
+          "published_on": "2026-11-01"
+        }
+      ]
+    },
+    {
+      "slug": "iron-man-2026",
+      "publisher_slug": "marvel",
+      "title": "Iron Man",
+      "volume": 1,
+      "start_year": 2026,
+      "description": "The 2026 Iron Man relaunch, restarting at #1.",
+      "issues": [
+        {
+          "issue_number": "1",
+          "title": "Iron Man (2026) #1",
+          "published_on": "2026-03-01"
+        },
+        {
+          "issue_number": "2",
+          "title": "Iron Man (2026) #2",
+          "published_on": "2026-04-01"
+        },
+        {
+          "issue_number": "3",
+          "title": "Iron Man (2026) #3",
+          "published_on": "2026-05-01"
+        },
+        {
+          "issue_number": "4",
+          "title": "Iron Man (2026) #4",
+          "published_on": "2026-06-01"
+        },
+        {
+          "issue_number": "5",
+          "title": "Iron Man (2026) #5",
+          "published_on": "2026-07-01"
+        },
+        {
+          "issue_number": "6",
+          "title": "Iron Man (2026) #6",
+          "published_on": "2026-08-01"
+        },
+        {
+          "issue_number": "7",
+          "title": "Iron Man (2026) #7",
+          "published_on": "2026-09-01"
+        },
+        {
+          "issue_number": "8",
+          "title": "Iron Man (2026) #8",
+          "published_on": "2026-10-01"
+        },
+        {
+          "issue_number": "9",
+          "title": "Iron Man (2026) #9",
+          "published_on": "2026-11-01"
+        },
+        {
+          "issue_number": "10",
+          "title": "Iron Man (2026) #10",
+          "published_on": "2026-12-01"
+        },
+        {
+          "issue_number": "11",
+          "title": "Iron Man (2026) #11",
+          "published_on": "2027-01-01"
+        }
+      ]
     }
   ],
   "reading_paths": [
@@ -14525,11 +14905,11 @@
     },
     {
       "slug": "batman-2016-vol-1",
-      "title": "Batman: Vol. 1",
-      "description": "The H2SH collection from Batman #158-163.",
+      "title": "Batman: H2SH",
+      "description": "Jeph Loeb and Jim Lee's Hush sequel, Batman #158-163.",
       "status": "published",
       "source_name": "DC",
-      "source_url": "https://www.dc.com/blog/2024/12/17/hush-returns-in-batman-158",
+      "source_url": "https://www.dc.com/blog/2025/03/26/h2sh-descends-jim-lee-jeph-loeb-and-alex-sinclair-return-to-a-bat-classic",
       "cover_url": "https://static.dc.com/2024-12/BM_Cv158_main.jpg",
       "entries": [
         {
@@ -30137,6 +30517,484 @@
           "sort_order": 30,
           "canonical_issue_key": "x-men-2024#27",
           "story_arc_slug": "x-men-2024-vol-5",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "batman-2025-vol-1",
+      "title": "Batman: Vol. 1",
+      "description": "Issues #1-6 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/12829/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "batman-2025#1",
+          "story_arc_slug": "batman-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "batman-2025#2",
+          "story_arc_slug": "batman-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "batman-2025#3",
+          "story_arc_slug": "batman-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "batman-2025#4",
+          "story_arc_slug": "batman-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "batman-2025#5",
+          "story_arc_slug": "batman-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "batman-2025#6",
+          "story_arc_slug": "batman-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "batman-2025-vol-2",
+      "title": "Batman: Vol. 2",
+      "description": "Issues #7-12 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/12829/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "batman-2025#7",
+          "story_arc_slug": "batman-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "batman-2025#8",
+          "story_arc_slug": "batman-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "batman-2025#9",
+          "story_arc_slug": "batman-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "batman-2025#10",
+          "story_arc_slug": "batman-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "batman-2025#11",
+          "story_arc_slug": "batman-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "batman-2025#12",
+          "story_arc_slug": "batman-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "batman-2025-vol-3",
+      "title": "Batman: Vol. 3",
+      "description": "Issues #13-15 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/12829/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "batman-2025#13",
+          "story_arc_slug": "batman-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "batman-2025#14",
+          "story_arc_slug": "batman-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "batman-2025#15",
+          "story_arc_slug": "batman-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "fantastic-four-2025-vol-1",
+      "title": "Fantastic Four: Vol. 1",
+      "description": "Issues #1-6 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/12316/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "fantastic-four-2025#1",
+          "story_arc_slug": "fantastic-four-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "fantastic-four-2025#2",
+          "story_arc_slug": "fantastic-four-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "fantastic-four-2025#3",
+          "story_arc_slug": "fantastic-four-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "fantastic-four-2025#4",
+          "story_arc_slug": "fantastic-four-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "fantastic-four-2025#5",
+          "story_arc_slug": "fantastic-four-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "fantastic-four-2025#6",
+          "story_arc_slug": "fantastic-four-2025-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "fantastic-four-2025-vol-2",
+      "title": "Fantastic Four: Vol. 2",
+      "description": "Issues #7-12 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/12316/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "fantastic-four-2025#7",
+          "story_arc_slug": "fantastic-four-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "fantastic-four-2025#8",
+          "story_arc_slug": "fantastic-four-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "fantastic-four-2025#9",
+          "story_arc_slug": "fantastic-four-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "fantastic-four-2025#10",
+          "story_arc_slug": "fantastic-four-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "fantastic-four-2025#11",
+          "story_arc_slug": "fantastic-four-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "fantastic-four-2025#12",
+          "story_arc_slug": "fantastic-four-2025-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "fantastic-four-2025-vol-3",
+      "title": "Fantastic Four: Vol. 3",
+      "description": "Issues #13-18 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/12316/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "fantastic-four-2025#13",
+          "story_arc_slug": "fantastic-four-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "fantastic-four-2025#14",
+          "story_arc_slug": "fantastic-four-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "fantastic-four-2025#15",
+          "story_arc_slug": "fantastic-four-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "fantastic-four-2025#16",
+          "story_arc_slug": "fantastic-four-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "fantastic-four-2025#17",
+          "story_arc_slug": "fantastic-four-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "fantastic-four-2025#18",
+          "story_arc_slug": "fantastic-four-2025-vol-3",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "doctor-strange-2026-vol-1",
+      "title": "Doctor Strange: Vol. 1",
+      "description": "Issues #1-6 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/13947/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "doctor-strange-2026#1",
+          "story_arc_slug": "doctor-strange-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "doctor-strange-2026#2",
+          "story_arc_slug": "doctor-strange-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "doctor-strange-2026#3",
+          "story_arc_slug": "doctor-strange-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "doctor-strange-2026#4",
+          "story_arc_slug": "doctor-strange-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "doctor-strange-2026#5",
+          "story_arc_slug": "doctor-strange-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "doctor-strange-2026#6",
+          "story_arc_slug": "doctor-strange-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "doctor-strange-2026-vol-2",
+      "title": "Doctor Strange: Vol. 2",
+      "description": "Issues #7-10 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/13947/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "doctor-strange-2026#7",
+          "story_arc_slug": "doctor-strange-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "doctor-strange-2026#8",
+          "story_arc_slug": "doctor-strange-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "doctor-strange-2026#9",
+          "story_arc_slug": "doctor-strange-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "doctor-strange-2026#10",
+          "story_arc_slug": "doctor-strange-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "iron-man-2026-vol-1",
+      "title": "Iron Man: Vol. 1",
+      "description": "Issues #1-6 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/14660/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "iron-man-2026#1",
+          "story_arc_slug": "iron-man-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "iron-man-2026#2",
+          "story_arc_slug": "iron-man-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "iron-man-2026#3",
+          "story_arc_slug": "iron-man-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "iron-man-2026#4",
+          "story_arc_slug": "iron-man-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "iron-man-2026#5",
+          "story_arc_slug": "iron-man-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 60,
+          "canonical_issue_key": "iron-man-2026#6",
+          "story_arc_slug": "iron-man-2026-vol-1",
+          "entry_type": "issue",
+          "importance": "main"
+        }
+      ]
+    },
+    {
+      "slug": "iron-man-2026-vol-2",
+      "title": "Iron Man: Vol. 2",
+      "description": "Issues #7-11 of the run.",
+      "status": "published",
+      "source_name": "Metron",
+      "source_url": "https://metron.cloud/series/14660/",
+      "entries": [
+        {
+          "sort_order": 10,
+          "canonical_issue_key": "iron-man-2026#7",
+          "story_arc_slug": "iron-man-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 20,
+          "canonical_issue_key": "iron-man-2026#8",
+          "story_arc_slug": "iron-man-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 30,
+          "canonical_issue_key": "iron-man-2026#9",
+          "story_arc_slug": "iron-man-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 40,
+          "canonical_issue_key": "iron-man-2026#10",
+          "story_arc_slug": "iron-man-2026-vol-2",
+          "entry_type": "issue",
+          "importance": "main"
+        },
+        {
+          "sort_order": 50,
+          "canonical_issue_key": "iron-man-2026#11",
+          "story_arc_slug": "iron-man-2026-vol-2",
           "entry_type": "issue",
           "importance": "main"
         }
