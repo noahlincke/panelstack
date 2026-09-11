@@ -178,13 +178,6 @@ export function ListsPage() {
 
   return (
     <section className="view view--lists">
-      <header className="view__header">
-        <h1>Lists</h1>
-        <p className="view__lede">
-          Build a list from anywhere in the catalog, then download all of it or just the parts you want.
-        </p>
-      </header>
-
       {error ? <p className="view__error">{error}</p> : null}
 
       <div className="lists">

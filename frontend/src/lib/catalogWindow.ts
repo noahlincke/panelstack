@@ -1,5 +1,5 @@
 
-/** The catalog is curated around modern DC and Marvel continuity. */
+/** The pair behind the "DC + Marvel" shortcut. Not the default — that is everything. */
 export const DEFAULT_PUBLISHERS = ['dc', 'marvel'];
 
 const MONTH_FORMATTER = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });

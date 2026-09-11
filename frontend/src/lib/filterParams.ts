@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { DEFAULT_PUBLISHERS } from './catalogWindow';
 import type { CatalogFilterState } from '../api/types';
 
 /**
@@ -11,14 +10,13 @@ import type { CatalogFilterState } from '../api/types';
  * Only what differs from the default is written, which keeps a plain /chronology
  * link short and makes "did the user choose this?" answerable from the URL.
  */
-const DEFAULT_PUBLISHER_PARAM = DEFAULT_PUBLISHERS.join(',');
-
 export function filtersToParams(filters: CatalogFilterState): Record<string, string> {
   const params: Record<string, string> = {};
+  // No publisher in the URL means every publisher. Defaulting to DC and Marvel
+  // hid the manga on first load, so Hunter x Hunter was nowhere to be found.
   const publisher = filters.publisher?.join(',');
-  if (publisher !== DEFAULT_PUBLISHER_PARAM) {
-    // An explicit empty value distinguishes "all publishers" from "not chosen".
-    params.publisher = publisher ?? '';
+  if (publisher) {
+    params.publisher = publisher;
   }
   if (filters.line) params.line = filters.line;
   if (filters.character) params.character = filters.character;
@@ -32,8 +30,7 @@ export function filtersFromParams(params: URLSearchParams): CatalogFilterState {
   const publisher = params.get('publisher');
   const owned = params.get('owned');
   return {
-    publisher:
-      publisher === null ? [...DEFAULT_PUBLISHERS] : publisher === '' ? undefined : publisher.split(','),
+    publisher: publisher ? publisher.split(',') : undefined,
     line: params.get('line') ?? undefined,
     character: params.get('character') ?? undefined,
     start: params.get('start') ?? undefined,

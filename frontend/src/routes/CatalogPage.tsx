@@ -57,13 +57,6 @@ export function CatalogPage({ searchQuery, refreshToken }: CatalogPageProps) {
 
   return (
     <section className="view view--catalog">
-      <header className="view__header">
-        <h1>Catalog</h1>
-        <p className="view__lede">
-          Curated runs and collected editions. Narrow by publisher, character or year.
-        </p>
-      </header>
-
       <CatalogFilterBar
         facets={facets}
         value={filters}

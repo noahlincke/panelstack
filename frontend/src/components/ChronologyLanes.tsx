@@ -28,6 +28,34 @@ export function availableLanes(characters: CatalogFacet[]): Lane[] {
   ];
 }
 
+/**
+ * The lanes worth opening the board on: the busiest ones that have actually
+ * started something lately.
+ *
+ * The default used to be the highest-count lanes outright, which put Jujutsu
+ * Kaisen on the board — it has plenty of collections but ended in 2024, so its
+ * column is empty across every recent year a reader is looking at.
+ */
+export function defaultLanes(lanes: Lane[], collections: CatalogCollection[], count: number): Lane[] {
+  const newest = collections.reduce((latest, collection) => {
+    const year = collection.startYear ?? Number(collection.firstPublishedOn?.slice(0, 4));
+    return year && year > latest ? year : latest;
+  }, 0);
+  if (!newest) return lanes.slice(0, count);
+
+  const recent = new Set(
+    collections
+      .filter((collection) => {
+        const year = collection.startYear ?? Number(collection.firstPublishedOn?.slice(0, 4));
+        return year && year >= newest - 1;
+      })
+      .flatMap((collection) => collection.tags),
+  );
+  const active = lanes.filter((lane) => recent.has(lane.id));
+  // Lanes keep their incoming order, which is by collection count.
+  return [...active, ...lanes.filter((lane) => !active.includes(lane))].slice(0, count);
+}
+
 function inLane(collection: CatalogCollection, laneId: string): boolean {
   if (laneId.startsWith('line:')) {
     return collection.line === laneId.slice('line:'.length);
@@ -40,23 +68,19 @@ type ChronologyLanesProps = {
   lanes: Lane[];
 };
 
-type Placed = {
-  collection: CatalogCollection;
-  /** True in the year the run began, false in the years it merely continues into. */
-  starts: boolean;
-};
-
-function yearSpan(collection: CatalogCollection): number[] {
-  // startYear falls back to the series' run years, which is all manga has —
-  // without it every non-DC/Marvel publisher fell off the board entirely.
-  const first = collection.startYear ?? Number(collection.firstPublishedOn?.slice(0, 4));
-  if (!first) return [];
-  const last = collection.endYear ?? (Number(collection.latestPublishedOn?.slice(0, 4)) || first);
-  const years = [];
-  for (let year = first; year <= Math.max(first, last); year += 1) {
-    years.push(year);
-  }
-  return years;
+/**
+ * The year a run lands in: when it began.
+ *
+ * It used to occupy every year it was publishing, greyed out and labelled
+ * "continues" in all but the first. For manga that meant each of Hunter x
+ * Hunter's seventeen collections appearing in all twenty-nine years of its run,
+ * which buried the thing the board is for — what started when.
+ *
+ * startYear falls back to the series' run years, which is all manga has;
+ * without it every non-DC/Marvel publisher fell off the board entirely.
+ */
+function startYear(collection: CatalogCollection): number | undefined {
+  return collection.startYear ?? (Number(collection.firstPublishedOn?.slice(0, 4)) || undefined);
 }
 
 /**
@@ -68,24 +92,24 @@ function yearSpan(collection: CatalogCollection): number[] {
 export function ChronologyLanes({ collections, lanes }: ChronologyLanesProps) {
   const years = useMemo(() => {
     const seen = new Set<number>();
-    collections.forEach((collection) => yearSpan(collection).forEach((year) => seen.add(year)));
+    collections.forEach((collection) => {
+      const year = startYear(collection);
+      if (year) seen.add(year);
+    });
     return [...seen].sort((a, b) => b - a);
   }, [collections]);
 
   const cells = useMemo(() => {
-    const byCell = new Map<string, Placed[]>();
+    const byCell = new Map<string, CatalogCollection[]>();
     collections.forEach((collection) => {
-      const span = yearSpan(collection);
+      const year = startYear(collection);
+      if (!year) return;
       lanes.forEach((lane) => {
         if (!inLane(collection, lane.id)) return;
-        span.forEach((year, index) => {
-          const key = `${year}:${lane.id}`;
-          byCell.set(key, [...(byCell.get(key) ?? []), { collection, starts: index === 0 }]);
-        });
+        const key = `${year}:${lane.id}`;
+        byCell.set(key, [...(byCell.get(key) ?? []), collection]);
       });
     });
-    // Runs that begin in a year lead that year's cell.
-    byCell.forEach((placed) => placed.sort((a, b) => Number(b.starts) - Number(a.starts)));
     return byCell;
   }, [collections, lanes]);
 
@@ -112,17 +136,13 @@ export function ChronologyLanes({ collections, lanes }: ChronologyLanesProps) {
             const entries = cells.get(`${year}:${lane.id}`) ?? [];
             return (
               <div className="lanes__cell" key={lane.id}>
-                {entries.map(({ collection, starts }) => (
+                {entries.map((collection) => (
                   <Link
-                    className={[
-                      'lane-card',
-                      starts ? 'lane-card--starts' : 'lane-card--continues',
-                      collection.ownedCount > 0 ? 'lane-card--owned' : '',
-                    ]
+                    className={['lane-card', collection.ownedCount > 0 ? 'lane-card--owned' : '']
                       .filter(Boolean)
                       .join(' ')}
                     to={collection.readingPathId ? `/collections/${collection.readingPathId}` : '/catalog'}
-                    key={`${collection.id}-${starts ? 'start' : 'cont'}`}
+                    key={collection.id}
                   >
                     <span className="lane-card__cover">
                       <CoverImage
@@ -135,7 +155,7 @@ export function ChronologyLanes({ collections, lanes }: ChronologyLanesProps) {
                     <span className="lane-card__body">
                       <span className="lane-card__title">{collection.title}</span>
                       <span className="lane-card__meta">
-                        {starts ? `${collection.issueCount} issues` : 'continues'}
+                        {`${collection.issueCount} issues`}
                         {collection.ownedCount > 0 ? ` · ${collection.ownedCount} owned` : ''}
                       </span>
                     </span>

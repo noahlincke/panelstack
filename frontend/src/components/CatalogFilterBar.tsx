@@ -68,12 +68,12 @@ type CatalogFilterBarProps = {
   value: CatalogFilterState;
   onChange: (next: CatalogFilterState) => void;
   resultLabel: string;
-  /** Chronology is about what was published, not about what is on disk. */
-  showLibraryFilter?: boolean;
 };
 
 export function defaultCatalogFilters(): CatalogFilterState {
-  return { publisher: [...DEFAULT_PUBLISHERS] };
+  // Everything, not just DC and Marvel — defaulting to the curated two hid the
+  // manga entirely, so Hunter x Hunter was nowhere on first load.
+  return {};
 }
 
 export function CatalogFilterBar({
@@ -81,12 +81,11 @@ export function CatalogFilterBar({
   value,
   onChange,
   resultLabel,
-  showLibraryFilter = true,
 }: CatalogFilterBarProps) {
   const scope = publisherScope(value.publisher);
   const defaults = defaultCatalogFilters();
   const hasFilters =
-    scope !== CURATED_SCOPE ||
+    Boolean(scope) ||
     Boolean(value.line || value.character) ||
     value.owned !== undefined ||
     value.start !== defaults.start ||
@@ -103,29 +102,13 @@ export function CatalogFilterBar({
         ) : null}
       </div>
 
-      {showLibraryFilter ? (
-        <FilterGroup label="Library">
-          <FilterChip
-            label="Everything"
-            isActive={value.owned === undefined}
-            onClick={() => onChange({ ...value, owned: undefined })}
-          />
-          <FilterChip label="In library" isActive={value.owned === true} onClick={() => onChange({ ...value, owned: true })} />
-          <FilterChip
-            label="Not yet owned"
-            isActive={value.owned === false}
-            onClick={() => onChange({ ...value, owned: false })}
-          />
-        </FilterGroup>
-      ) : null}
-
       <FilterGroup label="Publisher">
+        <FilterChip label="All publishers" isActive={!scope} onClick={() => onChange({ ...value, publisher: undefined })} />
         <FilterChip
           label="DC + Marvel"
           isActive={scope === CURATED_SCOPE}
           onClick={() => onChange({ ...value, publisher: [...DEFAULT_PUBLISHERS] })}
         />
-        <FilterChip label="All publishers" isActive={!scope} onClick={() => onChange({ ...value, publisher: undefined })} />
         {(facets?.publishers ?? []).map((publisher: CatalogFacet) => (
           <FilterChip
             key={publisher.value}

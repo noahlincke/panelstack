@@ -2,19 +2,31 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../api/client';
 import { CatalogFilterBar } from '../components/CatalogFilterBar';
-import { ChronologyLanes, availableLanes } from '../components/ChronologyLanes';
+import { ChronologyLanes, availableLanes, defaultLanes } from '../components/ChronologyLanes';
 import { CoverImage } from '../components/CoverImage';
 import { monthKey, monthLabel } from '../lib/catalogWindow';
 import { useFilterParams } from '../lib/filterParams';
+import { useShellViewToggle } from '../components/Shell';
 import type { CatalogCollection, CatalogFacets, ChronologyEntry } from '../api/types';
 
 const TIMELINE_PAGE_SIZE = 200;
-const LANE_PAGE_SIZE = 400;
+const LANE_PAGE_SIZE = 500;
 const DEFAULT_LANE_COUNT = 6;
 
 type ChronologyPageProps = {
   searchQuery: string;
 };
+
+async function fetchAllCollections(query: Parameters<typeof apiClient.getCatalogCollections>[0]) {
+  const first = await apiClient.getCatalogCollections(query, LANE_PAGE_SIZE, 0);
+  const items = [...first.items];
+  while (items.length < first.total) {
+    const next = await apiClient.getCatalogCollections(query, LANE_PAGE_SIZE, items.length);
+    if (next.items.length === 0) break;
+    items.push(...next.items);
+  }
+  return { items, total: first.total };
+}
 
 function groupByMonth(entries: ChronologyEntry[]) {
   const months = new Map<string, { key: string; label: string; entries: ChronologyEntry[] }>();
@@ -47,10 +59,26 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
   // those rather than from the line lanes present on the first render.
   const laneIds = useMemo(() => {
     if (extra.lanes) return extra.lanes.split(',');
-    return allLanes.slice(0, DEFAULT_LANE_COUNT).map((lane) => lane.id);
-  }, [allLanes, extra.lanes]);
+    return defaultLanes(allLanes, collections, DEFAULT_LANE_COUNT).map((lane) => lane.id);
+  }, [allLanes, collections, extra.lanes]);
 
   const activeLanes = useMemo(() => allLanes.filter((lane) => laneIds.includes(lane.id)), [allLanes, laneIds]);
+
+  useShellViewToggle(
+    useMemo(
+      () => ({
+        route: '/chronology',
+        ariaLabel: 'Chronology view',
+        value: view,
+        onChange: (next: string) => setExtra({ view: next }),
+        options: [
+          { value: 'lanes', label: 'Lanes', icon: 'lanes' as const },
+          { value: 'timeline', label: 'Timeline', icon: 'timeline' as const },
+        ],
+      }),
+      [view, setExtra],
+    ),
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -63,10 +91,13 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
             setEntries(page.items);
             setTotal(page.total);
           })
-        : apiClient.getCatalogCollections(query, LANE_PAGE_SIZE, 0).then((page) => {
+        : // The board needs every collection, not the first page of them. A fixed
+          // cap silently dropped whatever did not fit — at 470 collections that
+          // was 70 of them, which is why One Piece showed four of its forty.
+          fetchAllCollections(query).then(({ items, total: count }) => {
             if (cancelled) return;
-            setCollections(page.items);
-            setTotal(page.total);
+            setCollections(items);
+            setTotal(count);
           });
     request
       .then(() => {
@@ -101,30 +132,10 @@ export function ChronologyPage({ searchQuery }: ChronologyPageProps) {
 
   return (
     <section className="view view--chronology">
-      <header className="view__header">
-        <div className="view__header-row">
-          <h1>Chronology</h1>
-          <div className="view-switch" role="group" aria-label="Chronology view">
-            <button type="button" aria-pressed={view === 'lanes'} onClick={() => setExtra({ view: 'lanes' })}>
-              Lanes
-            </button>
-            <button type="button" aria-pressed={view === 'timeline'} onClick={() => setExtra({ view: 'timeline' })}>
-              Timeline
-            </button>
-          </div>
-        </div>
-        <p className="view__lede">
-          {view === 'timeline'
-            ? 'Every curated issue in publication order, newest first — for catching up on the last few months.'
-            : 'One column per character, team or line, stacked by year — for finding a jumping-on point.'}
-        </p>
-      </header>
-
       <CatalogFilterBar
         facets={facets}
         value={filters}
         onChange={setFilters}
-        showLibraryFilter={false}
         resultLabel={
           view === 'timeline'
             ? `${total} ${total === 1 ? 'issue' : 'issues'}`
