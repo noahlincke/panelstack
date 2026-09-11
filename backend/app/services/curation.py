@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from ..models import (
     CanonicalIssue,
+    CanonicalIssueSource,
     CanonicalSeries,
     Event,
     Issue,
@@ -255,6 +256,15 @@ def _upsert_canonical_series(
     return series
 
 
+def _has_external_source(db: Session, issue: CanonicalIssue) -> bool:
+    """Whether a real metadata source has already spoken for this issue."""
+    if issue.id is None:
+        return False
+    return db.scalar(
+        select(CanonicalIssueSource.id).where(CanonicalIssueSource.canonical_issue_id == issue.id).limit(1)
+    ) is not None
+
+
 def _upsert_canonical_issue(
     db: Session,
     series: CanonicalSeries,
@@ -279,9 +289,19 @@ def _upsert_canonical_issue(
     issue.issue_kind = _normalize_issue_kind(payload.get("issue_kind"))
     issue.title = payload.get("title")
     issue.sort_order = payload.get("sort_order", issue_sort_order(payload["issue_number"]))
-    issue.published_on = _parse_date(payload.get("published_on"))
     issue.summary = payload.get("summary")
-    issue.cover_url = payload.get("cover_url")
+    # The curation file is a seed, not an authority. Its publication dates are
+    # extrapolated monthly and it has no cover art, so once a real source has
+    # spoken for an issue those two fields are left alone -- otherwise every app
+    # restart re-ran the sync and threw away everything Metron corrected.
+    if _has_external_source(db, issue):
+        if issue.published_on is None:
+            issue.published_on = _parse_date(payload.get("published_on"))
+        if issue.cover_url is None:
+            issue.cover_url = payload.get("cover_url")
+    else:
+        issue.published_on = _parse_date(payload.get("published_on"))
+        issue.cover_url = payload.get("cover_url")
     db.flush()
     return issue
 
