@@ -3352,6 +3352,59 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
   gap: var(--space-1);
 }
 
+/* The page name lives here rather than as a heading below, so the title costs
+   no vertical space. It rides out of the icon on the page you are on. */
+.topbar__nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.nav-link__label {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: max-width 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease,
+    margin-left 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-link--active .nav-link__label {
+  max-width: 8rem;
+  margin-left: var(--space-2);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-link__label {
+    transition: none;
+  }
+}
+
+.view-switch--topbar {
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9px;
+}
+
+.view-switch--topbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+}
+
+.view-switch--topbar .topbar-icon {
+  width: 17px;
+  height: 17px;
+}
+
 .topbar-search__panel {
   border-radius: 10px;
   border-color: var(--line);
@@ -3631,16 +3684,7 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 }
 
 /* A run that merely continues into a year is dimmed so the launch year leads. */
-.lane-card--continues {
-  opacity: 0.55;
-  border-style: dashed;
-}
-
-.lane-card--continues:hover {
-  opacity: 1;
-}
-
-.lane-card--starts .lane-card__title {
+.lane-card__title {
   color: var(--text);
 }
 

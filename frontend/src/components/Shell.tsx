@@ -15,7 +15,35 @@ type ShellSettingsAction = {
   onClick: () => void;
 };
 
+export type ShellViewOption = {
+  value: string;
+  label: string;
+  icon: 'lanes' | 'timeline';
+};
+
+type ShellViewToggle = {
+  /** The nav route this toggle belongs beside, e.g. "/chronology". */
+  route: string;
+  ariaLabel: string;
+  options: ShellViewOption[];
+  value: string;
+  onChange: (value: string) => void;
+};
+
 const ShellSettingsContext = createContext<(action: ShellSettingsAction | null) => void>(() => {});
+const ShellViewToggleContext = createContext<(toggle: ShellViewToggle | null) => void>(() => {});
+
+/** Lets a page put its view switch in the top bar instead of the page body. */
+export function useShellViewToggle(toggle: ShellViewToggle | null) {
+  const setShellViewToggle = useContext(ShellViewToggleContext);
+
+  useEffect(() => {
+    setShellViewToggle(toggle);
+    return () => {
+      setShellViewToggle(null);
+    };
+  }, [toggle, setShellViewToggle]);
+}
 
 export function useShellSettingsAction(action: ShellSettingsAction | null) {
   const setShellSettingsAction = useContext(ShellSettingsContext);
@@ -34,7 +62,32 @@ const navItems = [
   { to: '/lists', label: 'Lists', icon: 'lists' as const },
 ];
 
-function TopbarIcon({ kind }: { kind: 'books' | 'cart' | 'search' | 'catalog' | 'chronology' | 'lists' }) {
+function TopbarIcon({
+  kind,
+}: {
+  kind: 'books' | 'cart' | 'search' | 'catalog' | 'chronology' | 'lists' | 'lanes' | 'timeline';
+}) {
+  if (kind === 'lanes') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
+        <path
+          d="M7 5v14M12 5v14M17 5v14"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  if (kind === 'timeline') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
+        <path d="M12 5v14" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
   if (kind === 'lists') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="topbar-icon">
@@ -122,9 +175,13 @@ export function Shell({ children, searchQuery, onSearchChange }: ShellProps) {
   const [isTopbarVisible, setIsTopbarVisible] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [settingsAction, setSettingsAction] = useState<ShellSettingsAction | null>(null);
+  const [viewToggle, setViewToggle] = useState<ShellViewToggle | null>(null);
   const hideTimerRef = useRef<number | null>(null);
   const registerSettingsAction = useCallback((action: ShellSettingsAction | null) => {
     setSettingsAction(action);
+  }, []);
+  const registerViewToggle = useCallback((toggle: ShellViewToggle | null) => {
+    setViewToggle(toggle);
   }, []);
 
   const isViewerRoute = location.pathname.startsWith('/viewer/');
@@ -192,7 +249,8 @@ export function Shell({ children, searchQuery, onSearchChange }: ShellProps) {
 
   return (
     <ShellSettingsContext.Provider value={registerSettingsAction}>
-      <div className={isViewerRoute ? 'app-shell app-shell--viewer' : 'app-shell'}>
+      <ShellViewToggleContext.Provider value={registerViewToggle}>
+        <div className={isViewerRoute ? 'app-shell app-shell--viewer' : 'app-shell'}>
         <div className="app-shell__backdrop" />
         <header
           className={
@@ -218,16 +276,40 @@ export function Shell({ children, searchQuery, onSearchChange }: ShellProps) {
           >
             <div className="topbar__spacer" aria-hidden="true" />
             <div className="topbar__center">
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) => (isActive ? 'nav-link nav-link--icon nav-link--active' : 'nav-link nav-link--icon')}
-                >
-                  <TopbarIcon kind={item.icon} />
-                  <span className="sr-only">{item.label}</span>
-                </NavLink>
-              ))}
+              {navItems.map((item) => {
+                const isActive = location.pathname.startsWith(item.to);
+                return (
+                  <div className="topbar__nav-item" key={item.to}>
+                    <NavLink
+                      to={item.to}
+                      className={({ isActive: active }) =>
+                        active ? 'nav-link nav-link--icon nav-link--active' : 'nav-link nav-link--icon'
+                      }
+                    >
+                      <TopbarIcon kind={item.icon} />
+                      <span className="nav-link__label" aria-hidden={!isActive}>
+                        {item.label}
+                      </span>
+                    </NavLink>
+                    {isActive && viewToggle?.route === item.to ? (
+                      <div className="view-switch view-switch--topbar" role="group" aria-label={viewToggle.ariaLabel}>
+                        {viewToggle.options.map((option) => (
+                          <button
+                            type="button"
+                            key={option.value}
+                            aria-pressed={viewToggle.value === option.value}
+                            aria-label={option.label}
+                            title={option.label}
+                            onClick={() => viewToggle.onChange(option.value)}
+                          >
+                            <TopbarIcon kind={option.icon} />
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
               <TopbarSearch
                 query={searchQuery}
                 onQueryChange={onSearchChange}
@@ -252,7 +334,8 @@ export function Shell({ children, searchQuery, onSearchChange }: ShellProps) {
         </header>
 
         <main className={isViewerRoute ? 'page-shell page-shell--viewer' : 'page-shell'}>{children}</main>
-      </div>
+        </div>
+      </ShellViewToggleContext.Provider>
     </ShellSettingsContext.Provider>
   );
 }
