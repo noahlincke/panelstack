@@ -59,6 +59,12 @@ def main() -> int:
         help="Stop cleanly after this many API requests. Roughly 3s each.",
     )
     parser.add_argument("--publisher", action="append", dest="publishers", help="Repeatable, defaults to dc and marvel.")
+    parser.add_argument(
+        "--create-missing",
+        action="store_true",
+        help="Also add issues the catalogue lacks. Off by default: Metron knows a series' whole "
+        "history, and importing all of it fills the database with books the catalogue never shows.",
+    )
     args = parser.parse_args()
     publishers = tuple(args.publishers or ("dc", "marvel"))
 
@@ -83,6 +89,7 @@ def main() -> int:
                 fetch=fetch,
                 publisher_slugs=publishers,
                 max_requests=args.max_requests,
+                create_missing=args.create_missing,
                 on_series=lambda result: print(describe(result), flush=True),
             )
         except MetronAuthError as exc:
