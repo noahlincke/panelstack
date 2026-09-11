@@ -111,3 +111,59 @@ class ComicsDownloaderTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ArchiveResponseTests(unittest.TestCase):
+    """A mirror answering with a page is not a mirror serving the file.
+
+    datanodes.to returns 200 text/html for a .cbz request. That page used to be
+    streamed through as the comic, giving a 51 KB ".cbz" of gzipped HTML that no
+    reader could open, and no mirror after it was ever tried.
+    """
+
+    def _response(self, content_type: str, status_code: int = 200) -> FakeResponse:
+        return FakeResponse(url="https://mirror.test/x.cbz", status_code=status_code, headers={"content-type": content_type})
+
+    def test_an_archive_content_type_is_accepted(self) -> None:
+        for content_type in (
+            "application/octet-stream",
+            "application/vnd.comicbook+zip",
+            "application/zip",
+            "application/x-rar-compressed",
+        ):
+            self.assertTrue(comics.serves_an_archive(self._response(content_type)), content_type)
+
+    def test_an_html_page_is_refused_even_with_a_200(self) -> None:
+        self.assertFalse(comics.serves_an_archive(self._response("text/html; charset=UTF-8")))
+        self.assertFalse(comics.serves_an_archive(self._response("application/xhtml+xml")))
+        self.assertFalse(comics.serves_an_archive(self._response("text/plain")))
+
+    def test_an_error_status_is_refused_whatever_the_type(self) -> None:
+        self.assertFalse(comics.serves_an_archive(self._response("application/octet-stream", status_code=403)))
+
+    def test_a_response_with_no_content_type_is_given_the_benefit_of_the_doubt(self) -> None:
+        self.assertTrue(comics.serves_an_archive(FakeResponse(url="https://mirror.test/x.cbz", headers={})))
+
+
+class MirrorFallthroughTests(unittest.TestCase):
+    def _session(self, by_url: dict[str, FakeResponse]) -> MagicMock:
+        session = MagicMock()
+        session.get.side_effect = lambda url, **kwargs: by_url[url]
+        return session
+
+    def test_a_page_serving_mirror_is_skipped_for_one_that_serves_bytes(self) -> None:
+        page = "https://datanodes.to/a/x.cbz"
+        real = "https://pixeldrain.com/api/file/abc"
+        session = self._session(
+            {
+                page: FakeResponse(url=page, headers={"content-type": "text/html; charset=UTF-8"}),
+                real: FakeResponse(url=real, status_code=206, headers={"content-type": "application/vnd.comicbook+zip"}),
+            }
+        )
+        self.assertFalse(comics.mirror_serves_file(session, page))
+        self.assertTrue(comics.mirror_serves_file(session, real))
+
+    def test_a_mirror_that_raises_is_not_treated_as_working(self) -> None:
+        session = MagicMock()
+        session.get.side_effect = requests.ConnectionError("boom")
+        self.assertFalse(comics.mirror_serves_file(session, "https://mirror.test/x.cbz"))

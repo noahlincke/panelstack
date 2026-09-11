@@ -1,0 +1,22 @@
+{
+  "_comment": [
+    "Hand-picked covers, keyed by reading path slug.",
+    "The automatic lookup takes the best-scoring GetComics post and uses whatever",
+    "image that post carries. That is right almost always, but the post's image is",
+    "sometimes not a cover at all — All-Star Superman matched a 2024 reprint whose",
+    "post image is the comic's first interior page ('DOOMED PLANET') — and some",
+    "books have no usable post at all.",
+    "An entry here wins over everything else. Keep it short: this is an escape",
+    "hatch for books the search gets wrong, not a place to curate covers by hand."
+  ],
+  "covers": {
+    "all-star-superman-2005-vol-1": {
+      "image_url": "https://i0.wp.com/getcomics.org/share/uploads/2015/09/All-Star-Superman-1-12-2006-2008.jpg?fit=400%2C615&ssl=1",
+      "note": "Search matched the 2024 reprint, whose post image is the first interior page."
+    },
+    "batman-the-black-mirror-2010-vol-1": {
+      "image_url": "https://i0.wp.com/getcomics.org/share/uploads/2015/09/Batman-The-Black-Mirror.jpg?fit=480%2C738&ssl=1",
+      "note": "No post matched the 2010 issues; this is the 2011 collected edition."
+    }
+  }
+}

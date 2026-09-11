@@ -211,12 +211,10 @@ export function ListsPage() {
                   aria-pressed={openList?.id === list.id}
                   onClick={() => openListById(list.id)}
                 >
-                  <span className="lists__index-name">
-                    {list.name}
-                    {list.firstYear ? (
-                      <span className="lists__index-years">{yearRange(list.firstYear, list.lastYear)}</span>
-                    ) : null}
-                  </span>
+                  <span className="lists__index-name">{list.name}</span>
+                  {/* Always rendered, so the years stay a column even when a
+                      list has nothing dated in it. */}
+                  <span className="lists__index-years">{yearRange(list.firstYear, list.lastYear)}</span>
                   <span className="lists__index-count">{list.itemCount}</span>
                 </button>
               </li>
@@ -312,8 +310,17 @@ export function ListsPage() {
           {isHosted ? (
             <div className="lists__hosted-note">
               <p>
-                Add this catalog once in an OPDS reader such as Panels, then download straight to your
-                phone. The URL carries its own key, so leave username and password blank.
+                Add this catalog once in an OPDS reader such as{' '}
+                <a
+                  className="lists__hosted-link"
+                  href="https://apps.apple.com/us/app/panels-comic-reader/id1236567663"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Panels
+                </a>
+                , then download straight to your phone. The URL carries its own key, so leave username
+                and password blank.
               </p>
               <code className="lists__opds-url">{opdsCatalogUrl}</code>
               <button

@@ -39,6 +39,9 @@ USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/136.0.0.0 Safari/537.36"
 )
+# Content types that mean "a page about the file", never the file itself.
+HTML_CONTENT_TYPES = {"application/xhtml+xml"}
+
 DEFAULT_HOST_PREFERENCE = [
     "comicfiles.ru",
     "pixeldrain.com",
@@ -368,13 +371,28 @@ def sort_candidates(candidates: Iterable[DownloadCandidate], preferred_host: str
     return sorted(candidates, key=score)
 
 
-def mirror_serves_file(session: requests.Session, url: str) -> bool:
-    """Confirm a resolved mirror URL actually hands over bytes.
+def serves_an_archive(response: requests.Response) -> bool:
+    """Whether a response body is the archive rather than a page about it.
 
-    A mirror can resolve cleanly and still refuse the file itself: comicfiles.ru
-    returns 403 on the archive even though the redirect chain succeeds. Checking
-    one byte here lets the caller fall through to the next mirror instead of
-    failing the whole download.
+    datanodes.to answers a request for a .cbz with ``200 text/html`` — an
+    interstitial, not the file. Streaming that through produced a 51 KB ".cbz"
+    of gzipped HTML that no reader could open, so the content type is checked
+    before the body is trusted.
+    """
+    if response.status_code >= 400:
+        return False
+    content_type = response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+    return not (content_type.startswith("text/") or content_type in HTML_CONTENT_TYPES)
+
+
+def mirror_serves_file(session: requests.Session, url: str) -> bool:
+    """Confirm a resolved mirror URL actually hands over the archive.
+
+    A mirror can resolve cleanly and still not give up the file: comicfiles.ru
+    returns 403 on the archive even though the redirect chain succeeds, and
+    datanodes.to returns an HTML page with a 200. Probing one byte here lets the
+    caller fall through to the next mirror instead of failing the download or,
+    worse, serving the page as if it were a comic.
     """
     try:
         response = session.get(
@@ -383,7 +401,7 @@ def mirror_serves_file(session: requests.Session, url: str) -> bool:
     except requests.RequestException:
         return False
     try:
-        return response.status_code < 400
+        return serves_an_archive(response)
     finally:
         response.close()
 

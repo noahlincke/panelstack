@@ -2648,10 +2648,12 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 }
 
 .lists__index-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  /* Name, then years, then count — three columns so the years line up down the
+     list instead of floating at the end of each name. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  column-gap: 10px;
   width: 100%;
   padding: 9px 11px;
   border: 1px solid transparent;
@@ -3740,10 +3742,14 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .year-range__input {
-  width: 11ch;
+  /* Wide enough for the whole placeholder: "Earliest (1937)" was being cut
+     off at "Earliest (19" and read like a bug. */
+  width: 17ch;
+  max-width: 100%;
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -3751,6 +3757,7 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
   color: var(--text);
   font: inherit;
   font-size: 0.82rem;
+  text-overflow: ellipsis;
 }
 
 .year-range__input:focus-visible {
@@ -3765,16 +3772,18 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 /* A list row carries its own read toggle, so progress can be kept without
    opening the collection the issue came from. */
 .lists__index-name {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lists__index-years {
+  justify-self: end;
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .lists__item-read {
@@ -3808,4 +3817,10 @@ body.viewer-fullscreen .viewer-stage:-webkit-full-screen .page-canvas__art {
 
 .lists__item--read .lists__item-title {
   color: var(--muted);
+}
+
+.lists__hosted-link {
+  color: var(--accent-strong);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }

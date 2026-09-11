@@ -205,3 +205,73 @@ class ReadingListTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SeriesCoverFallbackTests(unittest.TestCase):
+    """A volume borrows its series' cover however that cover is stored.
+
+    Batman and Immortal Thor kept their covers as publisher CDN URLs rather than
+    cached files, so a fallback that only looked for a cached path left all four
+    of their later volumes blank.
+    """
+
+    def setUp(self) -> None:
+        engine = create_engine("sqlite://", future=True)
+        Base.metadata.create_all(engine)
+        self.db = sessionmaker(bind=engine, future=True)()
+        publisher = Publisher(slug="dc", name="DC Comics")
+        self.db.add(publisher)
+        self.db.flush()
+        self.series = CanonicalSeries(slug="batman-2016", title="Batman", publisher_id=publisher.id)
+        self.db.add(self.series)
+        self.db.flush()
+
+    def tearDown(self) -> None:
+        self.db.close()
+
+    def _volume(self, number: int, *, source_image_url: str | None, cached_path: str | None) -> ReadingPath:
+        path = ReadingPath(slug=f"batman-2016-vol-{number}", title=f"Batman: Vol. {number}", status="published")
+        self.db.add(path)
+        self.db.flush()
+        if source_image_url or cached_path:
+            self.db.add(
+                ReadingPathCoverAsset(
+                    reading_path_id=path.id,
+                    status="ready",
+                    source_image_url=source_image_url,
+                    cached_path=cached_path,
+                )
+            )
+        self.db.add(
+            CatalogCollection(
+                slug=path.slug,
+                title=path.title,
+                sort_title=path.title.lower(),
+                canonical_series_id=self.series.id,
+                reading_path_id=path.id,
+                line="series",
+                collection_type="run",
+                sequence_number=number,
+            )
+        )
+        self.db.flush()
+        return path
+
+    def test_a_cdn_cover_on_an_earlier_volume_is_reused(self) -> None:
+        self._volume(1, source_image_url="https://static.dc.com/BM_Cv158.jpg", cached_path=None)
+        self._volume(3, source_image_url=None, cached_path=None)
+        self.db.commit()
+        covers = _series_cover_urls(self.db, [self.series.id])
+        self.assertEqual(covers[self.series.id], "https://static.dc.com/BM_Cv158.jpg")
+
+    def test_a_volume_whose_cover_never_resolved_is_not_offered(self) -> None:
+        self._volume(1, source_image_url=None, cached_path=None)
+        self.db.commit()
+        self.assertEqual(_series_cover_urls(self.db, [self.series.id]), {})
+
+    def test_the_earliest_volume_with_a_cover_wins(self) -> None:
+        self._volume(1, source_image_url="https://static.dc.com/vol1.jpg", cached_path=None)
+        self._volume(2, source_image_url="https://static.dc.com/vol2.jpg", cached_path=None)
+        self.db.commit()
+        covers = _series_cover_urls(self.db, [self.series.id])
+        self.assertEqual(covers[self.series.id], "https://static.dc.com/vol1.jpg")

@@ -18,6 +18,7 @@ import subprocess
 import sys
 import threading
 from typing import Literal
+from urllib.parse import urlparse
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -128,6 +129,8 @@ from .services import (
     ensure_reading_path_cover_asset,
     fetch_mangapill_chapter_pages,
     fetch_getcomics_cover,
+    find_getcomics_post,
+    override_cover_url,
     get_mangapill_collection_cover_url,
     list_archive_pages,
     MANGAPILL_DATA_PATH,
@@ -510,6 +513,11 @@ def _reading_path_provider_cover_url(reading_path: ReadingPath) -> str | None:
 
 
 def _reading_path_curated_cover_url(reading_path: ReadingPath) -> str | None:
+    # A hand-picked cover wins: it exists precisely because the search picked
+    # the wrong image for this book.
+    override = override_cover_url(reading_path.slug)
+    if override:
+        return override
     asset = reading_path.cover_asset
     if asset is not None and asset.status == "ready" and asset.source_image_url:
         return asset.source_image_url
@@ -543,20 +551,47 @@ def _series_cover_urls(db: Session, series_ids: Sequence[int]) -> dict[int, str]
     wanted = {series_id for series_id in series_ids if series_id is not None}
     if not wanted:
         return {}
-    rows = db.execute(
-        select(CatalogCollection.canonical_series_id, ReadingPathCoverAsset.reading_path_id)
-        .join(ReadingPathCoverAsset, ReadingPathCoverAsset.reading_path_id == CatalogCollection.reading_path_id)
-        .where(
-            CatalogCollection.canonical_series_id.in_(wanted),
-            ReadingPathCoverAsset.status == "ready",
-            ReadingPathCoverAsset.cached_path.is_not(None),
+    rows: list[tuple[int, int]] = []
+    for id_batch in _chunked_ids(wanted):
+        rows.extend(
+            db.execute(
+                select(CatalogCollection.canonical_series_id, CatalogCollection.reading_path_id)
+                .join(
+                    ReadingPathCoverAsset,
+                    ReadingPathCoverAsset.reading_path_id == CatalogCollection.reading_path_id,
+                )
+                .where(
+                    CatalogCollection.canonical_series_id.in_(id_batch),
+                    ReadingPathCoverAsset.status == "ready",
+                )
+                # The earliest volume is the one whose cover reads as the series' own.
+                .order_by(CatalogCollection.sequence_number.asc())
+            ).all()
         )
-        # The earliest volume is the one whose cover reads as the series' own.
-        .order_by(CatalogCollection.sequence_number.asc())
-    ).all()
-    covers: dict[int, str] = {}
+
+    first_path_by_series: dict[int, int] = {}
     for series_id, reading_path_id in rows:
-        covers.setdefault(series_id, f"/reading-paths/{reading_path_id}/cover-image")
+        first_path_by_series.setdefault(series_id, reading_path_id)
+    if not first_path_by_series:
+        return {}
+
+    # The cover may be a publisher CDN URL rather than a cached file, so the
+    # same resolution the rest of the app uses is applied rather than assuming
+    # a cached path exists — that assumption left whole series blank.
+    paths = {
+        path.id: path
+        for path in db.scalars(
+            select(ReadingPath)
+            .options(selectinload(ReadingPath.cover_asset))
+            .where(ReadingPath.id.in_(set(first_path_by_series.values())))
+        )
+    }
+    covers: dict[int, str] = {}
+    for series_id, reading_path_id in first_path_by_series.items():
+        path = paths.get(reading_path_id)
+        cover_url = _reading_path_ready_cover_url(path) if path is not None else None
+        if cover_url:
+            covers[series_id] = cover_url
     return covers
 
 
@@ -671,27 +706,37 @@ def _entry_has_streamable_local_match(entry: ReadingPathEntry) -> bool:
     return _entry_streamable_local_issue(entry) is not None
 
 
-def _entry_getcomics_post_url(entry: ReadingPathEntry) -> str | None:
-    """Resolve a source post, loosening the query for collected editions.
+def _entry_search_queries(entry: ReadingPathEntry) -> tuple[list[str], str | None, str | None, int | None]:
+    """Search terms to try for an entry, most specific first.
 
     A trade's subtitle is the least reliable part of its name, so an exact miss
-    retries without it rather than failing the download.
+    retries without it. The publication year goes on the front of the ladder
+    because GetComics search matches titles only: "X-Men #1" returns a page of
+    2026 one-shots and never Hickman's 2019 book, while "X-Men #1 (2019)" finds
+    it first.
     """
     query, expected_series_title, expected_issue_number, expected_year = _reading_path_entry_download_context(entry)
-    candidates = (
+    base = (
         opds.collected_edition_queries(query)
         if entry.entry_type == "collection"
         else [query]
     )
-    for candidate in candidates:
-        cover = fetch_getcomics_cover(
+    queries = [f"{candidate} ({expected_year})" for candidate in base] if expected_year else []
+    queries.extend(base)
+    return queries, expected_series_title, expected_issue_number, expected_year
+
+
+def _entry_getcomics_post_url(entry: ReadingPathEntry) -> str | None:
+    queries, expected_series_title, expected_issue_number, expected_year = _entry_search_queries(entry)
+    for candidate in queries:
+        match = find_getcomics_post(
             candidate,
             expected_series_title=expected_series_title,
             expected_issue_number=expected_issue_number,
             expected_year=expected_year,
         )
-        if cover.post_url:
-            return cover.post_url
+        if match.post_url:
+            return match.post_url
     return None
 
 
@@ -786,6 +831,14 @@ def _prepare_entry_device_download(
             plan.resolved_url, timeout=60, allow_redirects=True, stream=True, headers=request_headers
         )
         comics.ensure_success(response, plan.resolved_url)
+        # A mirror that answers with a page instead of the archive would
+        # otherwise be streamed straight to the reader as a tiny, unopenable
+        # ".cbz". Refusing here makes the failure visible.
+        if not comics.serves_an_archive(response):
+            response.close()
+            raise comics.ComicDownloadError(
+                f"{urlparse(plan.resolved_url).netloc} returned a web page instead of the archive."
+            )
     except comics.ComicDownloadError as exc:
         session.close()
         raise HTTPException(status_code=502, detail=str(exc)) from exc
@@ -815,13 +868,18 @@ def _buffered_entry_archive(entry: ReadingPathEntry) -> Archive:
 
     source_url = _entry_resolved_getcomics_post_url(entry)
     session = comics.build_session(False)
-    request_headers = {"Range": range_header} if range_header else None
     try:
         plan = comics.resolve_download_plan(source_url, session, preferred_host=None)
-        response = session.get(
-            plan.resolved_url, timeout=60, allow_redirects=True, stream=True, headers=request_headers
-        )
+        # Buffering wants the whole archive, so this never asks for a range —
+        # it used to reference a range_header that is not in scope here, which
+        # made reading any not-yet-downloaded issue in the browser a NameError.
+        response = session.get(plan.resolved_url, timeout=60, allow_redirects=True, stream=True)
         comics.ensure_success(response, plan.resolved_url)
+        if not comics.serves_an_archive(response):
+            response.close()
+            raise comics.ComicDownloadError(
+                f"{urlparse(plan.resolved_url).netloc} returned a web page instead of the archive."
+            )
         content_length = _response_content_length(response)
         if content_length is not None and content_length > stream_buffer_max_bytes():
             raise StreamBufferTooLargeError("Archive exceeds the configured stream buffer size limit.")
