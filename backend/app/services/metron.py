@@ -83,8 +83,10 @@ class SeriesResult:
     issues_updated: int = 0
     dates_corrected: int = 0
     covers_added: int = 0
-    # Issues we hold that Metron has no record of, almost always the monthly
-    # extrapolation that filled the catalogue out to the present.
+    # Issues we hold that this Metron series has no record of. Usually the
+    # monthly extrapolation, but also anything the two model differently -- a
+    # crossover we keep as one series is several series on Metron -- so this is
+    # a list to review, not a list to delete.
     unmatched_issue_numbers: list[str] = field(default_factory=list)
     requests_made: int = 0
 

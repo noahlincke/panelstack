@@ -103,7 +103,11 @@ def main() -> int:
     )
     unmatched = sum(len(result.unmatched_issue_numbers) for result in outcome.series)
     if unmatched:
-        print(f"{unmatched} issues in the catalogue have no Metron record; these are the extrapolated ones.")
+        print(
+            f"{unmatched} issues in the catalogue have no Metron record. Most are the monthly "
+            "extrapolation, but not all: a crossover the catalogue models as one series is split "
+            "across several on Metron, so check a run before deleting anything from it."
+        )
     if outcome.stopped_early:
         print("Stopped early on the request budget. Re-run to continue.")
     return 0
