@@ -23,6 +23,7 @@ No API calls; scripts/metron_import.py already recorded what it matched.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -44,6 +45,7 @@ from backend.app.models import (  # noqa: E402
     ReadingListItem,
     ReadingPathEntry,
 )
+from backend.app.services.curation import CURATION_DATA_PATH  # noqa: E402
 from backend.app.services.library import issue_sort_order  # noqa: E402
 
 
@@ -159,6 +161,48 @@ def prune(db: Session, phantoms: list[CanonicalIssue]) -> tuple[int, int, int]:
     return issues.rowcount, entries.rowcount, (items.rowcount if items is not None else 0)
 
 
+def prune_curation_seed(phantoms: list[tuple[str, str]], path: Path | None = None) -> tuple[int, int, int]:
+    """Take the invented issues out of the curation file too.
+
+    Deleting them from the database alone achieves nothing: the curation file is
+    the seed, its sync runs on every app start, and it put all thirteen phantom
+    Batman issues straight back. Reading paths left with no entries go as well —
+    that is what "Batman: Vol. 4", a volume holding one made-up issue, was.
+    """
+    data_path = path or CURATION_DATA_PATH
+    payload = json.loads(data_path.read_text(encoding="utf-8"))
+    doomed = {f"{series_slug}#{number}" for series_slug, number in phantoms}
+    by_series: dict[str, set[str]] = {}
+    for series_slug, number in phantoms:
+        by_series.setdefault(series_slug, set()).add(number)
+
+    removed_issues = 0
+    for series in payload.get("series", []):
+        wanted = by_series.get(series.get("slug"))
+        if not wanted:
+            continue
+        before = len(series.get("issues", []))
+        series["issues"] = [i for i in series.get("issues", []) if i.get("issue_number") not in wanted]
+        removed_issues += before - len(series["issues"])
+
+    removed_entries = 0
+    kept_paths = []
+    removed_paths = 0
+    for reading_path in payload.get("reading_paths", []):
+        entries = reading_path.get("entries", [])
+        before = len(entries)
+        reading_path["entries"] = [e for e in entries if e.get("canonical_issue_key") not in doomed]
+        removed_entries += before - len(reading_path["entries"])
+        if reading_path["entries"] or not before:
+            kept_paths.append(reading_path)
+        else:
+            removed_paths += 1
+    payload["reading_paths"] = kept_paths
+
+    data_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return removed_issues, removed_entries, removed_paths
+
+
 def _as_int(value: str | None) -> int | None:
     try:
         return int(str(value).strip())
@@ -238,8 +282,16 @@ def main() -> int:
         total = sum(len(r.phantoms) for r in invented)
         print(f"\n{total} invented issues across {len(invented)} series.")
         if args.prune and total:
-            issues, entries, items = prune(db, [i for r in invented for i in r.phantoms])
+            phantoms = [i for r in invented for i in r.phantoms]
+            issues, entries, items = prune(db, phantoms)
             print(f"Deleted {issues} issues, {entries} reading-path entries, {items} reading-list items.")
+            seed_issues, seed_entries, seed_paths = prune_curation_seed(
+                [(r.series.slug, i.issue_number) for r in invented for i in r.phantoms]
+            )
+            print(
+                f"Curation seed: removed {seed_issues} issues, {seed_entries} entries and "
+                f"{seed_paths} now-empty reading paths, so the sync cannot put them back."
+            )
         elif total:
             print("Re-run with --prune to delete them.")
     return 0

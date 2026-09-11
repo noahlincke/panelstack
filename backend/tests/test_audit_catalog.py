@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import sys
+import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,7 +26,13 @@ from backend.app.models import (  # noqa: E402
     ReadingPath,
     ReadingPathEntry,
 )
-from scripts.audit_catalog import SeriesAudit, audit, prune, reject_wrong_volume  # noqa: E402
+from scripts.audit_catalog import (  # noqa: E402
+    SeriesAudit,
+    audit,
+    prune,
+    prune_curation_seed,
+    reject_wrong_volume,
+)
 
 
 class AuditTests(unittest.TestCase):
@@ -223,3 +231,73 @@ class WrongVolumeRejectionTests(unittest.TestCase):
     def test_nothing_to_judge_when_there_are_no_phantoms(self) -> None:
         entry = SeriesAudit(CanonicalSeries(slug="x", title="Batman", start_year=2016), "dc")
         self.assertIsNone(reject_wrong_volume(entry, [{"series": "Batman (1940)", "issue_count": 715}]))
+
+
+class CurationSeedPruneTests(unittest.TestCase):
+    """Deleting from the database alone achieves nothing; the seed rebuilds it."""
+
+    def setUp(self) -> None:
+        self.temp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+        json.dump(
+            {
+                "series": [
+                    {
+                        "slug": "batman-2016",
+                        "issues": [
+                            {"issue_number": "163", "title": "Batman #163"},
+                            {"issue_number": "164", "title": "Batman #164"},
+                            {"issue_number": "176", "title": "Batman #176"},
+                        ],
+                    }
+                ],
+                "reading_paths": [
+                    {
+                        "slug": "batman-2016-vol-3",
+                        "entries": [
+                            {"canonical_issue_key": "batman-2016#163", "sort_order": 10},
+                            {"canonical_issue_key": "batman-2016#164", "sort_order": 20},
+                        ],
+                    },
+                    {"slug": "batman-2016-vol-4", "entries": [{"canonical_issue_key": "batman-2016#176"}]},
+                    {"slug": "an-empty-path", "entries": []},
+                ],
+            },
+            self.temp,
+        )
+        self.temp.close()
+        self.path = Path(self.temp.name)
+
+    def tearDown(self) -> None:
+        self.path.unlink(missing_ok=True)
+
+    def _payload(self) -> dict:
+        return json.loads(self.path.read_text())
+
+    def test_an_invented_issue_is_removed_from_the_seed(self) -> None:
+        prune_curation_seed([("batman-2016", "164"), ("batman-2016", "176")], self.path)
+        numbers = [i["issue_number"] for i in self._payload()["series"][0]["issues"]]
+        self.assertEqual(numbers, ["163"])
+
+    def test_the_shelf_entry_goes_with_it(self) -> None:
+        prune_curation_seed([("batman-2016", "164")], self.path)
+        vol3 = next(p for p in self._payload()["reading_paths"] if p["slug"] == "batman-2016-vol-3")
+        self.assertEqual([e["canonical_issue_key"] for e in vol3["entries"]], ["batman-2016#163"])
+
+    def test_a_volume_left_holding_nothing_is_dropped(self) -> None:
+        """Batman: Vol. 4 held one invented issue and nothing else."""
+        prune_curation_seed([("batman-2016", "176")], self.path)
+        slugs = [p["slug"] for p in self._payload()["reading_paths"]]
+        self.assertNotIn("batman-2016-vol-4", slugs)
+        self.assertIn("batman-2016-vol-3", slugs)
+
+    def test_a_path_that_was_always_empty_is_left_alone(self) -> None:
+        prune_curation_seed([("batman-2016", "176")], self.path)
+        self.assertIn("an-empty-path", [p["slug"] for p in self._payload()["reading_paths"]])
+
+    def test_another_series_with_the_same_issue_number_is_untouched(self) -> None:
+        payload = self._payload()
+        payload["series"].append({"slug": "detective-comics-1937", "issues": [{"issue_number": "164"}]})
+        self.path.write_text(json.dumps(payload))
+        prune_curation_seed([("batman-2016", "164")], self.path)
+        other = next(s for s in self._payload()["series"] if s["slug"] == "detective-comics-1937")
+        self.assertEqual([i["issue_number"] for i in other["issues"]], ["164"])
