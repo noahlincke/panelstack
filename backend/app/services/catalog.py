@@ -37,18 +37,9 @@ FAMILY_TAG_RULES: dict[str, tuple[str, ...]] = {
         "street level",
         "echo",
     ),
-    "hunter-x-hunter-family": (
-        "hunter x hunter",
-        "hunterxhunter",
-        "gon freecss",
-        "killua",
-        "kurapika",
-        "leorio",
-        "hisoka",
-        "chimera ant",
-        "phantom troupe",
-        "greed island",
-    ),
+    # No hunter-x-hunter-family: unlike bat-family or jojo-family it would span
+    # exactly one series, so it only ever duplicated the plain series tag and
+    # put two identical chips in the filter bar.
     "jojo-family": (
         "jojo",
         "jojo s bizarre adventure",
