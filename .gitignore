@@ -15,3 +15,6 @@ backend/data/*
 frontend/node_modules/
 frontend/dist/
 frontend/*.tsbuildinfo
+
+# Deploy script lives in the private dotfiles repo (~/bin/deploy-panelstack)
+deploy_panels.sh
